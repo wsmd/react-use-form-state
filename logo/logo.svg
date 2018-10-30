@@ -1,28 +1,18 @@
-<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <defs>
-    <linearGradient x1="102.8%" y1="98%" x2="10.6%" y2="-1.8%" id="b">
-      <stop stop-color="#A4FA83" offset="0%"/>
-      <stop stop-color="#50E3C2" offset="100%"/>
+    <linearGradient x1="87.1%" y1="88.7%" x2="19.7%" y2="19.1%" id="b">
+      <stop stop-color="#9FFF9B" offset="0%"/>
+      <stop stop-color="#61E7B5" offset="92.4%"/>
+      <stop stop-color="#49DFBF" offset="100%"/>
     </linearGradient>
-    <path d="M81 82.1A17.4 17.4 0 0 1 63 99a17.7 17.7 0 0 1-19-18l-.1-1h.1V68l2.4 12h10.4a1.5 1.5 0 0 0 1.1-2.5L32.7 47.2a1.5 1.5 0 0 0-2.7 1V81a32.3 32.3 0 0 0 30.5 32H20.8a15 15 0 0 1-15-13.4L0 45.7a6 6 0 0 1 1.8-4.9l28.3-27.4a12 12 0 0 1 9.4-3.3l30.6 2.7a12 12 0 0 1 10.9 12V82z" id="a"/>
-    <path d="M33.6 10c1.1 9 .3 16.1-2.3 21.6-2.6 5.5-13.7 9.8-33.2 12.9A1885 1885 0 0 1 33.6 10z" id="e"/>
-    <filter x="-29.2%" y="-21.8%" width="158.4%" height="161%" filterUnits="objectBoundingBox" id="d">
-      <feOffset dy="3" in="SourceAlpha" result="shadowOffsetOuter1"/>
-      <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
-      <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0341938406 0" in="shadowBlurOuter1"/>
-    </filter>
+    <path d="M87 102a17.7 17.7 0 0 1-19-18V71L71 83 82.9 81a1.5 1.5 0 0 0 1.1-2.5L55.7 48.8a1 1 0 0 0-1.7.7V84c0 14.3 8 24.3 24.1 30a1 1 0 0 1-.3 2h-33a15 15 0 0 1-15-13.4L24 48.7a6 6 0 0 1 1.8-5l28.3-27.3a12 12 0 0 1 9.4-3.4l30.6 2.8a12 12 0 0 1 10.9 12V85A17.4 17.4 0 0 1 87 102z" id="a"/>
   </defs>
   <g fill="none" fill-rule="evenodd">
-    <g transform="translate(24 3)">
-      <mask id="c" fill="#fff">
-        <use xlink:href="#a"/>
-      </mask>
-      <use fill="url(#b)" xlink:href="#a"/>
-      <g mask="url(#c)">
-        <use fill="#000" filter="url(#d)" xlink:href="#e"/>
-        <use fill="#C5FFF2" xlink:href="#e"/>
-      </g>
-    </g>
-    <path fill="#8EF494" opacity=".4" d="M68 71v12h15.1z"/>
+    <path d="M68 71v12.8l14.8-2.7a1 1 0 0 0 .3-1.9L68 71z" fill-opacity=".4" fill="#86F5A6"/>
+    <mask id="c" fill="#fff">
+      <use xlink:href="#a"/>
+    </mask>
+    <use fill="url(#b)" xlink:href="#a"/>
+    <path d="M61.3 13c-3.7.5-2.6 2.8-2.5 3.3 3 9.3 1.9 15.4-3.5 18.3C51 37 40.5 36.2 26.8 44.8c-1.8 1.1-2.6 3.9-2.4 8.3l-.7-5.3c0-1.6.2-2.6.7-3l31-31.8h5.9z" fill="#D6FFF6" mask="url(#c)"/>
   </g>
 </svg>

@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://user-images.githubusercontent.com/2100222/47685882-ad1dbd80-dbae-11e8-97b1-453f80d79844.png" width="128">
+  <img src="https://user-images.githubusercontent.com/2100222/47732577-e00e9280-dc3c-11e8-9f2f-dd290b29fd35.png" width="128">
   <br>
   react-use-form-state
 </h1>
