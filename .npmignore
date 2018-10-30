@@ -5,3 +5,4 @@ logo
 .eslintignore
 .eslintrc
 .prettierrc
+yarn.lock

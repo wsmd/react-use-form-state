@@ -1,6 +1,6 @@
 {
   "name": "react-use-form-state",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A small hook for managing forms and inputs state in React",
   "main": "dist/index.js",
   "repository": {
