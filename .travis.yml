@@ -7,6 +7,6 @@ cache:
   directories:
     - node_modules
 script:
-  - yarn run prepare
+  - yarn run prepack
 after_success:
   - yarn run coveralls

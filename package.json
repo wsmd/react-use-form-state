@@ -23,7 +23,7 @@
     "build": "babel src -d dist",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "eslint src",
-    "prepare": "yarn run lint && yarn run test",
+    "prepack": "yarn run lint && yarn run test",
     "prepublishOnly": "yarn run build",
     "test": "jest --coverage"
   },
@@ -33,6 +33,9 @@
     },
     "collectCoverageFrom": [
       "src/**"
+    ],
+    "coveragePathIgnorePatterns": [
+      "src/index.js"
     ]
   },
   "peerDependencies": {
