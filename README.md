@@ -3,6 +3,13 @@
   <br>
   react-use-form-state
 </h1>
+
+<h6 align="center">
+  <a href="https://travis-ci.org/wsmd/react-use-form-state"><img src="https://travis-ci.org/wsmd/react-use-form-state.svg?branch=master" alt="Coverage Status"></a>
+  <a href="https://coveralls.io/github/wsmd/react-use-form-state?branch=master"><img src="https://coveralls.io/repos/github/wsmd/react-use-form-state/badge.svg?branch=master" alt="Coverage Status"></a>
+  <a href="https://github.com/wsmd/react-use-form-state/blob/master/LICENSE"><img src="https://img.shields.io/github/license/wsmd/react-use-form-state.svg" alt="Coverage Status"></a>
+</h6>
+
 <h6 align="center">⚠️ This is a working proof-of-concept, and still under active development ⚠️</h6>
 
 ## Why?

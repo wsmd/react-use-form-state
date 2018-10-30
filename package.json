@@ -20,11 +20,12 @@
     "hook"
   ],
   "scripts": {
-    "lint": "eslint src",
-    "test": "jest",
     "build": "babel src -d dist",
-    "prepare": "npm run lint && npm run test",
-    "prepublishOnly": "npm run build"
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "lint": "eslint src",
+    "prepare": "yarn run lint && yarn run test",
+    "prepublishOnly": "yarn run build",
+    "test": "jest"
   },
   "jest": {
     "transform": {
@@ -44,6 +45,7 @@
     "@babel/preset-react": "^7.0.0",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
+    "coveralls": "^3.0.2",
     "eslint": "^5.3.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
