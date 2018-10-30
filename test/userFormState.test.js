@@ -1,13 +1,13 @@
 import React from 'react';
 import useFormState from '../src/useFormState';
 
+let state;
 function useReducerMock(reducer, initialState = {}) {
-  let state = initialState;
+  state = initialState;
   const dispatch = action => {
     state = reducer(state, action);
   };
-  const getState = () => state;
-  return [getState(), dispatch];
+  return [state, dispatch];
 }
 
 jest.spyOn(React, 'useReducer').mockImplementation(useReducerMock);
@@ -118,5 +118,46 @@ describe('inputs receive default values from initial state', () => {
     const [, input] = useFormState({ option: 'no' });
     expect(input.radio('option', 'yes').checked).toEqual(false);
     expect(input.radio('option', 'no').checked).toEqual(true);
+  });
+});
+
+describe('onChange updates inputs value', () => {
+  it.each(['text', 'password', 'email', 'tel', 'url'])(
+    'updates value for type "%s"',
+    type => {
+      const [, input] = useFormState();
+      const name = 'input-name';
+      const value = `value for ${type}`;
+      input[type](name).onChange({ target: { value } });
+      expect(state[name]).toBe(value);
+    },
+  );
+
+  it('updates value for type "number"', () => {
+    const [, input] = useFormState();
+    const name = 'number-input';
+    const value = '10';
+    input.number(name).onChange({ target: { value } });
+    expect(state[name]).toBe(10);
+  });
+
+  it('updates value for type "checkbox"', () => {
+    const [, input] = useFormState();
+    const name = 'checkbox-input';
+    const value = 'yes';
+    input.checkbox(name, value).onChange({ target: { value, checked: true } });
+    expect(state[name]).toEqual([value]);
+    input.checkbox(name, value).onChange({ target: { value, checked: false } });
+    expect(state[name]).toEqual([]);
+  });
+
+  it('updates value for type "radio"', () => {
+    const [, input] = useFormState();
+    const name = 'radio-input';
+    const option1 = 'option_1';
+    const option2 = 'option_2';
+    input.radio(name, option1).onChange({ target: { value: option1 } });
+    input.radio(name, option2).onChange({ target: { value: option2 } });
+    expect(state[name]).toEqual(option2);
   });
 });
