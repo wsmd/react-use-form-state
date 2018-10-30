@@ -24,7 +24,7 @@ npm install react@16.7.0-alpha.0 react-dom@16.7.0-alpha.0
 #### Using NPM
 
 ```
-npm install --save react-use-form-state
+npm install react-use-form-state
 ```
 
 #### Using Yarn
@@ -33,21 +33,27 @@ npm install --save react-use-form-state
 yarn add react-use-form-state
 ```
 
-## Example
+## API
+
+WIP
+
+## Examples
 
 > _Warning: This is an experimental API and it is likely to break in a future release. Use with caution!_
+
+### Basic Usage
 
 ```jsx
 import { useFormState } from 'react-use-form-state';
 
 export default function App() {
-  const [formState, input] = useFormInputs();
+  const [formState, inputProps] = useFormState(/* initial state */);
   return (
-    <form onSubmit={e => console.log(formState)}>
+    <form onSubmit={() => console.log(formState)}>
       {/* Text */}
-      <input {...input.text('name')} />
-      <input {...input.email('email')} />
-      <input {...input.password('password')} />
+      <input {...input.text('name')} required />
+      <input {...input.email('email')} required />
+      <input {...input.password('password')} required minLength="8" />
 
       {/* Date and Time */}
       <input {...input.date('departure-date')} />
@@ -77,13 +83,14 @@ export default function App() {
 }
 ```
 
-From the example above, as the user fills in the form, `formState`, will look something like this:
+From the example above, as the user fills in the form, `formState` will look something like this:
 
 ```js
 {
   "values": {
-    "email": "user@example.com",
-    "password": "asdfasdf",
+    "name": "Mary Poppins",
+    "email": "mary@example.com",
+    "password": "abcd",
     "departure-date": "2018-10-09",
     "return-date": "2018-11-14",
     "extra": ["car"],
@@ -94,10 +101,16 @@ From the example above, as the user fills in the form, `formState`, will look so
     "cabin": "business"
   },
   "validity": {
-    /* inputs validation results */
+    "name": true,
+    "email": true,
+    "password": false,
+    /* etc */
   },
   "touched": {
-    /* ... */
+    "name": true,
+    "email": true,
+    "password": false,
+    /* etc */
   }
 }
 ```
