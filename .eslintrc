@@ -1,7 +1,11 @@
 {
   "extends": "airbnb-base",
+  "env": {
+    "jest": true
+  },
   "rules": {
     "consistent-return": "off",
-    "getter-return": "off"
+    "getter-return": "off",
+    "arrow-parens": ["error", "as-needed"]
   }
 }

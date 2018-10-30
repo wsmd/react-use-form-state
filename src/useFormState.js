@@ -14,13 +14,14 @@ export default function useFormState(initialState) {
       }
     },
     onChange(e) {
-      let { value: inputValue } = e.target;
+      const { value: targetValue, checked } = e.target;
+      let inputValue = targetValue;
       if (type === 'checkbox') {
         const values = new Set(formState[name]);
-        if (values.has(inputValue)) {
-          values.delete(inputValue);
-        } else {
+        if (checked) {
           values.add(inputValue);
+        } else {
+          values.delete(inputValue);
         }
         inputValue = Array.from(values);
       }
@@ -35,9 +36,6 @@ export default function useFormState(initialState) {
       }
       if (type === 'checkbox' || type === 'radio') {
         return value;
-      }
-      if (type === 'reset') {
-        return undefined;
       }
       return formState[name] !== undefined ? formState[name] : '';
     },
