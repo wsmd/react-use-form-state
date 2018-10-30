@@ -12,6 +12,13 @@
   },
   "author": "Waseem Dahman <dwaseem@icloud.com>",
   "license": "MIT",
+  "keywords": [
+    "react",
+    "form",
+    "forms",
+    "state",
+    "hook"
+  ],
   "scripts": {
     "test": "eslint src",
     "build": "babel src -d dist",
