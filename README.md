@@ -47,7 +47,7 @@ WIP
 import { useFormState } from 'react-use-form-state';
 
 export default function App() {
-  const [formState, inputProps] = useFormState(/* initial state */);
+  const [formState, input] = useFormState(/* initial state */);
   return (
     <form onSubmit={() => console.log(formState)}>
       {/* Text */}
