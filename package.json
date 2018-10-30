@@ -20,10 +20,19 @@
     "hook"
   ],
   "scripts": {
-    "test": "eslint src",
+    "lint": "eslint src",
+    "test": "jest",
     "build": "babel src -d dist",
-    "prepare": "npm run test",
+    "prepare": "npm run lint && npm run test",
     "prepublishOnly": "npm run build"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "collectCoverageFrom": [
+      "src/**"
+    ]
   },
   "peerDependencies": {
     "react": "^16.7.0-alpha.0"
@@ -33,9 +42,12 @@
     "@babel/core": "^7.1.2",
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-react": "^7.0.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
     "eslint": "^5.3.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "jest": "^23.6.0",
     "react": "^16.7.0-alpha.0"
   }
 }

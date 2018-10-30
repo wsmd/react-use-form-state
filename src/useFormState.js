@@ -36,9 +36,6 @@ export default function useFormState(initialState) {
       if (type === 'checkbox' || type === 'radio') {
         return value;
       }
-      if (type === 'reset') {
-        return undefined;
-      }
       return formState[name] !== undefined ? formState[name] : '';
     },
     get checked() {
