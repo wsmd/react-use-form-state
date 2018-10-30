@@ -5,11 +5,30 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wsmd/react-user-form-state"
+    "url": "https://github.com/wsmd/react-use-form-state"
   },
   "bugs": {
-    "url": "https://github.com/wsmd/react-user-form-state/issues"
+    "url": "https://github.com/wsmd/react-use-form-state/issues"
   },
   "author": "Waseem Dahman <dwaseem@icloud.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "eslint src",
+    "build": "babel src -d dist",
+    "prepare": "npm run test",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": "^16.7.0-alpha.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-react": "^7.0.0",
+    "eslint": "^5.3.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "react": "^16.7.0-alpha.0"
+  }
 }
