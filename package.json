@@ -4,6 +4,7 @@
   "description": "A small hook for managing forms and inputs state in React",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
   "repository": "wsmd/react-use-form-state",
   "bugs": {
     "url": "https://github.com/wsmd/react-use-form-state/issues"
@@ -18,7 +19,7 @@
     "hook"
   ],
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c && cp src/index.d.ts dist/index.d.ts",
     "build:dev": "rollup -c -w",
     "clean": "rm -rf dist",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
