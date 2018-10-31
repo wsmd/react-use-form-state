@@ -10,26 +10,50 @@ function useReducerMock(reducer, initialState = {}) {
   return [state, dispatch];
 }
 
+/**
+ * @todo Render actual React components
+ */
 jest.spyOn(React, 'useReducer').mockImplementation(useReducerMock);
+jest.spyOn(React, 'useMemo').mockImplementation(fn => fn());
 
-describe('useReducerMock', () => {
+describe('useFormState API', () => {
+  const result = useFormState();
+
   it('returns an array', () => {
-    expect(useFormState()).toBeInstanceOf(Array);
-    expect(useFormState()).toHaveLength(2);
+    expect(result).toBeInstanceOf(Array);
+    expect(result).toHaveLength(2);
   });
-});
 
-describe('formState', () => {
-  it('creates formState object', () => {
-    const [formState] = useFormState();
-    expect(formState).toEqual({
+  it.each([
+    'checkbox',
+    'color',
+    'date',
+    'email',
+    'month',
+    'number',
+    'password',
+    'radio',
+    'range',
+    'search',
+    'select',
+    'tel',
+    'text',
+    'time',
+    'url',
+    'week',
+  ])('has a method for type "%s"', type => {
+    expect(result[1][type]).toBeInstanceOf(Function);
+  });
+
+  it('returns a form state object', () => {
+    expect(result[0]).toEqual({
       values: expect.any(Object),
       validity: expect.any(Object),
       touched: expect.any(Object),
     });
   });
 
-  it('sets initial state', () => {
+  it('sets initial/default state for inputs', () => {
     const initialState = {
       name: 'Mary Poppins',
       email: 'user@example.com',
@@ -40,22 +64,39 @@ describe('formState', () => {
   });
 });
 
-describe('input calls return appropriate props object', () => {
-  it.each(['text', 'password', 'email', 'tel', 'url', 'range', 'number'])(
-    'props for type "%s"',
-    type => {
-      const [, input] = useFormState();
-      expect(input[type]('input-name')).toEqual({
-        type,
-        name: 'input-name',
-        value: expect.any(String),
-        onChange: expect.any(Function),
-        onBlur: expect.any(Function),
-      });
-    },
-  );
+describe('type methods return correct props object', () => {
+  /**
+   * Must return type and value
+   */
+  it.each([
+    'color',
+    'date',
+    'email',
+    'month',
+    'number',
+    'password',
+    'range',
+    'search',
+    'tel',
+    'text',
+    'time',
+    'url',
+    'week',
+  ])('returns props for type "%s"', type => {
+    const [, input] = useFormState();
+    expect(input[type]('input-name')).toEqual({
+      type,
+      name: 'input-name',
+      value: expect.any(String),
+      onChange: expect.any(Function),
+      onBlur: expect.any(Function),
+    });
+  });
 
-  it('props for type "checkbox"', () => {
+  /**
+   * Checkbox must have a type, value, and checked
+   */
+  it('returns props for type "checkbox"', () => {
     const [, input] = useFormState();
     expect(input.checkbox('option', 'option_1')).toEqual({
       type: 'checkbox',
@@ -67,7 +108,10 @@ describe('input calls return appropriate props object', () => {
     });
   });
 
-  it('props for type "radio"', () => {
+  /**
+   * Radio must have a type, value, and checked
+   */
+  it('returns props for type "radio"', () => {
     const [, input] = useFormState();
     expect(input.radio('radio_name', 'radio_option')).toEqual({
       type: 'radio',
@@ -79,6 +123,9 @@ describe('input calls return appropriate props object', () => {
     });
   });
 
+  /**
+   * Select doesn't need a type
+   */
   it('returns props for type "select"', () => {
     const [, input] = useFormState();
     expect(input.select('select_name')).toEqual({
@@ -92,18 +139,27 @@ describe('input calls return appropriate props object', () => {
 
 describe('inputs receive default values from initial state', () => {
   it.each([
-    'text',
-    'password',
+    'color',
+    'date',
     'email',
+    'month',
+    'password',
+    'search',
     'tel',
+    'text',
+    'time',
     'url',
-    'range',
-    'number',
-    'select',
+    'week',
   ])('sets initiate "value" for type "%s"', type => {
     const initialState = { 'input-name': 'input-value' };
     const [, input] = useFormState(initialState);
     expect(input[type]('input-name').value).toEqual('input-value');
+  });
+
+  it.each(['number', 'range'])('sets initiate "value" for type "%s"', type => {
+    const initialState = { 'input-name': '101' };
+    const [, input] = useFormState(initialState);
+    expect(input[type]('input-name').value).toEqual('101');
   });
 
   it('sets initiate "checked" for type "checkbox"', () => {
@@ -122,23 +178,32 @@ describe('inputs receive default values from initial state', () => {
 });
 
 describe('onChange updates inputs value', () => {
-  it.each(['text', 'password', 'email', 'tel', 'url'])(
-    'updates value for type "%s"',
-    type => {
-      const [, input] = useFormState();
-      const name = 'input-name';
-      const value = `value for ${type}`;
-      input[type](name).onChange({ target: { value } });
-      expect(state[name]).toBe(value);
-    },
-  );
-
-  it('updates value for type "number"', () => {
+  it.each([
+    'color',
+    'date',
+    'email',
+    'month',
+    'password',
+    'search',
+    'tel',
+    'text',
+    'time',
+    'url',
+    'week',
+  ])('updates value for type "%s"', type => {
     const [, input] = useFormState();
-    const name = 'number-input';
+    const name = 'input-name';
+    const value = `value for ${type}`;
+    input[type](name).onChange({ target: { value } });
+    expect(state[name]).toBe(value);
+  });
+
+  it.each(['number', 'range'])('updates value for type "%s"', type => {
+    const [, input] = useFormState();
+    const name = 'numeric-input';
     const value = '10';
-    input.number(name).onChange({ target: { value } });
-    expect(state[name]).toBe(10);
+    input[type](name).onChange({ target: { value } });
+    expect(state[name]).toBe(value);
   });
 
   it('updates value for type "checkbox"', () => {

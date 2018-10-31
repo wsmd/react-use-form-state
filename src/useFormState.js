@@ -1,69 +1,68 @@
 import { useReducer } from 'react';
-import reducer from './stateReducer';
+import stateReducer from './stateReducer';
+import { TYPES, SELECT, CHECKBOX, RADIO } from './constants';
 
 export default function useFormState(initialState) {
-  const [formState, setFormState] = useReducer(reducer, initialState || {});
-  const [touchedState, setTouchedState] = useReducer(reducer, {});
-  const [validityState, setValidityState] = useReducer(reducer, {});
+  const [values, setFormState] = useReducer(stateReducer, initialState || {});
+  const [touched, setTouchedState] = useReducer(stateReducer, {});
+  const [validity, setValidityState] = useReducer(stateReducer, {});
 
-  const getInputProps = type => (name, value) => ({
-    name,
-    get type() {
-      if (type !== 'select') {
-        return type;
-      }
-    },
-    onChange(e) {
-      const { value: targetValue, checked } = e.target;
-      let inputValue = targetValue;
-      if (type === 'checkbox') {
-        const values = new Set(formState[name]);
-        if (checked) {
-          values.add(inputValue);
-        } else {
-          values.delete(inputValue);
+  const createPropsGetter = type => (name, value) => {
+    const hasValue = values[name] !== undefined;
+    const inputProps = {
+      name,
+      get type() {
+        if (type !== SELECT) {
+          return type;
         }
-        inputValue = Array.from(values);
-      }
-      if (['range', 'number'].includes(type)) {
-        inputValue = parseInt(inputValue, 10);
-      }
-      setFormState({ [name]: inputValue });
-    },
-    get value() {
-      if (formState[name] === undefined) {
-        setFormState({ [name]: type === 'checkbox' ? [] : '' });
-      }
-      if (type === 'checkbox' || type === 'radio') {
-        return value;
-      }
-      return formState[name] !== undefined ? formState[name] : '';
-    },
-    get checked() {
-      if (type === 'checkbox') {
-        if (formState[name]) {
-          return formState[name].includes(value);
+      },
+      get checked() {
+        if (type === CHECKBOX) {
+          return hasValue ? values[name].includes(value) : false;
         }
-        return false;
-      }
-      if (['radio'].includes(type)) {
-        return formState[name] === value;
-      }
-    },
-    onBlur(e) {
-      setTouchedState({ [name]: true });
-      setValidityState({ [name]: e.target.validity.valid });
-    },
-  });
-
-  const typeProxyHandler = {
-    get(target, typeName) {
-      return getInputProps(typeName);
-    },
+        if (type === RADIO) {
+          return values[name] === value;
+        }
+      },
+      get value() {
+        // populating values of the form state on first render
+        if (!hasValue) {
+          setFormState({ [name]: type === CHECKBOX ? [] : '' });
+        }
+        if (type === CHECKBOX || type === RADIO) {
+          return value;
+        }
+        if (hasValue) {
+          return values[name];
+        }
+        return '';
+      },
+      onChange(e) {
+        const { value: targetValue, checked } = e.target;
+        let inputValue = targetValue;
+        if (type === CHECKBOX) {
+          const checkedValues = new Set(values[name]);
+          if (checked) {
+            checkedValues.add(inputValue);
+          } else {
+            checkedValues.delete(inputValue);
+          }
+          inputValue = Array.from(checkedValues);
+        }
+        setFormState({ [name]: inputValue });
+      },
+      onBlur(e) {
+        setTouchedState({ [name]: true });
+        setValidityState({ [name]: e.target.validity.valid });
+      },
+    };
+    return inputProps;
   };
 
-  return [
-    { values: formState, touched: touchedState, validity: validityState },
-    new Proxy({}, typeProxyHandler),
-  ];
+  const typeMethods = TYPES.reduce(
+    (methods, type) => ({ ...methods, [type]: createPropsGetter(type) }),
+    {},
+  );
+
+  return [{ values, touched, validity }, typeMethods];
 }
