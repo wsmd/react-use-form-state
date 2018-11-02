@@ -7,8 +7,24 @@ export default function useFormState(initialState) {
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
 
-  const createPropsGetter = type => (name, value) => {
-    const hasValue = values[name] !== undefined;
+  const createPropsGetter = type => (name, ownValue) => {
+    const hasOwnValue = !!ownValue;
+    const hasValueInState = values[name] !== undefined;
+    const isCheckbox = type === CHECKBOX;
+    const isRadio = type === RADIO;
+
+    const setInitialValue = () => {
+      let value = '';
+      if (isCheckbox) {
+        /**
+         * If a checkbox has a user-defined value, its value the form state
+         * value will be an array. Otherwise it will be considered a toggle.
+         */
+        value = hasOwnValue ? [] : false;
+      }
+      setFormState({ [name]: value });
+    };
+
     const inputProps = {
       name,
       get type() {
@@ -17,37 +33,52 @@ export default function useFormState(initialState) {
         }
       },
       get checked() {
-        if (type === CHECKBOX) {
-          return hasValue ? values[name].includes(value) : false;
+        if (isCheckbox) {
+          if (hasOwnValue) {
+            /**
+             * @todo Handle the case where two checkbox inputs share the same
+             * name, but one with a value, and the other doesn't (throws currently).
+             * <input {...input.checkbox('option1')} />
+             * <input {...input.checkbox('option1', 'value_of_option1')} />
+             */
+            return hasValueInState ? values[name].includes(ownValue) : false;
+          }
+          return values[name] || false;
         }
-        if (type === RADIO) {
-          return values[name] === value;
+        if (isRadio) {
+          return values[name] === ownValue;
         }
       },
       get value() {
-        // populating values of the form state on first render
-        if (!hasValue) {
-          setFormState({ [name]: type === CHECKBOX ? [] : '' });
+        // auto populating initial state values on first render
+        if (!hasValueInState) {
+          setInitialValue();
         }
-        if (type === CHECKBOX || type === RADIO) {
-          return value;
+        /**
+         * Since checkbox and radio inputs have their own user-defined values,
+         * and since checkbox inputs can be either an array or a boolean,
+         * returning the value of input from the current form state is illogical
+         */
+        if (isCheckbox || isRadio) {
+          return ownValue;
         }
-        if (hasValue) {
-          return values[name];
-        }
-        return '';
+        return hasValueInState ? values[name] : '';
       },
       onChange(e) {
         const { value: targetValue, checked } = e.target;
         let inputValue = targetValue;
-        if (type === CHECKBOX) {
-          const checkedValues = new Set(values[name]);
-          if (checked) {
-            checkedValues.add(inputValue);
+        if (isCheckbox) {
+          if (!hasOwnValue) {
+            inputValue = checked;
           } else {
-            checkedValues.delete(inputValue);
+            const checkedValues = new Set(values[name]);
+            if (checked) {
+              checkedValues.add(inputValue);
+            } else {
+              checkedValues.delete(inputValue);
+            }
+            inputValue = Array.from(checkedValues);
           }
-          inputValue = Array.from(checkedValues);
         }
         setFormState({ [name]: inputValue });
       },
