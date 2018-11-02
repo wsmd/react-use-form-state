@@ -37,7 +37,7 @@ export default function useFormState(initialState) {
           if (hasOwnValue) {
             /**
              * @todo Handle the case where two checkbox inputs share the same
-             * name, but one with a value, and the other doesn't (throws currently).
+             * name, but one has a value, the other doesn't (throws currently).
              * <input {...input.checkbox('option1')} />
              * <input {...input.checkbox('option1', 'value_of_option1')} />
              */
