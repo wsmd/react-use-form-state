@@ -3,17 +3,17 @@ import stateReducer from './stateReducer';
 import { TYPES, SELECT, CHECKBOX, RADIO } from './constants';
 
 export default function useFormState(initialState) {
-  const [values, setFormState] = useReducer(stateReducer, initialState || {});
+  const [state, setState] = useReducer(stateReducer, initialState || {});
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
 
   const createPropsGetter = type => (name, ownValue) => {
     const hasOwnValue = !!ownValue;
-    const hasValueInState = values[name] !== undefined;
+    const hasValueInState = state[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
 
-    const setInitialValue = () => {
+    function setInitialValue() {
       let value = '';
       if (isCheckbox) {
         /**
@@ -22,31 +22,43 @@ export default function useFormState(initialState) {
          */
         value = hasOwnValue ? [] : false;
       }
-      setFormState({ [name]: value });
-    };
+      setState({ [name]: value });
+    }
+
+    function getNextCheckboxValue(e) {
+      const { value, checked } = e.target;
+      if (!hasOwnValue) {
+        return checked;
+      }
+      const checkedValues = new Set(state[name]);
+      if (checked) {
+        checkedValues.add(value);
+      } else {
+        checkedValues.delete(value);
+      }
+      return Array.from(checkedValues);
+    }
 
     const inputProps = {
       name,
       get type() {
-        if (type !== SELECT) {
-          return type;
-        }
+        if (type !== SELECT) return type;
       },
       get checked() {
-        if (isCheckbox) {
-          if (hasOwnValue) {
-            /**
-             * @todo Handle the case where two checkbox inputs share the same
-             * name, but one has a value, the other doesn't (throws currently).
-             * <input {...input.checkbox('option1')} />
-             * <input {...input.checkbox('option1', 'value_of_option1')} />
-             */
-            return hasValueInState ? values[name].includes(ownValue) : false;
-          }
-          return values[name] || false;
-        }
         if (isRadio) {
-          return values[name] === ownValue;
+          return state[name] === ownValue;
+        }
+        if (isCheckbox) {
+          if (!hasOwnValue) {
+            return state[name] || false;
+          }
+          /**
+           * @todo Handle the case where two checkbox inputs share the same
+           * name, but one has a value, the other doesn't (throws currently).
+           * <input {...input.checkbox('option1')} />
+           * <input {...input.checkbox('option1', 'value_of_option1')} />
+           */
+          return hasValueInState ? state[name].includes(ownValue) : false;
         }
       },
       get value() {
@@ -62,38 +74,28 @@ export default function useFormState(initialState) {
         if (isCheckbox || isRadio) {
           return ownValue;
         }
-        return hasValueInState ? values[name] : '';
+        return hasValueInState ? state[name] : '';
       },
       onChange(e) {
-        const { value: targetValue, checked } = e.target;
-        let inputValue = targetValue;
+        let { value } = e.target;
         if (isCheckbox) {
-          if (!hasOwnValue) {
-            inputValue = checked;
-          } else {
-            const checkedValues = new Set(values[name]);
-            if (checked) {
-              checkedValues.add(inputValue);
-            } else {
-              checkedValues.delete(inputValue);
-            }
-            inputValue = Array.from(checkedValues);
-          }
+          value = getNextCheckboxValue(e);
         }
-        setFormState({ [name]: inputValue });
+        setState({ [name]: value });
       },
       onBlur(e) {
         setTouchedState({ [name]: true });
         setValidityState({ [name]: e.target.validity.valid });
       },
     };
+
     return inputProps;
   };
 
-  const typeMethods = TYPES.reduce(
+  const inputPropsCreators = TYPES.reduce(
     (methods, type) => ({ ...methods, [type]: createPropsGetter(type) }),
     {},
   );
 
-  return [{ values, touched, validity }, typeMethods];
+  return [{ values: state, validity, touched }, inputPropsCreators];
 }
