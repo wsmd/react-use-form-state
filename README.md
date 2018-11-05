@@ -4,7 +4,7 @@
   react-use-form-state
 </h1>
 
-<h6 align="center">
+<p align="center">
   <a href="https://www.npmjs.com/package/react-use-form-state">
     <img src="https://img.shields.io/npm/v/react-use-form-state.svg" alt="Current Release" />
   </a>
@@ -17,7 +17,7 @@
   <a href="https://github.com/wsmd/react-use-form-state/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/wsmd/react-use-form-state.svg" alt="Licence">
   </a>
-</h6>
+</p>
 
 ## Motivation
 
