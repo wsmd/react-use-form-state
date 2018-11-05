@@ -1,11 +1,12 @@
 {
   "name": "react-use-form-state",
-  "version": "0.2.0",
-  "description": "A small hook for managing forms and inputs state in React",
+  "version": "0.3.0",
+  "description": "React hook for managing form and inputs state",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
   "repository": "wsmd/react-use-form-state",
+  "homepage": "http://react-use-form-state.now.sh",
   "bugs": {
     "url": "https://github.com/wsmd/react-use-form-state/issues"
   },
