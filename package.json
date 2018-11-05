@@ -32,6 +32,9 @@
     "dist"
   ],
   "jest": {
+    "watchPathIgnorePatterns": [
+      "dist"
+    ],
     "collectCoverageFrom": [
       "src/**"
     ],

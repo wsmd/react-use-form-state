@@ -197,6 +197,7 @@ The following types are currently supported:
 | `<input {...input.tel(name: string) />`                     | `{ [name: string]: string }`        |
 | `<input {...input.radio(name: string, value: string) />`    | `{ [name: string]: string }`        |
 | `<input {...input.checkbox(name: string, value: string) />` | `{ [name: string]: Array<string> }` |
+| `<input {...input.checkbox(name: string) />`                | `{ [name: string]: boolean }`       |
 | `<input {...input.date(name: string) />`                    | `{ [name: string]: string }`        |
 | `<input {...input.month(name: string) />`                   | `{ [name: string]: string }`        |
 | `<input {...input.week(name: string) />`                    | `{ [name: string]: string }`        |

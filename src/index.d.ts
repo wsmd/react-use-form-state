@@ -1,4 +1,4 @@
-// Type definitions for react-use-form-state 0.2
+// Type definitions for react-use-form-state 0.3
 // Project: https://github.com/wsmd/react-use-form-state
 // Definitions by: Waseem Dahman <https://github.com/wsmd>
 
@@ -24,7 +24,16 @@ interface Inputs {
   range(name: string): InputProps;
   tel(name: string): InputProps;
   radio(name: string, value: string): InputProps & CheckedProp;
+  /**
+   * Checkbox inputs with a value will be treated as a collection of choices.
+   * Their values in in the form state will be of type Array<string>
+   */
   checkbox(name: string, value: string): InputProps & CheckedProp;
+  /**
+   * Checkbox inputs without a value will be treated as toggles. Their values in
+   * in the form state will be of type boolean
+   */
+  checkbox(name: string): InputProps & CheckedProp;
   date(name: string): InputProps;
   month(name: string): InputProps;
   week(name: string): InputProps;

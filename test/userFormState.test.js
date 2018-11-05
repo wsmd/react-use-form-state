@@ -109,6 +109,20 @@ describe('type methods return correct props object', () => {
   });
 
   /**
+   * Checkbox must have a type, value, and checked
+   */
+  it('returns props for type "checkbox" without a value', () => {
+    const [, input] = useFormState();
+    expect(input.checkbox('option')).toEqual({
+      type: 'checkbox',
+      name: 'option',
+      checked: expect.any(Boolean),
+      onChange: expect.any(Function),
+      onBlur: expect.any(Function),
+    });
+  });
+
+  /**
    * Radio must have a type, value, and checked
    */
   it('returns props for type "radio"', () => {
@@ -170,6 +184,15 @@ describe('inputs receive default values from initial state', () => {
     expect(input.checkbox('options', 'option_3').checked).toEqual(false);
   });
 
+  it('sets initiate "checked" for type "checkbox" without a value', () => {
+    const initialState = { option1: true };
+    const [, input] = useFormState(initialState);
+    expect(input.checkbox('option1').checked).toEqual(true);
+    expect(input.checkbox('option1').value).toEqual(undefined);
+    expect(input.checkbox('option2').checked).toEqual(false);
+    expect(input.checkbox('option2').value).toEqual(undefined);
+  });
+
   it('sets initiate "checked" for type "radio"', () => {
     const [, input] = useFormState({ option: 'no' });
     expect(input.radio('option', 'yes').checked).toEqual(false);
@@ -214,6 +237,15 @@ describe('onChange updates inputs value', () => {
     expect(state[name]).toEqual([value]);
     input.checkbox(name, value).onChange({ target: { value, checked: false } });
     expect(state[name]).toEqual([]);
+  });
+
+  it('updates value for type "checkbox" without a value', () => {
+    const [, input] = useFormState();
+    const name = 'checkbox-input';
+    input.checkbox(name).onChange({ target: { checked: true } });
+    expect(state[name]).toEqual(true);
+    input.checkbox(name).onChange({ target: { checked: false } });
+    expect(state[name]).toEqual(false);
   });
 
   it('updates value for type "radio"', () => {
