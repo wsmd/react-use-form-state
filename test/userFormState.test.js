@@ -1,56 +1,32 @@
-import React from 'react';
 import useFormState from '../src/useFormState';
+import { renderInput, mockReactUseReducer } from './test-utils';
 
-let state;
-function useReducerMock(reducer, initialState = {}) {
-  state = initialState;
-  const dispatch = action => {
-    state = reducer(state, action);
-  };
-  return [state, dispatch];
-}
-
-/**
- * @todo Render actual React components
- */
-jest.spyOn(React, 'useReducer').mockImplementation(useReducerMock);
-jest.spyOn(React, 'useMemo').mockImplementation(fn => fn());
+const textLikeInputs = ['text', 'email', 'password', 'search', 'tel', 'url'];
+const timeInputs = ['date', 'month', 'time', 'week'];
+const numericInputs = ['number', 'range'];
 
 describe('useFormState API', () => {
-  const result = useFormState();
+  mockReactUseReducer();
 
-  it('returns an array', () => {
-    expect(result).toBeInstanceOf(Array);
-    expect(result).toHaveLength(2);
+  it('returns an array matching [formState, input]', () => {
+    const result = useFormState();
+    expect(result).toEqual([
+      { values: {}, validity: {}, touched: {} },
+      expect.any(Object),
+    ]);
   });
 
   it.each([
+    ...textLikeInputs,
+    ...numericInputs,
+    ...timeInputs,
     'checkbox',
     'color',
-    'date',
-    'email',
-    'month',
-    'number',
-    'password',
     'radio',
-    'range',
-    'search',
     'select',
-    'tel',
-    'text',
-    'time',
-    'url',
-    'week',
   ])('has a method for type "%s"', type => {
+    const result = useFormState();
     expect(result[1][type]).toBeInstanceOf(Function);
-  });
-
-  it('returns a form state object', () => {
-    expect(result[0]).toEqual({
-      values: expect.any(Object),
-      validity: expect.any(Object),
-      touched: expect.any(Object),
-    });
   });
 
   it('sets initial/default state for inputs', () => {
@@ -64,34 +40,25 @@ describe('useFormState API', () => {
   });
 });
 
-describe('type methods return correct props object', () => {
+describe('input type methods return correct props object', () => {
+  mockReactUseReducer();
+
   /**
    * Must return type and value
    */
-  it.each([
-    'color',
-    'date',
-    'email',
-    'month',
-    'number',
-    'password',
-    'range',
-    'search',
-    'tel',
-    'text',
-    'time',
-    'url',
-    'week',
-  ])('returns props for type "%s"', type => {
-    const [, input] = useFormState();
-    expect(input[type]('input-name')).toEqual({
-      type,
-      name: 'input-name',
-      value: expect.any(String),
-      onChange: expect.any(Function),
-      onBlur: expect.any(Function),
-    });
-  });
+  it.each([...textLikeInputs, ...numericInputs, ...timeInputs, 'color'])(
+    'returns props for type "%s"',
+    type => {
+      const [, input] = useFormState();
+      expect(input[type]('input-name')).toEqual({
+        type,
+        name: 'input-name',
+        value: '',
+        onChange: expect.any(Function),
+        onBlur: expect.any(Function),
+      });
+    },
+  );
 
   /**
    * Checkbox must have a type, value, and checked
@@ -102,7 +69,7 @@ describe('type methods return correct props object', () => {
       type: 'checkbox',
       name: 'option',
       value: 'option_1',
-      checked: expect.any(Boolean),
+      checked: false,
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
@@ -116,7 +83,7 @@ describe('type methods return correct props object', () => {
     expect(input.checkbox('option')).toEqual({
       type: 'checkbox',
       name: 'option',
-      checked: expect.any(Boolean),
+      checked: false,
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
@@ -131,7 +98,7 @@ describe('type methods return correct props object', () => {
       type: 'radio',
       name: 'radio_name',
       value: 'radio_option',
-      checked: expect.any(Boolean),
+      checked: false,
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
@@ -152,31 +119,24 @@ describe('type methods return correct props object', () => {
 });
 
 describe('inputs receive default values from initial state', () => {
-  it.each([
-    'color',
-    'date',
-    'email',
-    'month',
-    'password',
-    'search',
-    'tel',
-    'text',
-    'time',
-    'url',
-    'week',
-  ])('sets initiate "value" for type "%s"', type => {
-    const initialState = { 'input-name': 'input-value' };
-    const [, input] = useFormState(initialState);
-    expect(input[type]('input-name').value).toEqual('input-value');
-  });
+  mockReactUseReducer();
 
-  it.each(['number', 'range'])('sets initiate "value" for type "%s"', type => {
+  it.each([...textLikeInputs, ...timeInputs, 'color'])(
+    'sets initial "value" for type "%s"',
+    type => {
+      const initialState = { 'input-name': 'input-value' };
+      const [, input] = useFormState(initialState);
+      expect(input[type]('input-name').value).toEqual('input-value');
+    },
+  );
+
+  it.each(numericInputs)('sets initial "value" for type "%s"', type => {
     const initialState = { 'input-name': '101' };
     const [, input] = useFormState(initialState);
     expect(input[type]('input-name').value).toEqual('101');
   });
 
-  it('sets initiate "checked" for type "checkbox"', () => {
+  it('sets initial "checked" for type "checkbox"', () => {
     const initialState = { options: ['option_1', 'option_2'] };
     const [, input] = useFormState(initialState);
     expect(input.checkbox('options', 'option_1').checked).toEqual(true);
@@ -184,7 +144,7 @@ describe('inputs receive default values from initial state', () => {
     expect(input.checkbox('options', 'option_3').checked).toEqual(false);
   });
 
-  it('sets initiate "checked" for type "checkbox" without a value', () => {
+  it('sets initial "checked" for type "checkbox" without a value', () => {
     const initialState = { option1: true };
     const [, input] = useFormState(initialState);
     expect(input.checkbox('option1').checked).toEqual(true);
@@ -193,7 +153,7 @@ describe('inputs receive default values from initial state', () => {
     expect(input.checkbox('option2').value).toEqual(undefined);
   });
 
-  it('sets initiate "checked" for type "radio"', () => {
+  it('sets initial "checked" for type "radio"', () => {
     const [, input] = useFormState({ option: 'no' });
     expect(input.radio('option', 'yes').checked).toEqual(false);
     expect(input.radio('option', 'no').checked).toEqual(true);
@@ -201,60 +161,81 @@ describe('inputs receive default values from initial state', () => {
 });
 
 describe('onChange updates inputs value', () => {
-  it.each([
-    'color',
-    'date',
-    'email',
-    'month',
-    'password',
-    'search',
-    'tel',
-    'text',
-    'time',
-    'url',
-    'week',
-  ])('updates value for type "%s"', type => {
-    const [, input] = useFormState();
-    const name = 'input-name';
-    const value = `value for ${type}`;
-    input[type](name).onChange({ target: { value } });
-    expect(state[name]).toBe(value);
+  it.each(textLikeInputs)('updates value for type "%s"', type => {
+    const { change, input } = renderInput(type, 'input-name');
+    change({ value: `value for ${type}` });
+    expect(input).toHaveAttribute('value', `value for ${type}`);
   });
 
-  it.each(['number', 'range'])('updates value for type "%s"', type => {
-    const [, input] = useFormState();
-    const name = 'numeric-input';
-    const value = '10';
-    input[type](name).onChange({ target: { value } });
-    expect(state[name]).toBe(value);
+  it.each(numericInputs)('updates value for type "%s"', type => {
+    const { change, input } = renderInput(type);
+    change({ value: '10' });
+    expect(input).toHaveAttribute('value', '10');
+  });
+
+  it('updates value for type "color"', () => {
+    const { change, input } = renderInput('color', 'input-name');
+    change({ value: '#ffffff' });
+    expect(input).toHaveAttribute('value', '#ffffff');
+  });
+
+  it.each([
+    ['week', '2018-W01'],
+    ['date', '2018-11-01'],
+    ['time', '02:00'],
+    ['month', '2018-11'],
+  ])('updates value for type %s', (type, value) => {
+    const { change, input } = renderInput(type);
+    change({ value });
+    expect(input).toHaveAttribute('value', value);
   });
 
   it('updates value for type "checkbox"', () => {
-    const [, input] = useFormState();
-    const name = 'checkbox-input';
-    const value = 'yes';
-    input.checkbox(name, value).onChange({ target: { value, checked: true } });
-    expect(state[name]).toEqual([value]);
-    input.checkbox(name, value).onChange({ target: { value, checked: false } });
-    expect(state[name]).toEqual([]);
+    const name = 'collection';
+    const value = 'item';
+    const { click, changeHandler } = renderInput('checkbox', name, value);
+    click();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ [name]: [value] });
+    click();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ [name]: [] });
   });
 
   it('updates value for type "checkbox" without a value', () => {
-    const [, input] = useFormState();
-    const name = 'checkbox-input';
-    input.checkbox(name).onChange({ target: { checked: true } });
-    expect(state[name]).toEqual(true);
-    input.checkbox(name).onChange({ target: { checked: false } });
-    expect(state[name]).toEqual(false);
+    const name = 'remember_me';
+    const { click, changeHandler } = renderInput('checkbox', name);
+    click();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ [name]: true });
+    click();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ [name]: false });
   });
 
   it('updates value for type "radio"', () => {
-    const [, input] = useFormState();
-    const name = 'radio-input';
-    const option1 = 'option_1';
-    const option2 = 'option_2';
-    input.radio(name, option1).onChange({ target: { value: option1 } });
-    input.radio(name, option2).onChange({ target: { value: option2 } });
-    expect(state[name]).toEqual(option2);
+    const { changeHandler, click } = renderInput('radio', 'radio', 'option');
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ radio: '' });
+    click();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ radio: 'option' });
+  });
+});
+
+describe('Input blur behavior', () => {
+  it('marks input as touched on blur', () => {
+    const { blur, changeHandler } = renderInput('text', 'name');
+    blur();
+    expect(changeHandler).toHaveBeenLastCalledWith({
+      values: { name: '' },
+      validity: { name: false },
+      touched: { name: true },
+    });
+  });
+
+  it('marks input as valid on blur', () => {
+    const { change, blur, changeHandler } = renderInput('text', 'name');
+    change({ value: 'test' });
+    blur();
+    expect(changeHandler).toHaveBeenLastCalledWith({
+      values: { name: 'test' },
+      validity: { name: true },
+      touched: { name: true },
+    });
   });
 });
