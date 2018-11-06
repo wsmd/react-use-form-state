@@ -122,7 +122,7 @@ describe('inputs receive default values from initial state', () => {
   mockReactUseReducer();
 
   it.each([...textLikeInputs, ...timeInputs, 'color'])(
-    'sets initiate "value" for type "%s"',
+    'sets initial "value" for type "%s"',
     type => {
       const initialState = { 'input-name': 'input-value' };
       const [, input] = useFormState(initialState);
@@ -130,13 +130,13 @@ describe('inputs receive default values from initial state', () => {
     },
   );
 
-  it.each(numericInputs)('sets initiate "value" for type "%s"', type => {
+  it.each(numericInputs)('sets initial "value" for type "%s"', type => {
     const initialState = { 'input-name': '101' };
     const [, input] = useFormState(initialState);
     expect(input[type]('input-name').value).toEqual('101');
   });
 
-  it('sets initiate "checked" for type "checkbox"', () => {
+  it('sets initial "checked" for type "checkbox"', () => {
     const initialState = { options: ['option_1', 'option_2'] };
     const [, input] = useFormState(initialState);
     expect(input.checkbox('options', 'option_1').checked).toEqual(true);
@@ -144,7 +144,7 @@ describe('inputs receive default values from initial state', () => {
     expect(input.checkbox('options', 'option_3').checked).toEqual(false);
   });
 
-  it('sets initiate "checked" for type "checkbox" without a value', () => {
+  it('sets initial "checked" for type "checkbox" without a value', () => {
     const initialState = { option1: true };
     const [, input] = useFormState(initialState);
     expect(input.checkbox('option1').checked).toEqual(true);
@@ -153,7 +153,7 @@ describe('inputs receive default values from initial state', () => {
     expect(input.checkbox('option2').value).toEqual(undefined);
   });
 
-  it('sets initiate "checked" for type "radio"', () => {
+  it('sets initial "checked" for type "radio"', () => {
     const [, input] = useFormState({ option: 'no' });
     expect(input.radio('option', 'yes').checked).toEqual(false);
     expect(input.radio('option', 'no').checked).toEqual(true);

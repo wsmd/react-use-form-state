@@ -29,9 +29,10 @@ export function renderInput(type, name, value) {
   };
 }
 
+const useReducerMock = (reducer, initialState = {}) => [initialState, noop];
+
 export function mockReactUseReducer() {
   let spy;
-  const useReducerMock = (reducer, initialState = {}) => [initialState, noop];
   beforeAll(() => {
     spy = jest.spyOn(React, 'useReducer').mockImplementation(useReducerMock);
   });
