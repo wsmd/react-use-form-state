@@ -1,6 +1,6 @@
 import { useReducer } from 'react';
 import stateReducer from './stateReducer';
-import { TYPES, SELECT, CHECKBOX, RADIO } from './constants';
+import { TYPES, SELECT, CHECKBOX, RADIO, TEXTAREA } from './constants';
 
 export default function useFormState(initialState) {
   const [state, setState] = useReducer(stateReducer, initialState || {});
@@ -42,7 +42,7 @@ export default function useFormState(initialState) {
     const inputProps = {
       name,
       get type() {
-        if (type !== SELECT) return type;
+        if (type !== SELECT && type !== TEXTAREA) return type;
       },
       get checked() {
         if (isRadio) {

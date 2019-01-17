@@ -11,6 +11,7 @@ export const SEARCH = 'search';
 export const SELECT = 'select';
 export const TEL = 'tel';
 export const TEXT = 'text';
+export const TEXTAREA = 'textarea';
 export const TIME = 'time';
 export const URL = 'url';
 export const WEEK = 'week';
@@ -37,6 +38,7 @@ export const TYPES = [
   SELECT,
   TEL,
   TEXT,
+  TEXTAREA,
   TIME,
   URL,
   WEEK,
