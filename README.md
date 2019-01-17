@@ -185,7 +185,6 @@ The following types are currently supported:
 
 | Type and Usage                                              | State Shape                         |
 | ----------------------------------------------------------- | ----------------------------------- |
-| `<select {...input.select(name: string) />`                 | `{ [name: string]: string }`        |
 | `<input {...input.email(name: string) />`                   | `{ [name: string]: string }`        |
 | `<input {...input.color(name: string) />`                   | `{ [name: string]: string }`        |
 | `<input {...input.password(name: string) />`                | `{ [name: string]: string }`        |
@@ -202,6 +201,9 @@ The following types are currently supported:
 | `<input {...input.month(name: string) />`                   | `{ [name: string]: string }`        |
 | `<input {...input.week(name: string) />`                    | `{ [name: string]: string }`        |
 | `<input {...input.time(name: string) />`                    | `{ [name: string]: string }`        |
+| `<select {...input.select(name: string) />`                 | `{ [name: string]: string }`        |
+| `<textarea {...input.textarea(name: string) />`             | `{ [name: string]: string }`        |
+
 
 ## License
 

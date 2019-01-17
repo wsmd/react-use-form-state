@@ -24,6 +24,7 @@ describe('useFormState API', () => {
     'color',
     'radio',
     'select',
+    'textarea',
   ])('has a method for type "%s"', type => {
     const result = useFormState();
     expect(result[1][type]).toBeInstanceOf(Function);
@@ -116,12 +117,25 @@ describe('input type methods return correct props object', () => {
       onBlur: expect.any(Function),
     });
   });
+
+  /**
+   * Textarea doesn't need a type
+   */
+  it('returns props from type "textarea"', () => {
+    const [, input] = useFormState();
+    expect(input.textarea('name')).toEqual({
+      name: 'name',
+      value: '',
+      onChange: expect.any(Function),
+      onBlur: expect.any(Function),
+    });
+  });
 });
 
 describe('inputs receive default values from initial state', () => {
   mockReactUseReducer();
 
-  it.each([...textLikeInputs, ...timeInputs, 'color'])(
+  it.each([...textLikeInputs, ...timeInputs, 'color', 'textarea'])(
     'sets initial "value" for type "%s"',
     type => {
       const initialState = { 'input-name': 'input-value' };
@@ -161,11 +175,14 @@ describe('inputs receive default values from initial state', () => {
 });
 
 describe('onChange updates inputs value', () => {
-  it.each(textLikeInputs)('updates value for type "%s"', type => {
-    const { change, input } = renderInput(type, 'input-name');
-    change({ value: `value for ${type}` });
-    expect(input).toHaveAttribute('value', `value for ${type}`);
-  });
+  it.each([...textLikeInputs, 'textarea'])(
+    'updates value for type "%s"',
+    type => {
+      const { change, input } = renderInput(type, 'input-name');
+      change({ value: `value for ${type}` });
+      expect(input).toHaveAttribute('value', `value for ${type}`);
+    },
+  );
 
   it.each(numericInputs)('updates value for type "%s"', type => {
     const { change, input } = renderInput(type);
