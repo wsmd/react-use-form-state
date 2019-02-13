@@ -1,6 +1,13 @@
 import { useReducer } from 'react';
 import stateReducer from './stateReducer';
-import { TYPES, SELECT, CHECKBOX, RADIO, TEXTAREA } from './constants';
+import {
+  TYPES,
+  SELECT,
+  CHECKBOX,
+  RADIO,
+  TEXTAREA,
+  MULTIPLE,
+} from './constants';
 
 export default function useFormState(initialState) {
   const [state, setState] = useReducer(stateReducer, initialState || {});
@@ -12,6 +19,7 @@ export default function useFormState(initialState) {
     const hasValueInState = state[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
+    const isMultiple = type === SELECT && ownValue === MULTIPLE;
 
     function setInitialValue() {
       let value = '';
@@ -39,10 +47,22 @@ export default function useFormState(initialState) {
       return Array.from(checkedValues);
     }
 
+    function getNextMultipleSelectValue(e) {
+      const { options } = e.target;
+      return Array.from(options).reduce(
+        (values, option) =>
+          option.selected ? [...values, option.value] : values,
+        [],
+      );
+    }
+
     const inputProps = {
       name,
       get type() {
         if (type !== SELECT && type !== TEXTAREA) return type;
+      },
+      get multiple() {
+        if (type === SELECT && ownValue === MULTIPLE) return true;
       },
       get checked() {
         if (isRadio) {
@@ -80,6 +100,9 @@ export default function useFormState(initialState) {
         let { value } = e.target;
         if (isCheckbox) {
           value = getNextCheckboxValue(e);
+        }
+        if (isMultiple) {
+          value = getNextMultipleSelectValue(e);
         }
         setState({ [name]: value });
       },
