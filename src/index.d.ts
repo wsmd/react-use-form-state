@@ -13,6 +13,7 @@ interface FormState<T> {
 }
 
 interface Inputs {
+  selectMultiple(name: string): Omit<InputProps, 'type'> & MultipleProp;
   select(name: string): Omit<InputProps, 'type'>;
   email(name: string): InputProps;
   color(name: string): InputProps;
@@ -62,4 +63,8 @@ interface InputProps {
 
 interface CheckedProp {
   checked: boolean;
+}
+
+interface MultipleProp {
+  multiple: boolean;
 }

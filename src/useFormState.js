@@ -6,7 +6,7 @@ import {
   CHECKBOX,
   RADIO,
   TEXTAREA,
-  MULTIPLE,
+  SELECT_MULTIPLE,
 } from './constants';
 
 export default function useFormState(initialState) {
@@ -19,7 +19,7 @@ export default function useFormState(initialState) {
     const hasValueInState = state[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
-    const isMultiple = type === SELECT && ownValue === MULTIPLE;
+    const isSelectMultiple = type === SELECT_MULTIPLE;
 
     function setInitialValue() {
       let value = '';
@@ -29,6 +29,9 @@ export default function useFormState(initialState) {
          * value will be an array. Otherwise it will be considered a toggle.
          */
         value = hasOwnValue ? [] : false;
+      }
+      if (isSelectMultiple) {
+        value = [];
       }
       setState({ [name]: value });
     }
@@ -47,7 +50,7 @@ export default function useFormState(initialState) {
       return Array.from(checkedValues);
     }
 
-    function getNextMultipleSelectValue(e) {
+    function getNextSelectMultipleValue(e) {
       const { options } = e.target;
       return Array.from(options).reduce(
         (values, option) =>
@@ -59,10 +62,11 @@ export default function useFormState(initialState) {
     const inputProps = {
       name,
       get type() {
-        if (type !== SELECT && type !== TEXTAREA) return type;
+        if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA)
+          return type;
       },
       get multiple() {
-        if (type === SELECT && ownValue === MULTIPLE) return true;
+        if (type === SELECT_MULTIPLE) return true;
       },
       get checked() {
         if (isRadio) {
@@ -101,8 +105,8 @@ export default function useFormState(initialState) {
         if (isCheckbox) {
           value = getNextCheckboxValue(e);
         }
-        if (isMultiple) {
-          value = getNextMultipleSelectValue(e);
+        if (isSelectMultiple) {
+          value = getNextSelectMultipleValue(e);
         }
         setState({ [name]: value });
       },

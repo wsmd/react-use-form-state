@@ -183,26 +183,27 @@ An object with keys as input types. Each type is a function that returns the app
 
 The following types are currently supported:
 
-| Type and Usage                                                | State Shape                         |
-| ------------------------------------------------------------- | ----------------------------------- |
-| `<input {...input.email(name: string) />`                     | `{ [name: string]: string }`        |
-| `<input {...input.color(name: string) />`                     | `{ [name: string]: string }`        |
-| `<input {...input.password(name: string) />`                  | `{ [name: string]: string }`        |
-| `<input {...input.text(name: string) />`                      | `{ [name: string]: string }`        |
-| `<input {...input.url(name: string) />`                       | `{ [name: string]: string }`        |
-| `<input {...input.search(name: string) />`                    | `{ [name: string]: string }`        |
-| `<input {...input.number(name: string) />`                    | `{ [name: string]: string }`        |
-| `<input {...input.range(name: string) />`                     | `{ [name: string]: string }`        |
-| `<input {...input.tel(name: string) />`                       | `{ [name: string]: string }`        |
-| `<input {...input.radio(name: string, value: string) />`      | `{ [name: string]: string }`        |
-| `<input {...input.checkbox(name: string, value: string) />`   | `{ [name: string]: Array<string> }` |
-| `<input {...input.checkbox(name: string) />`                  | `{ [name: string]: boolean }`       |
-| `<input {...input.date(name: string) />`                      | `{ [name: string]: string }`        |
-| `<input {...input.month(name: string) />`                     | `{ [name: string]: string }`        |
-| `<input {...input.week(name: string) />`                      | `{ [name: string]: string }`        |
-| `<input {...input.time(name: string) />`                      | `{ [name: string]: string }`        |
-| `<select {...input.select(name: string, opt?: 'multiple') />` | `{ [name: string]: string|Array }`  |
-| `<textarea {...input.textarea(name: string) />`               | `{ [name: string]: string }`        |
+| Type and Usage                                              | State Shape                         |
+| ----------------------------------------------------------- | ----------------------------------- |
+| `<input {...input.email(name: string) />`                   | `{ [name: string]: string }`        |
+| `<input {...input.color(name: string) />`                   | `{ [name: string]: string }`        |
+| `<input {...input.password(name: string) />`                | `{ [name: string]: string }`        |
+| `<input {...input.text(name: string) />`                    | `{ [name: string]: string }`        |
+| `<input {...input.url(name: string) />`                     | `{ [name: string]: string }`        |
+| `<input {...input.search(name: string) />`                  | `{ [name: string]: string }`        |
+| `<input {...input.number(name: string) />`                  | `{ [name: string]: string }`        |
+| `<input {...input.range(name: string) />`                   | `{ [name: string]: string }`        |
+| `<input {...input.tel(name: string) />`                     | `{ [name: string]: string }`        |
+| `<input {...input.radio(name: string, value: string) />`    | `{ [name: string]: string }`        |
+| `<input {...input.checkbox(name: string, value: string) />` | `{ [name: string]: Array<string> }` |
+| `<input {...input.checkbox(name: string) />`                | `{ [name: string]: boolean }`       |
+| `<input {...input.date(name: string) />`                    | `{ [name: string]: string }`        |
+| `<input {...input.month(name: string) />`                   | `{ [name: string]: string }`        |
+| `<input {...input.week(name: string) />`                    | `{ [name: string]: string }`        |
+| `<input {...input.time(name: string) />`                    | `{ [name: string]: string }`        |
+| `<select {...input.select(name: string) />`                 | `{ [name: string]: string }`        |
+| `<select {...input.selectMultiple(name: string) />`         | `{ [name: string]: Array<string> }` |
+| `<textarea {...input.textarea(name: string) />`             | `{ [name: string]: string }`        |
 
 
 ## License

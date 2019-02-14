@@ -9,13 +9,13 @@ export const RADIO = 'radio';
 export const RANGE = 'range';
 export const SEARCH = 'search';
 export const SELECT = 'select';
+export const SELECT_MULTIPLE = 'selectMultiple';
 export const TEL = 'tel';
 export const TEXT = 'text';
 export const TEXTAREA = 'textarea';
 export const TIME = 'time';
 export const URL = 'url';
 export const WEEK = 'week';
-export const MULTIPLE = 'multiple';
 
 /**
  * @todo add support for datetime-local
@@ -34,11 +34,11 @@ export const TYPES = [
   RANGE,
   SEARCH,
   SELECT,
+  SELECT_MULTIPLE,
   TEL,
   TEXT,
   TEXTAREA,
   TIME,
   URL,
   WEEK,
-  MULTIPLE,
 ];
