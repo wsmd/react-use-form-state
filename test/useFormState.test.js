@@ -1,5 +1,5 @@
 import useFormState from '../src/useFormState';
-import { renderInput, mockReactUseReducer } from './test-utils';
+import { renderInput, renderSelect, mockReactUseReducer } from './test-utils';
 
 const textLikeInputs = ['text', 'email', 'password', 'search', 'tel', 'url'];
 const timeInputs = ['date', 'month', 'time', 'week'];
@@ -24,6 +24,7 @@ describe('useFormState API', () => {
     'color',
     'radio',
     'select',
+    'selectMultiple',
     'textarea',
   ])('has a method for type "%s"', type => {
     const result = useFormState();
@@ -119,9 +120,23 @@ describe('input type methods return correct props object', () => {
   });
 
   /**
+   * SelectMultiple doesn't need a type but must have a multiple
+   */
+  it('returns props for type "selectMultiple"', () => {
+    const [, input] = useFormState();
+    expect(input.selectMultiple('select_name')).toEqual({
+      name: 'select_name',
+      multiple: true,
+      value: expect.any(String),
+      onChange: expect.any(Function),
+      onBlur: expect.any(Function),
+    });
+  });
+
+  /**
    * Textarea doesn't need a type
    */
-  it('returns props from type "textarea"', () => {
+  it('returns props for type "textarea"', () => {
     const [, input] = useFormState();
     expect(input.textarea('name')).toEqual({
       name: 'name',
@@ -135,7 +150,7 @@ describe('input type methods return correct props object', () => {
 describe('inputs receive default values from initial state', () => {
   mockReactUseReducer();
 
-  it.each([...textLikeInputs, ...timeInputs, 'color', 'textarea'])(
+  it.each([...textLikeInputs, ...timeInputs, 'color', 'textarea', 'select'])(
     'sets initial "value" for type "%s"',
     type => {
       const initialState = { 'input-name': 'input-value' };
@@ -148,6 +163,13 @@ describe('inputs receive default values from initial state', () => {
     const initialState = { 'input-name': '101' };
     const [, input] = useFormState(initialState);
     expect(input[type]('input-name').value).toEqual('101');
+  });
+
+  it('sets initial "value" for type "selectMultiple"', () => {
+    const value = ['option_1', 'option_2'];
+    const initialState = { multiple: value };
+    const [, input] = useFormState(initialState);
+    expect(input.selectMultiple('multiple').value).toEqual(value);
   });
 
   it('sets initial "checked" for type "checkbox"', () => {
@@ -231,6 +253,30 @@ describe('onChange updates inputs value', () => {
     expect(changeHandler).toHaveBeenLastCalledWithValues({ radio: '' });
     click();
     expect(changeHandler).toHaveBeenLastCalledWithValues({ radio: 'option' });
+  });
+
+  it('updates value for type "select"', () => {
+    const values = ['option_1', 'option_2'];
+    const { change, changeHandler } = renderSelect('select', 'select', values);
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ select: '' });
+    change({ value: 'option_1' });
+    expect(changeHandler).toHaveBeenLastCalledWithValues({
+      select: 'option_1',
+    });
+  });
+
+  it('updates value for type "selectMultiple"', () => {
+    const values = ['option_1', 'option_2', 'option_3'];
+    const { change, changeHandler } = renderSelect(
+      'selectMultiple',
+      'select',
+      values,
+    );
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ select: [] });
+    change({ value: 'option_1' });
+    expect(changeHandler).toHaveBeenLastCalledWithValues({
+      select: ['option_1'],
+    });
   });
 });
 
