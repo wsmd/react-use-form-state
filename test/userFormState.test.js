@@ -25,6 +25,8 @@ describe('useFormState API', () => {
     'radio',
     'select',
     'textarea',
+    'label',
+    'id',
   ])('has a method for type "%s"', type => {
     const result = useFormState();
     expect(result[1][type]).toBeInstanceOf(Function);
