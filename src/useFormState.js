@@ -1,6 +1,22 @@
 import { useReducer } from 'react';
 import stateReducer from './stateReducer';
-import { TYPES, SELECT, CHECKBOX, RADIO, TEXTAREA } from './constants';
+import {
+  ID_PREFIX,
+  TYPES,
+  SELECT,
+  CHECKBOX,
+  RADIO,
+  TEXTAREA,
+  LABEL,
+  ID,
+} from './constants';
+
+const idGetter = (name, value) =>
+  [ID_PREFIX, name, value].filter(part => !!part).join(`__`);
+
+const labelPropsGetter = (...args) => ({
+  htmlFor: idGetter(...args),
+});
 
 export default function useFormState(initialState) {
   const [state, setState] = useReducer(stateReducer, initialState || {});
@@ -41,6 +57,7 @@ export default function useFormState(initialState) {
 
     const inputProps = {
       name,
+      id: idGetter(name, ownValue),
       get type() {
         if (type !== SELECT && type !== TEXTAREA) return type;
       },
@@ -97,5 +114,13 @@ export default function useFormState(initialState) {
     {},
   );
 
-  return [{ values: state, validity, touched }, inputPropsCreators];
+  const otherCreators = {
+    [LABEL]: labelPropsGetter,
+    [ID]: idGetter,
+  };
+
+  return [
+    { values: state, validity, touched },
+    { ...inputPropsCreators, ...otherCreators },
+  ];
 }
