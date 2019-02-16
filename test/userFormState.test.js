@@ -136,6 +136,24 @@ describe('input type methods return correct props object', () => {
       onBlur: expect.any(Function),
     });
   });
+
+  /**
+   * Label only needs a htmlFor
+   */
+  it('returns props from type "label"', () => {
+    const [, input] = useFormState();
+    expect(input.label('name')).toEqual({
+      htmlFor: expect.any(String),
+    });
+  });
+
+  /**
+   * ID returns a single value instead of an object
+   */
+  it('returns string from type "id"', () => {
+    const [, input] = useFormState();
+    expect(input.id('name')).toEqual(expect.any(String));
+  });
 });
 
 describe('inputs receive default values from initial state', () => {
