@@ -55,6 +55,7 @@ describe('input type methods return correct props object', () => {
         type,
         name: 'input-name',
         value: '',
+        id: expect.any(String),
         onChange: expect.any(Function),
         onBlur: expect.any(Function),
       });
@@ -70,6 +71,7 @@ describe('input type methods return correct props object', () => {
       type: 'checkbox',
       name: 'option',
       value: 'option_1',
+      id: expect.any(String),
       checked: false,
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
@@ -85,6 +87,7 @@ describe('input type methods return correct props object', () => {
       type: 'checkbox',
       name: 'option',
       checked: false,
+      id: expect.any(String),
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
@@ -100,6 +103,7 @@ describe('input type methods return correct props object', () => {
       name: 'radio_name',
       value: 'radio_option',
       checked: false,
+      id: expect.any(String),
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
@@ -113,6 +117,7 @@ describe('input type methods return correct props object', () => {
     expect(input.select('select_name')).toEqual({
       name: 'select_name',
       value: expect.any(String),
+      id: expect.any(String),
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
@@ -126,6 +131,7 @@ describe('input type methods return correct props object', () => {
     expect(input.textarea('name')).toEqual({
       name: 'name',
       value: '',
+      id: expect.any(String),
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
@@ -254,5 +260,37 @@ describe('Input blur behavior', () => {
       validity: { name: true },
       touched: { name: true },
     });
+  });
+});
+
+describe('Input IDs', () => {
+  mockReactUseReducer();
+
+  it('generates unique IDs for inputs with different names', () => {
+    const [, input] = useFormState();
+    const { id: firstId } = input.text('firstName');
+    const { id: lastId } = input.text('lastName');
+    expect(firstId).not.toBe(lastId);
+  });
+
+  it('generates unique IDs for inputs with the same name and different values', () => {
+    const [, input] = useFormState();
+    const { id: freeId } = input.radio('plan', 'free');
+    const { id: premiumId } = input.radio('plan', 'premium');
+    expect(freeId).not.toBe(premiumId);
+  });
+
+  it('sets matching IDs for inputs and labels', () => {
+    const [, input] = useFormState();
+    const { id: inputId } = input.text('name');
+    const { htmlFor: labelId } = input.label('name');
+    expect(labelId).toBe(inputId);
+  });
+
+  it('sets matching IDs for inputs and the ID getter', () => {
+    const [, input] = useFormState();
+    const { id: inputId } = input.text('name');
+    const getterId = input.id('name');
+    expect(getterId).toBe(inputId);
   });
 });
