@@ -125,6 +125,38 @@ function LoginForm({ onSubmit }) {
 }
 ```
 
+### Labels
+
+A label can be paired to a specific input by passing the same parameters to
+`input.label()`. This will populate the label's `htmlFor` attribute.
+
+```js
+const [formState, { label, text, radio }] = useFormState();
+
+return (
+  <form>
+    <label {...label('name')}>Full Name</label>
+    <input {...text('name')} />
+
+    <label {...label('plan', 'free')}>Free Plan</label>
+    <input {...radio('plan', 'free')} />
+
+    <label {...label('plan', 'premium')}>Premium Plan</label>
+    <input {...radio('plan', 'premium')} />
+  </form>
+);
+```
+
+An input's generated ID can also be queried with the `id` getter.
+
+```jsx
+const [formState, { id, text }] = useFormState();
+
+return (
+  <input {...text('name')} />
+  <p>The input's ID is {id('name')}</p>
+);
+```
 
 ## API
 
@@ -146,7 +178,7 @@ It returns an array of two items, the first is the [form state](#form-state), an
 The first item returned by `useFormState`.
 
 ```js
-const [formState, input] = useFormState()
+const [formState, input] = useFormState();
 ```
 
 An object describing the form state that updates during subsequent re-renders.
@@ -176,7 +208,7 @@ formState = {
 The second item returned by `useFormState`.
 
 ```js
-const [formState, input] = useFormState()
+const [formState, input] = useFormState();
 ```
 
 An object with keys as input types. Each type is a function that returns the appropriate props that can be spread on the corresponding input.
@@ -203,7 +235,7 @@ The following types are currently supported:
 | `<input {...input.time(name: string) />`                    | `{ [name: string]: string }`        |
 | `<select {...input.select(name: string) />`                 | `{ [name: string]: string }`        |
 | `<textarea {...input.textarea(name: string) />`             | `{ [name: string]: string }`        |
-
+| `<label {...input.label(name: string, value: string?)} />`  | N/A                                 |
 
 ## License
 
