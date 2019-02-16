@@ -153,8 +153,10 @@ An input's generated ID can also be queried with the `id` getter.
 const [formState, { id, text }] = useFormState();
 
 return (
-  <input {...text('name')} />
-  <p>The input's ID is {id('name')}</p>
+  <>
+    <input {...text('name')} />
+    <p>The input's ID is {id('name')}</p>
+  </>
 );
 ```
 
