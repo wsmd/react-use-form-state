@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from 'react-testing-library';
 import { useFormState } from '../src';
-import { SELECT_MULTIPLE } from '../src/constants';
 
 const noop = () => {};
 
@@ -16,11 +15,10 @@ InputForm.defaultProps = {
 };
 
 const SelectForm = ({ onChange, name, values, type }) => {
-  const isSelectMultiple = type === SELECT_MULTIPLE;
   const [formState, input] = useFormState();
   onChange(formState);
   return (
-    <select {...input[type](name)} multiple={isSelectMultiple}>
+    <select {...input[type](name)}>
       {values.map(value => (
         <option key={value} value={value}>
           {value}
@@ -51,7 +49,7 @@ export function renderInput(type, name, value) {
 
 export function renderSelect(type, name, values) {
   const onChangeMock = jest.fn();
-  const { container, getByValue } = render(
+  const { container } = render(
     <SelectForm
       type={type}
       name={name}

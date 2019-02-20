@@ -267,15 +267,29 @@ describe('onChange updates inputs value', () => {
 
   it('updates value for type "selectMultiple"', () => {
     const values = ['option_1', 'option_2', 'option_3'];
-    const { change, changeHandler } = renderSelect(
+    const { select, change, changeHandler } = renderSelect(
       'selectMultiple',
       'select',
       values,
     );
     expect(changeHandler).toHaveBeenLastCalledWithValues({ select: [] });
-    change({ value: 'option_1' });
+
+    select.options[0].selected = true; // selecting one options
+    change();
     expect(changeHandler).toHaveBeenLastCalledWithValues({
       select: ['option_1'],
+    });
+
+    select.options[1].selected = true; // selecting another option
+    change();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({
+      select: ['option_1', 'option_2'],
+    });
+
+    select.options[0].selected = false; // deselecting an option
+    change();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({
+      select: ['option_2'],
     });
   });
 });
