@@ -12,7 +12,7 @@ import {
 } from './constants';
 
 const idGetter = (name, value) =>
-  [ID_PREFIX, name, value].filter(part => !!part).join(`__`);
+  [ID_PREFIX, name, value].filter(part => !!part).join('__');
 
 const labelPropsGetter = (...args) => ({
   htmlFor: idGetter(...args),

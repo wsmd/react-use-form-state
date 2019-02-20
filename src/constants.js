@@ -47,4 +47,4 @@ export const TYPES = [
   WEEK,
 ];
 
-export const ID_PREFIX = `__ufs`;
+export const ID_PREFIX = '__ufs';
