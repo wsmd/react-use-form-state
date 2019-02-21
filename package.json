@@ -24,7 +24,7 @@
     "build:dev": "rollup -c -w",
     "clean": "rm -rf dist",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "lint": "eslint src",
+    "lint": "eslint src test",
     "prepack": "yarn lint && yarn test",
     "prepublishOnly": "yarn clean && yarn build",
     "test": "jest --coverage"
