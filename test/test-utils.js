@@ -14,6 +14,24 @@ InputForm.defaultProps = {
   onChange: noop,
 };
 
+const SelectForm = ({ onChange, name, values, type }) => {
+  const [formState, input] = useFormState();
+  onChange(formState);
+  return (
+    <select {...input[type](name)}>
+      {values.map(value => (
+        <option key={value} value={value}>
+          {value}
+        </option>
+      ))}
+    </select>
+  );
+};
+
+SelectForm.defaultProps = {
+  onChange: noop,
+};
+
 export function renderInput(type, name, value) {
   const onChangeMock = jest.fn();
   const { container } = render(
@@ -26,6 +44,26 @@ export function renderInput(type, name, value) {
     blur: () => fireEvent.blur(input),
     change: target => fireEvent.change(input, { target }),
     click: () => fireEvent.click(input),
+  };
+}
+
+export function renderSelect(type, name, values) {
+  const onChangeMock = jest.fn();
+  const { container } = render(
+    <SelectForm
+      type={type}
+      name={name}
+      values={values}
+      onChange={onChangeMock}
+    />,
+  );
+  const select = container.firstChild;
+
+  return {
+    select,
+    changeHandler: onChangeMock,
+    blur: () => fireEvent.blur(select),
+    change: target => fireEvent.change(select, { target }),
   };
 }
 

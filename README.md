@@ -202,6 +202,7 @@ The following types are currently supported:
 | `<input {...input.week(name: string) />`                    | `{ [name: string]: string }`        |
 | `<input {...input.time(name: string) />`                    | `{ [name: string]: string }`        |
 | `<select {...input.select(name: string) />`                 | `{ [name: string]: string }`        |
+| `<select {...input.selectMultiple(name: string) />`         | `{ [name: string]: Array<string> }` |
 | `<textarea {...input.textarea(name: string) />`             | `{ [name: string]: string }`        |
 
 
