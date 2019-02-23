@@ -4,12 +4,22 @@
 
 export function useFormState<
   T extends { [key: string]: string | string[] | number }
->(initialState?: T): [FormState<T>, Inputs];
+>(initialState?: T, options?: Partial<FormOptions<T>>): [FormState<T>, Inputs];
 
 interface FormState<T> {
   values: InputValues<T>;
   validity: InputValuesValidity<T>;
   touched: InputValuesValidity<T>;
+}
+
+interface FormOptions<T> {
+  onChange(
+    e: React.ChangeEvent<InputElement>,
+    state: InputValues<T>,
+    nextState: InputValues<T>,
+  ): void;
+  onBlur(e: React.FocusEvent<InputElement>): void;
+  onTouched(e: React.FocusEvent<InputElement>): void;
 }
 
 interface Inputs {
@@ -44,6 +54,8 @@ interface Inputs {
 type Maybe<T> = T | void;
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 type InputValues<T> = { readonly [A in keyof T]: T[A] } & {
   readonly [key: string]: Maybe<string | string[]>;
