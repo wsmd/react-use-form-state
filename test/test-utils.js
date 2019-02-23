@@ -4,8 +4,8 @@ import { useFormState } from '../src';
 
 const noop = () => {};
 
-const InputForm = ({ onChange, name, value, type }) => {
-  const [formState, input] = useFormState();
+const InputForm = ({ onChange, name, value, type, formOptions = {} }) => {
+  const [formState, input] = useFormState(null, formOptions);
   onChange(formState);
   return <input {...input[type](name, value)} required />;
 };
@@ -32,10 +32,16 @@ SelectForm.defaultProps = {
   onChange: noop,
 };
 
-export function renderInput(type, name, value) {
+export function renderInput(type, name, value, formOptions) {
   const onChangeMock = jest.fn();
   const { container } = render(
-    <InputForm type={type} name={name} value={value} onChange={onChangeMock} />,
+    <InputForm
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChangeMock}
+      formOptions={formOptions}
+    />,
   );
   const input = container.firstChild;
   return {

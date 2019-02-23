@@ -42,6 +42,43 @@ describe('useFormState API', () => {
   });
 });
 
+describe('useFormState options', () => {
+  it('calls options.onChange when an input changes', () => {
+    const changeHandler = jest.fn();
+    const { change } = renderInput('text', 'username', undefined, {
+      onChange: changeHandler,
+    });
+    change({ value: 'w' });
+    expect(changeHandler).toHaveBeenCalledWith(
+      expect.any(Object), // SyntheticEvent
+      expect.objectContaining({ username: '' }),
+      expect.objectContaining({ username: 'w' }),
+    );
+  });
+
+  it('calls options.onBlur when an input changes', () => {
+    const blurHandler = jest.fn();
+    const { blur } = renderInput('text', 'username', undefined, {
+      onBlur: blurHandler,
+    });
+    blur();
+    expect(blurHandler).toHaveBeenCalledWith(expect.any(Object));
+    blur();
+    expect(blurHandler).toHaveBeenCalledTimes(2);
+  });
+
+  it('calls options.onTouched when an input changes', () => {
+    const touchedHandler = jest.fn();
+    const { blur } = renderInput('text', 'username', undefined, {
+      onTouched: touchedHandler,
+    });
+    blur();
+    expect(touchedHandler).toHaveBeenCalled();
+    blur();
+    expect(touchedHandler).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('input type methods return correct props object', () => {
   mockReactUseReducer();
 
