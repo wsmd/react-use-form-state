@@ -28,7 +28,7 @@
 - [Examples](#examples)
   - [Basic Usage](#basic-usage)
   - [Initial State](#initial-state)
-  - [Global Options](#global-options)
+  - [Global Handlers](#global-handlers)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
 - [API](#api)
   - [`initialState`](#initialstate)
@@ -133,19 +133,22 @@ export default function RentCarForm() {
 }
 ```
 
-### Global Options
+### Global Handlers
+
+`useFormState` supports [a variety of form-level event handlers](#formoptions) that you could use to perform certain actions:
 
 ```jsx
 export default function RentCarForm() {
-  const [formState, { text }] = useFormState(null, {
+  const [formState, { email, password }] = useFormState(null, {
     onChange(e, stateValues, nextStateValues) {
-      console.log(`the ${e.target.name} input has changed!`);
-    }
+      const { name, value } = e.target;
+      console.log(`the ${name} input has changed!`);
+    },
   });
   return (
     <>
       <input {...text('username')} />
-      <input {...text('password')} />
+      <input {...password('password')} />
     </>
   );
 }
@@ -206,8 +209,6 @@ const [formState, inputs] = useFormState(null, {
 A function that gets triggered upon any `change` of the form's inputs, and before updating `formState`.
 
 This function gives you access to the input's `change` [`SyntheticEvent`](https://reactjs.org/docs/events.html), the current `formState`, the next state after the change is applied.
-
-Use this as a global handler to handle any change.
 
 ```js
 const [formState, inputs] = useFormState(null, {
