@@ -15,8 +15,8 @@ interface FormState<T> {
 interface FormOptions<T> {
   onChange(
     e: React.ChangeEvent<InputElement>,
-    state: InputValues<T>,
-    nextState: InputValues<T>,
+    stateValues: InputValues<T>,
+    nextStateValues: InputValues<T>,
   ): void;
   onBlur(e: React.FocusEvent<InputElement>): void;
   onTouched(e: React.FocusEvent<InputElement>): void;
