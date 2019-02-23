@@ -19,6 +19,31 @@
   </a>
 </p>
 
+<details>
+<summary>📖 Table of Contents</summary>
+<p>
+
+- [Motivation](#motivation)
+- [Getting Started](#getting-started)
+- [Examples](#examples)
+  - [Basic Usage](#basic-usage)
+  - [Initial State](#initial-state)
+  - [Global Options](#global-options)
+  - [Without Using a `<form />` Element](#without-using-a-form--element)
+- [API](#api)
+  - [`initialState`](#initialstate)
+  - [`formOptions`](#formoptions)
+    - [`formOptions.onBlur`](#formoptionsonblur)
+    - [`formOptions.onChange`](#formoptionsonchange)
+    - [`formOptions.onTouched`](#formoptionsontouched)
+  - [`[formState, input]`](#formstate-input)
+    - [Form State](#form-state)
+    - [Input Types](#input-types)
+- [License](#license)
+
+</p>
+</details>
+
 ## Motivation
 
 Managing form state in React can be a bit unwieldy sometimes. There are [plenty of great solutions](https://www.npmjs.com/search?q=react%20forms&ranking=popularity) already available that make managing forms state a breeze. However, many of those solutions are opinionated, packed with tons of features that may end up not being used, and/or requires shipping a few extra bytes!
@@ -108,6 +133,24 @@ export default function RentCarForm() {
 }
 ```
 
+### Global Options
+
+```jsx
+export default function RentCarForm() {
+  const [formState, { text }] = useFormState(null, {
+    onChange(e, stateValues, nextStateValues) {
+      console.log(`the ${e.target.name} input has changed!`);
+    }
+  });
+  return (
+    <>
+      <input {...text('username')} />
+      <input {...text('password')} />
+    </>
+  );
+}
+```
+
 ### Without Using a `<form />` Element
 
 `react-use-form-state` is not limited to actual forms. It can be used anywhere inputs are used.
@@ -131,17 +174,74 @@ function LoginForm({ onSubmit }) {
 ```js
 import { useFormState } from 'react-use-form-state';
 
-function SignupForm({ onSubmit }) {
-  const [formState, input] = useFormState(initialState);
+function FormComponent()
+  const [formState, input] = useFormState(initialState, formOptions);
   // ...
 }
 ```
 
-On initial render, `useFormState` takes an optional initial state object with keys as the name property of the form inputs, and values as the initial values of those inputs (similar to `defaultValue`/`defaultChecked`).
+### `initialState`
 
-It returns an array of two items, the first is the [form state](#form-state), and the second an [input types](#input-types) object.
+`useFormState` takes an optional initial state object with keys as the name property of the form inputs, and values as the initial values of those inputs (similar to `defaultValue`/`defaultChecked`).
 
-### Form State
+### `formOptions`
+
+`useFormState` also accepts an optional form options object as a second argument with following properties:
+
+#### `formOptions.onBlur`
+
+A function that gets called upon any `blur` of the form's inputs. This functions provides access to the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html)
+
+```js
+const [formState, inputs] = useFormState(null, {
+  onBlur(e) {
+    // accessing the inputs target that triggered the blur event
+    const { name, value, ...target } = e.target;
+  }
+});
+```
+
+#### `formOptions.onChange`
+
+A function that gets triggered upon any `change` of the form's inputs, and before updating `formState`.
+
+This function gives you access to the input's `change` [`SyntheticEvent`](https://reactjs.org/docs/events.html), the current `formState`, the next state after the change is applied.
+
+Use this as a global handler to handle any change.
+
+```js
+const [formState, inputs] = useFormState(null, {
+  onChange(e, stateValues, nextStateValues) {
+    // accessing the actual inputs target that triggered the change event
+    const { name, value, ...target } = e.target;
+    // the state values prior to applying the change
+    formState.values === stateValues; // true
+    // the state values after applying the change
+    nextStateValues;
+    // the state value of the input. See Input Types below for more information.
+    nextStateValues[name];
+  }
+});
+```
+
+#### `formOptions.onTouched`
+
+A function that gets called after an input inside the form has lost focus, and marked as touched. It will be called once throughout the component life cycle. This functions provides access to the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).
+
+```js
+const [formState, inputs] = useFormState(null, {
+  onTouched(e) {
+    // accessing the inputs target that triggered the blur event
+    const { name, value, ...target } = e.target;
+  }
+});
+```
+
+### `[formState, input]`
+
+The return value of `useFormState`. An array of two items, the first is the [form state](#form-state), and the second an [input types](#input-types) object.
+
+#### Form State
 
 The first item returned by `useFormState`.
 
@@ -171,7 +271,7 @@ formState = {
 }
 ```
 
-### Input Types
+#### Input Types
 
 The second item returned by `useFormState`.
 
