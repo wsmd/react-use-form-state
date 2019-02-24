@@ -32,6 +32,7 @@ interface Inputs {
   color(name: string): InputProps;
   password(name: string): InputProps;
   text(name: string): InputProps;
+  textarea(name: string): Omit<InputProps, 'type'>;
   url(name: string): InputProps;
   search(name: string): InputProps;
   number(name: string): InputProps;
