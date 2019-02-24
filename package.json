@@ -25,9 +25,11 @@
     "clean": "rm -rf dist",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "eslint src test",
-    "prepack": "yarn lint && yarn test",
-    "prepublishOnly": "yarn clean && yarn build",
-    "test": "jest --coverage"
+    "prepack": "yarn clean && yarn build",
+    "prepublishOnly": "yarn test:all",
+    "test": "jest --coverage",
+    "test:all": "yarn lint && yarn typecheck && yarn test",
+    "typecheck": "tsc --noEmit"
   },
   "files": [
     "dist"
@@ -45,14 +47,15 @@
     "setupTestFrameworkScriptFile": "<rootDir>/jest.setup.js"
   },
   "peerDependencies": {
-    "react": "^16.7.0-alpha.0",
-    "react-dom": "^16.7.0-alpha.0"
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
     "@babel/core": "^7.1.2",
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-react": "^7.0.0",
+    "@types/react": "^16.8.4",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
     "coveralls": "^3.0.2",
@@ -69,6 +72,7 @@
     "react-dom": "^16.7.0-alpha.0",
     "react-testing-library": "^5.2.3",
     "rollup": "^0.66.6",
-    "rollup-plugin-babel": "^4.0.3"
+    "rollup-plugin-babel": "^4.0.3",
+    "typescript": "^3.3.3333"
   }
 }

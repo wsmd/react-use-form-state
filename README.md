@@ -60,7 +60,7 @@ To get it started, add `react-use-form-state` to your project:
 npm install --save react-use-form-state
 ```
 
-Please note that `react-use-form-state` requires `react@^16.8` as a peer dependency.
+Please note that `react-use-form-state` requires `react@^16.8.0` as a peer dependency.
 
 ## Examples
 
