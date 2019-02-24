@@ -9,7 +9,17 @@ import {
   SELECT_MULTIPLE,
 } from './constants';
 
-export default function useFormState(initialState) {
+function noop() {}
+
+const defaultFromOptions = {
+  onChange: noop,
+  onBlur: noop,
+  onTouched: noop,
+};
+
+export default function useFormState(initialState, options) {
+  const formOptions = { ...defaultFromOptions, ...options };
+
   const [state, setState] = useReducer(stateReducer, initialState || {});
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
@@ -51,8 +61,7 @@ export default function useFormState(initialState) {
     }
 
     function getNextSelectMultipleValue(e) {
-      const { options } = e.target;
-      return Array.from(options).reduce(
+      return Array.from(e.target.options).reduce(
         (values, option) =>
           option.selected ? [...values, option.value] : values,
         [],
@@ -108,9 +117,19 @@ export default function useFormState(initialState) {
         if (isSelectMultiple) {
           value = getNextSelectMultipleValue(e);
         }
-        setState({ [name]: value });
+
+        const partialNewState = { [name]: value };
+        const newState = { ...state, ...partialNewState };
+
+        formOptions.onChange(e, state, newState);
+
+        setState(partialNewState);
       },
       onBlur(e) {
+        if (!touched[name]) {
+          formOptions.onTouched(e);
+        }
+        formOptions.onBlur(e);
         setTouchedState({ [name]: true });
         setValidityState({ [name]: e.target.validity.valid });
       },
