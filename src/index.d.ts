@@ -1,10 +1,13 @@
-// Type definitions for react-use-form-state 0.3
+// Type definitions for react-use-form-state 0.6.0
 // Project: https://github.com/wsmd/react-use-form-state
 // Definitions by: Waseem Dahman <https://github.com/wsmd>
 
 export function useFormState<
   T extends { [key: string]: string | string[] | number }
->(initialState?: T, options?: Partial<FormOptions<T>>): [FormState<T>, Inputs];
+>(
+  initialState?: T | null,
+  options?: Partial<FormOptions<T>>,
+): [FormState<T>, Inputs];
 
 interface FormState<T> {
   values: InputValues<T>;
