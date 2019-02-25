@@ -53,6 +53,9 @@ interface Inputs {
   month(name: string): InputProps;
   week(name: string): InputProps;
   time(name: string): InputProps;
+
+  label(name: string, value?: string): LabelProps;
+  id(name: string, value?: string): string;
 }
 
 type Maybe<T> = T | void;
@@ -83,4 +86,8 @@ interface CheckedProp {
 
 interface MultipleProp {
   multiple: boolean;
+}
+
+interface LabelProps {
+  htmlFor: string;
 }
