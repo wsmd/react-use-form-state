@@ -56,3 +56,6 @@ formState.values.colors.forEach(color => console.log(color));
 <select {...input.selectMultiple('name')} />;
 
 <textarea {...input.textarea('name')} />;
+
+<label {...input.label('name')} />;
+input.id('name');
