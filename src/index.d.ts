@@ -1,10 +1,13 @@
-// Type definitions for react-use-form-state 0.3
+// Type definitions for react-use-form-state 0.6.0
 // Project: https://github.com/wsmd/react-use-form-state
 // Definitions by: Waseem Dahman <https://github.com/wsmd>
 
 export function useFormState<
   T extends { [key: string]: string | string[] | number }
->(initialState?: T): [FormState<T>, Inputs];
+>(
+  initialState?: T | null,
+  options?: Partial<FormOptions<T>>,
+): [FormState<T>, Inputs];
 
 interface FormState<T> {
   values: InputValues<T>;
@@ -12,12 +15,24 @@ interface FormState<T> {
   touched: InputValuesValidity<T>;
 }
 
+interface FormOptions<T> {
+  onChange(
+    e: React.ChangeEvent<InputElement>,
+    stateValues: InputValues<T>,
+    nextStateValues: InputValues<T>,
+  ): void;
+  onBlur(e: React.FocusEvent<InputElement>): void;
+  onTouched(e: React.FocusEvent<InputElement>): void;
+}
+
 interface Inputs {
+  selectMultiple(name: string): Omit<InputProps, 'type'> & MultipleProp;
   select(name: string): Omit<InputProps, 'type'>;
   email(name: string): InputProps;
   color(name: string): InputProps;
   password(name: string): InputProps;
   text(name: string): InputProps;
+  textarea(name: string): Omit<InputProps, 'type'>;
   url(name: string): InputProps;
   search(name: string): InputProps;
   number(name: string): InputProps;
@@ -44,6 +59,8 @@ type Maybe<T> = T | void;
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
+type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
 type InputValues<T> = { readonly [A in keyof T]: T[A] } & {
   readonly [key: string]: Maybe<string | string[]>;
 };
@@ -62,4 +79,8 @@ interface InputProps {
 
 interface CheckedProp {
   checked: boolean;
+}
+
+interface MultipleProp {
+  multiple: boolean;
 }

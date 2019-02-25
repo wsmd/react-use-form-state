@@ -1,5 +1,5 @@
 import useFormState from '../src/useFormState';
-import { renderInput, mockReactUseReducer } from './test-utils';
+import { renderInput, renderSelect, mockReactUseReducer } from './test-utils';
 
 const textLikeInputs = ['text', 'email', 'password', 'search', 'tel', 'url'];
 const timeInputs = ['date', 'month', 'time', 'week'];
@@ -24,6 +24,7 @@ describe('useFormState API', () => {
     'color',
     'radio',
     'select',
+    'selectMultiple',
     'textarea',
     'label',
     'id',
@@ -40,6 +41,43 @@ describe('useFormState API', () => {
     };
     const [formState] = useFormState(initialState);
     expect(formState.values).toEqual(expect.objectContaining(initialState));
+  });
+});
+
+describe('useFormState options', () => {
+  it('calls options.onChange when an input changes', () => {
+    const changeHandler = jest.fn();
+    const { change } = renderInput('text', 'username', undefined, {
+      onChange: changeHandler,
+    });
+    change({ value: 'w' });
+    expect(changeHandler).toHaveBeenCalledWith(
+      expect.any(Object), // SyntheticEvent
+      expect.objectContaining({ username: '' }),
+      expect.objectContaining({ username: 'w' }),
+    );
+  });
+
+  it('calls options.onBlur when an input changes', () => {
+    const blurHandler = jest.fn();
+    const { blur } = renderInput('text', 'username', undefined, {
+      onBlur: blurHandler,
+    });
+    blur();
+    expect(blurHandler).toHaveBeenCalledWith(expect.any(Object));
+    blur();
+    expect(blurHandler).toHaveBeenCalledTimes(2);
+  });
+
+  it('calls options.onTouched when an input changes', () => {
+    const touchedHandler = jest.fn();
+    const { blur } = renderInput('text', 'username', undefined, {
+      onTouched: touchedHandler,
+    });
+    blur();
+    expect(touchedHandler).toHaveBeenCalled();
+    blur();
+    expect(touchedHandler).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -126,9 +164,23 @@ describe('input type methods return correct props object', () => {
   });
 
   /**
+   * SelectMultiple doesn't need a type but must have a multiple
+   */
+  it('returns props for type "selectMultiple"', () => {
+    const [, input] = useFormState();
+    expect(input.selectMultiple('select_name')).toEqual({
+      name: 'select_name',
+      multiple: true,
+      value: expect.any(String),
+      onChange: expect.any(Function),
+      onBlur: expect.any(Function),
+    });
+  });
+
+  /**
    * Textarea doesn't need a type
    */
-  it('returns props from type "textarea"', () => {
+  it('returns props for type "textarea"', () => {
     const [, input] = useFormState();
     expect(input.textarea('name')).toEqual({
       name: 'name',
@@ -161,7 +213,7 @@ describe('input type methods return correct props object', () => {
 describe('inputs receive default values from initial state', () => {
   mockReactUseReducer();
 
-  it.each([...textLikeInputs, ...timeInputs, 'color', 'textarea'])(
+  it.each([...textLikeInputs, ...timeInputs, 'color', 'textarea', 'select'])(
     'sets initial "value" for type "%s"',
     type => {
       const initialState = { 'input-name': 'input-value' };
@@ -174,6 +226,13 @@ describe('inputs receive default values from initial state', () => {
     const initialState = { 'input-name': '101' };
     const [, input] = useFormState(initialState);
     expect(input[type]('input-name').value).toEqual('101');
+  });
+
+  it('sets initial "value" for type "selectMultiple"', () => {
+    const value = ['option_1', 'option_2'];
+    const initialState = { multiple: value };
+    const [, input] = useFormState(initialState);
+    expect(input.selectMultiple('multiple').value).toEqual(value);
   });
 
   it('sets initial "checked" for type "checkbox"', () => {
@@ -257,6 +316,44 @@ describe('onChange updates inputs value', () => {
     expect(changeHandler).toHaveBeenLastCalledWithValues({ radio: '' });
     click();
     expect(changeHandler).toHaveBeenLastCalledWithValues({ radio: 'option' });
+  });
+
+  it('updates value for type "select"', () => {
+    const values = ['option_1', 'option_2'];
+    const { change, changeHandler } = renderSelect('select', 'select', values);
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ select: '' });
+    change({ value: 'option_1' });
+    expect(changeHandler).toHaveBeenLastCalledWithValues({
+      select: 'option_1',
+    });
+  });
+
+  it('updates value for type "selectMultiple"', () => {
+    const values = ['option_1', 'option_2', 'option_3'];
+    const { select, change, changeHandler } = renderSelect(
+      'selectMultiple',
+      'select',
+      values,
+    );
+    expect(changeHandler).toHaveBeenLastCalledWithValues({ select: [] });
+
+    select.options[0].selected = true; // selecting one options
+    change();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({
+      select: ['option_1'],
+    });
+
+    select.options[1].selected = true; // selecting another option
+    change();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({
+      select: ['option_1', 'option_2'],
+    });
+
+    select.options[0].selected = false; // deselecting an option
+    change();
+    expect(changeHandler).toHaveBeenLastCalledWithValues({
+      select: ['option_2'],
+    });
   });
 });
 

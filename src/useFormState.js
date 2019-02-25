@@ -7,9 +7,18 @@ import {
   CHECKBOX,
   RADIO,
   TEXTAREA,
+  SELECT_MULTIPLE,
   LABEL,
   ID,
 } from './constants';
+
+function noop() {}
+
+const defaultFromOptions = {
+  onChange: noop,
+  onBlur: noop,
+  onTouched: noop,
+};
 
 const idGetter = (name, value) =>
   [ID_PREFIX, name, value].filter(part => !!part).join('__');
@@ -18,7 +27,9 @@ const labelPropsGetter = (...args) => ({
   htmlFor: idGetter(...args),
 });
 
-export default function useFormState(initialState) {
+export default function useFormState(initialState, options) {
+  const formOptions = { ...defaultFromOptions, ...options };
+
   const [state, setState] = useReducer(stateReducer, initialState || {});
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
@@ -28,6 +39,7 @@ export default function useFormState(initialState) {
     const hasValueInState = state[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
+    const isSelectMultiple = type === SELECT_MULTIPLE;
 
     function setInitialValue() {
       let value = '';
@@ -37,6 +49,9 @@ export default function useFormState(initialState) {
          * value will be an array. Otherwise it will be considered a toggle.
          */
         value = hasOwnValue ? [] : false;
+      }
+      if (isSelectMultiple) {
+        value = [];
       }
       setState({ [name]: value });
     }
@@ -55,11 +70,23 @@ export default function useFormState(initialState) {
       return Array.from(checkedValues);
     }
 
+    function getNextSelectMultipleValue(e) {
+      return Array.from(e.target.options).reduce(
+        (values, option) =>
+          option.selected ? [...values, option.value] : values,
+        [],
+      );
+    }
+
     const inputProps = {
       name,
       id: idGetter(name, ownValue),
       get type() {
-        if (type !== SELECT && type !== TEXTAREA) return type;
+        if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA)
+          return type;
+      },
+      get multiple() {
+        if (type === SELECT_MULTIPLE) return true;
       },
       get checked() {
         if (isRadio) {
@@ -98,9 +125,22 @@ export default function useFormState(initialState) {
         if (isCheckbox) {
           value = getNextCheckboxValue(e);
         }
-        setState({ [name]: value });
+        if (isSelectMultiple) {
+          value = getNextSelectMultipleValue(e);
+        }
+
+        const partialNewState = { [name]: value };
+        const newState = { ...state, ...partialNewState };
+
+        formOptions.onChange(e, state, newState);
+
+        setState(partialNewState);
       },
       onBlur(e) {
+        if (!touched[name]) {
+          formOptions.onTouched(e);
+        }
+        formOptions.onBlur(e);
         setTouchedState({ [name]: true });
         setValidityState({ [name]: e.target.validity.valid });
       },
