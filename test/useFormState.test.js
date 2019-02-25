@@ -172,6 +172,7 @@ describe('input type methods return correct props object', () => {
       name: 'select_name',
       multiple: true,
       value: expect.any(String),
+      id: expect.any(String),
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
