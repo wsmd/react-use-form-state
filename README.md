@@ -237,7 +237,7 @@ The following types are currently supported:
 | `<input {...input.time(name: string) />`                    | `{ [name: string]: string }`        |
 | `<select {...input.select(name: string) />`                 | `{ [name: string]: string }`        |
 | `<textarea {...input.textarea(name: string) />`             | `{ [name: string]: string }`        |
-| `<label {...input.label(name: string, value: string?)} />`  | N/A                                 |
+| `<label {...input.label(name: string, value?: string)} />`  | N/A – `input.label()` is stateless and thus does not affect the form state |
 
 ## License
 
