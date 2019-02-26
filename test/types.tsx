@@ -81,6 +81,9 @@ interface ConnectFormState {
   port: number;
 }
 
-const [typedState] = useFormState<ConnectFormState>();
+const [typedState] = useFormState<ConnectFormState>({
+  user: 'wsmd',
+  port: 80,
+});
 
 const { port, host }: { port: string; host: string } = typedState.values;
