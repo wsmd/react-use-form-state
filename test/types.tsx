@@ -8,6 +8,8 @@ useFormState(null);
 const initialState = {
   username: 'wsmd',
   colors: ['yellow', 'red'],
+  power_level: 9000,
+  remember_me: true,
 };
 
 const [formState, input] = useFormState(initialState, {
@@ -30,11 +32,22 @@ const [formState, input] = useFormState(initialState, {
   },
 });
 
+let username: string = formState.values.username;
+
+formState.values.colors.forEach(color => console.log(color));
+
+/**
+ * Even though we're accepting a number as a default value for numeric inputs
+ * (e.g. type=number and type=range), the value we store in state will be a string
+ */
+let level: string = formState.values.power_level;
+
+/**
+ * values of validity and touched will be determined via the blur event. Until
+ * the even is fired, the values will be of type undefined
+ */
 formState.touched.colors;
 formState.validity.username;
-
-formState.values.username;
-formState.values.colors.forEach(color => console.log(color));
 
 <input {...input.checkbox('name', 'value')} />;
 <input {...input.color('name')} />;
@@ -56,3 +69,17 @@ formState.values.colors.forEach(color => console.log(color));
 <select {...input.selectMultiple('name')} />;
 
 <textarea {...input.textarea('name')} />;
+
+// typed state
+
+interface ConnectFormState {
+  user: string;
+  host: string;
+  password: string;
+  database: string;
+  port: number;
+}
+
+const [typedState] = useFormState<ConnectFormState>();
+
+const { port, host }: { port: string; host: string } = typedState.values;
