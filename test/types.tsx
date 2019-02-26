@@ -8,6 +8,8 @@ useFormState(null);
 const initialState = {
   username: 'wsmd',
   colors: ['yellow', 'red'],
+  power_level: 9000,
+  remember_me: true,
 };
 
 const [formState, input] = useFormState(initialState, {
@@ -30,11 +32,23 @@ const [formState, input] = useFormState(initialState, {
   },
 });
 
+let username: string = formState.values.username;
+
+formState.values.colors.forEach(color => console.log(color));
+
+/**
+ * numeric values will be retrieved as strings
+ */
+let level: string = formState.values.power_level;
+
+let rememberMe: boolean = formState.values.remember_me;
+
+/**
+ * values of validity and touched will be determined via the blur event. Until
+ * the even is fired, the values will be of type undefined
+ */
 formState.touched.colors;
 formState.validity.username;
-
-formState.values.username;
-formState.values.colors.forEach(color => console.log(color));
 
 <input {...input.checkbox('name', 'value')} />;
 <input {...input.color('name')} />;
@@ -58,4 +72,22 @@ formState.values.colors.forEach(color => console.log(color));
 <textarea {...input.textarea('name')} />;
 
 <label {...input.label('name')} />;
+
 input.id('name');
+
+// typed state
+
+interface ConnectFormState {
+  user: string;
+  host: string;
+  password: string;
+  database: string;
+  port: number;
+}
+
+const [typedState] = useFormState<ConnectFormState>({
+  user: 'wsmd',
+  port: 80,
+});
+
+const { port, host }: { port: string; host: string } = typedState.values;
