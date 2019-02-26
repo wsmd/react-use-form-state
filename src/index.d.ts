@@ -5,7 +5,7 @@
 export function useFormState<
   T extends { [key in keyof T]: string | string[] | number | boolean }
 >(
-  initialState?: T | null,
+  initialState?: Partial<T> | null,
   options?: Partial<FormOptions<T>>,
 ): [FormState<T>, Inputs];
 
