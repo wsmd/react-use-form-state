@@ -25,7 +25,13 @@ interface FormOptions<T> {
   onTouched(e: React.FocusEvent<InputElement>): void;
 }
 
+// prettier-ignore
 type StateValues<T> = {
+  /**
+   * Even though we're accepting a number as a default value for numeric inputs
+   * (e.g. type=number and type=range), the value we store in  state for those
+   * inputs will will be of a string
+   */
   readonly [A in keyof T]: T[A] extends number ? string : T[A]
 } & {
   readonly [key: string]: Maybe<string | string[] | boolean>;

@@ -37,10 +37,11 @@ let username: string = formState.values.username;
 formState.values.colors.forEach(color => console.log(color));
 
 /**
- * Even though we're accepting a number as a default value for numeric inputs
- * (e.g. type=number and type=range), the value we store in state will be a string
+ * numeric values will be retrieved as strings
  */
 let level: string = formState.values.power_level;
+
+let rememberMe: boolean = formState.values.remember_me;
 
 /**
  * values of validity and touched will be determined via the blur event. Until
