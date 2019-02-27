@@ -9,6 +9,17 @@ import {
   SELECT_MULTIPLE,
 } from './constants';
 
+function toString(value) {
+  switch (typeof value) {
+    case 'function':
+    case 'symbol':
+    case 'undefined':
+      return '';
+    default:
+      return '' + value; // eslint-disable-line prefer-template
+  }
+}
+
 function noop() {}
 
 const defaultFromOptions = {
@@ -25,7 +36,7 @@ export default function useFormState(initialState, options) {
   const [validity, setValidityState] = useReducer(stateReducer, {});
 
   const createPropsGetter = type => (name, ownValue) => {
-    const hasOwnValue = !!ownValue;
+    const hasOwnValue = !!toString(ownValue);
     const hasValueInState = state[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
@@ -79,7 +90,7 @@ export default function useFormState(initialState, options) {
       },
       get checked() {
         if (isRadio) {
-          return state[name] === ownValue;
+          return state[name] === toString(ownValue);
         }
         if (isCheckbox) {
           if (!hasOwnValue) {
@@ -91,7 +102,9 @@ export default function useFormState(initialState, options) {
            * <input {...input.checkbox('option1')} />
            * <input {...input.checkbox('option1', 'value_of_option1')} />
            */
-          return hasValueInState ? state[name].includes(ownValue) : false;
+          return hasValueInState
+            ? state[name].includes(toString(ownValue))
+            : false;
         }
       },
       get value() {

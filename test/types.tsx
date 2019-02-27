@@ -51,13 +51,16 @@ formState.touched.colors;
 formState.validity.username;
 
 <input {...input.checkbox('name', 'value')} />;
+<input {...input.radio('name', 'value')} />;
+<input {...input.radio('name', true)} />;
+<input {...input.radio('name', 123)} />;
+<input {...input.radio('name', ['a', 'b'])} />;
 <input {...input.color('name')} />;
 <input {...input.date('name')} />;
 <input {...input.email('name')} />;
 <input {...input.month('name')} />;
 <input {...input.number('name')} />;
 <input {...input.password('name')} />;
-<input {...input.radio('name', 'value')} />;
 <input {...input.range('name')} />;
 <input {...input.search('name')} />;
 <input {...input.tel('name')} />;
