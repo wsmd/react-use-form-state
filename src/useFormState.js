@@ -1,5 +1,6 @@
 import { useReducer } from 'react';
-import stateReducer from './stateReducer';
+import { stateReducer } from './stateReducer';
+import { toString } from './toString';
 import {
   TYPES,
   SELECT,
@@ -8,17 +9,6 @@ import {
   TEXTAREA,
   SELECT_MULTIPLE,
 } from './constants';
-
-function toString(value) {
-  switch (typeof value) {
-    case 'function':
-    case 'symbol':
-    case 'undefined':
-      return '';
-    default:
-      return '' + value; // eslint-disable-line prefer-template
-  }
-}
 
 function noop() {}
 
