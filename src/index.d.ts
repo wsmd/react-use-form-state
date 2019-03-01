@@ -1,4 +1,4 @@
-// Type definitions for react-use-form-state 0.6.0
+// Type definitions for react-use-form-state 0.6.2
 // Project: https://github.com/wsmd/react-use-form-state
 // Definitions by: Waseem Dahman <https://github.com/wsmd>
 
