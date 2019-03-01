@@ -145,6 +145,26 @@ describe('input type methods return correct props object', () => {
   });
 
   /**
+   * Stringify non-string ownValue of checkbox and radio
+   */
+  it.each`
+    type          | ownValue      | expected
+    ${'array'}    | ${[1, 2]}     | ${'1,2'}
+    ${'boolean'}  | ${false}      | ${'false'}
+    ${'number'}   | ${1}          | ${'1'}
+    ${'object'}   | ${{}}         | ${'[object Object]'}
+    ${'function'} | ${() => {}}   | ${''}
+    ${'Symbol'}   | ${Symbol('')} | ${''}
+  `(
+    'stringify ownValue of type $type for checkbox and radio',
+    ({ ownValue, expected }) => {
+      const [, input] = useFormState();
+      expect(input.checkbox('option1', ownValue).value).toEqual(expected);
+      expect(input.radio('option2', ownValue).value).toEqual(expected);
+    },
+  );
+
+  /**
    * Select doesn't need a type
    */
   it('returns props for type "select"', () => {
