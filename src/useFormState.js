@@ -118,7 +118,7 @@ export default function useFormState(initialState, options) {
          * returning the value of input from the current form state is illogical
          */
         if (isCheckbox || isRadio) {
-          return ownValue;
+          return toString(ownValue);
         }
         return hasValueInState ? state[name] : '';
       },

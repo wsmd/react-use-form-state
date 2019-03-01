@@ -125,6 +125,7 @@ describe('input type methods return correct props object', () => {
       checked: false,
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
+      value: '',
     });
   });
 
@@ -221,9 +222,9 @@ describe('inputs receive default values from initial state', () => {
     const initialState = { option1: true };
     const [, input] = useFormState(initialState);
     expect(input.checkbox('option1').checked).toEqual(true);
-    expect(input.checkbox('option1').value).toEqual(undefined);
+    expect(input.checkbox('option1').value).toEqual('');
     expect(input.checkbox('option2').checked).toEqual(false);
-    expect(input.checkbox('option2').value).toEqual(undefined);
+    expect(input.checkbox('option2').value).toEqual('');
   });
 
   it('sets initial "checked" for type "radio"', () => {
