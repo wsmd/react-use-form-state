@@ -56,12 +56,12 @@ interface Inputs {
   number(name: string): BaseInputProps;
   range(name: string): BaseInputProps;
   tel(name: string): BaseInputProps;
-  radio(name: string, value: string): RadioProps;
+  radio(name: string, ownValue: OwnValue): RadioProps;
   /**
    * Checkbox inputs with a value will be treated as a collection of choices.
    * Their values in in the form state will be of type Array<string>
    */
-  checkbox(name: string, value: string): CheckboxProps;
+  checkbox(name: string, ownValue: OwnValue): CheckboxProps;
   /**
    * Checkbox inputs without a value will be treated as toggles. Their values in
    * in the form state will be of type boolean
@@ -74,6 +74,8 @@ interface Inputs {
 }
 
 type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+type OwnValue = string | number | boolean | string[];
 
 interface BaseInputProps {
   onChange(e: any): void;
