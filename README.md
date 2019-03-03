@@ -30,13 +30,14 @@
   - [Initial State](#initial-state)
   - [Global Handlers](#global-handlers)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
+- [Working with TypeScript](#working-with-typescript)
 - [API](#api)
   - [`initialState`](#initialstate)
   - [`formOptions`](#formoptions)
     - [`formOptions.onBlur`](#formoptionsonblur)
     - [`formOptions.onChange`](#formoptionsonchange)
     - [`formOptions.onTouched`](#formoptionsontouched)
-  - [`[formState, input]`](#formstate-input)
+  - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
     - [Input Types](#input-types)
 - [License](#license)
@@ -171,6 +172,31 @@ function LoginForm({ onSubmit }) {
 }
 ```
 
+## Working with TypeScript
+
+When working with TypeScript, the compiler needs to know what values and inputs `useFormState` is expected to be working with.
+
+For this reason, `useFormState` accepts an optional type argument that defines the state of the form and its fields which you could use to enforce type safety.
+
+```ts
+interface LoginFormFields {
+  username: string;
+  password: string;
+  remember_me: boolean;
+}
+
+const [formState, { text }] = useFormState<LoginFormFields>();
+                                          ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+// OK
+<input {...text('username')} />
+formState.values.username
+
+// Error
+formState.values.doesNotExist
+<input {...text('doesNotExist')} />
+```
+
+By default, `useFormState` will use the type `any` for the form state and its inputs if no type argument is provided. Therefore, it is recommended that you provide one.
 
 ## API
 
@@ -238,7 +264,7 @@ const [formState, inputs] = useFormState(null, {
 });
 ```
 
-### `[formState, input]`
+### `[formState, inputs]`
 
 The return value of `useFormState`. An array of two items, the first is the [form state](#form-state), and the second an [input types](#input-types) object.
 
@@ -247,7 +273,7 @@ The return value of `useFormState`. An array of two items, the first is the [for
 The first item returned by `useFormState`.
 
 ```js
-const [formState, input] = useFormState()
+const [formState, inputs] = useFormState()
 ```
 
 An object describing the form state that updates during subsequent re-renders.
