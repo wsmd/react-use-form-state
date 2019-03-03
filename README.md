@@ -30,13 +30,15 @@
   - [Initial State](#initial-state)
   - [Global Handlers](#global-handlers)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
+  - [Labels](#labels)
+- [Working with TypeScript](#working-with-typescript)
 - [API](#api)
   - [`initialState`](#initialstate)
   - [`formOptions`](#formoptions)
     - [`formOptions.onBlur`](#formoptionsonblur)
     - [`formOptions.onChange`](#formoptionsonchange)
     - [`formOptions.onTouched`](#formoptionsontouched)
-  - [`[formState, input]`](#formstate-input)
+  - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
     - [Input Types](#input-types)
 - [License](#license)
@@ -170,7 +172,6 @@ function LoginForm({ onSubmit }) {
   );
 }
 ```
-
 ### Labels
 
 A label can be paired to a specific input by passing the same parameters to
@@ -206,13 +207,39 @@ return (
 );
 ```
 
+## Working with TypeScript
+
+When working with TypeScript, the compiler needs to know what values and inputs `useFormState` is expected to be working with.
+
+For this reason, `useFormState` accepts an optional type argument that defines the state of the form and its fields which you could use to enforce type safety.
+
+```ts
+interface LoginFormFields {
+  username: string;
+  password: string;
+  remember_me: boolean;
+}
+
+const [formState, { text }] = useFormState<LoginFormFields>();
+                                          ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+// OK
+<input {...text('username')} />
+formState.values.username
+
+// Error
+formState.values.doesNotExist
+<input {...text('doesNotExist')} />
+```
+
+By default, `useFormState` will use the type `any` for the form state and its inputs if no type argument is provided. Therefore, it is recommended that you provide one.
+
 ## API
 
 ```js
 import { useFormState } from 'react-use-form-state';
 
 function FormComponent()
-  const [formState, input] = useFormState(initialState, formOptions);
+  const [formState, inputs] = useFormState(initialState, formOptions);
   // ...
 }
 ```
@@ -272,7 +299,7 @@ const [formState, inputs] = useFormState(null, {
 });
 ```
 
-### `[formState, input]`
+### `[formState, inputs]`
 
 The return value of `useFormState`. An array of two items, the first is the [form state](#form-state), and the second an [input types](#input-types) object.
 
@@ -281,7 +308,7 @@ The return value of `useFormState`. An array of two items, the first is the [for
 The first item returned by `useFormState`.
 
 ```js
-const [formState, input] = useFormState();
+const [formState, inputs] = useFormState();
 ```
 
 An object describing the form state that updates during subsequent re-renders.
@@ -311,35 +338,35 @@ formState = {
 The second item returned by `useFormState`.
 
 ```js
-const [formState, input] = useFormState();
+const [formState, inputs] = useFormState();
 ```
 
 An object with keys as input types. Each type is a function that returns the appropriate props that can be spread on the corresponding input.
 
 The following types are currently supported:
 
-| Type and Usage                                              | State Shape                         |
-| ----------------------------------------------------------- | ----------------------------------- |
-| `<input {...input.email(name: string) />`                   | `{ [name: string]: string }`        |
-| `<input {...input.color(name: string) />`                   | `{ [name: string]: string }`        |
-| `<input {...input.password(name: string) />`                | `{ [name: string]: string }`        |
-| `<input {...input.text(name: string) />`                    | `{ [name: string]: string }`        |
-| `<input {...input.url(name: string) />`                     | `{ [name: string]: string }`        |
-| `<input {...input.search(name: string) />`                  | `{ [name: string]: string }`        |
-| `<input {...input.number(name: string) />`                  | `{ [name: string]: string }`        |
-| `<input {...input.range(name: string) />`                   | `{ [name: string]: string }`        |
-| `<input {...input.tel(name: string) />`                     | `{ [name: string]: string }`        |
-| `<input {...input.radio(name: string, value: string) />`    | `{ [name: string]: string }`        |
-| `<input {...input.checkbox(name: string, value: string) />` | `{ [name: string]: Array<string> }` |
-| `<input {...input.checkbox(name: string) />`                | `{ [name: string]: boolean }`       |
-| `<input {...input.date(name: string) />`                    | `{ [name: string]: string }`        |
-| `<input {...input.month(name: string) />`                   | `{ [name: string]: string }`        |
-| `<input {...input.week(name: string) />`                    | `{ [name: string]: string }`        |
-| `<input {...input.time(name: string) />`                    | `{ [name: string]: string }`        |
-| `<select {...input.select(name: string) />`                 | `{ [name: string]: string }`        |
-| `<select {...input.selectMultiple(name: string) />`         | `{ [name: string]: Array<string> }` |
-| `<textarea {...input.textarea(name: string) />`             | `{ [name: string]: string }`        |
-| `<label {...input.label(name: string, value?: string)} />`  | N/A – `input.label()` is stateless and thus does not affect the form state |
+| Type and Usage                                                 | State Shape                                                                |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `<input {...input.email(name: string) />`                      | `{ [name: string]: string }`                                               |
+| `<input {...input.color(name: string) />`                      | `{ [name: string]: string }`                                               |
+| `<input {...input.password(name: string) />`                   | `{ [name: string]: string }`                                               |
+| `<input {...input.text(name: string) />`                       | `{ [name: string]: string }`                                               |
+| `<input {...input.url(name: string) />`                        | `{ [name: string]: string }`                                               |
+| `<input {...input.search(name: string) />`                     | `{ [name: string]: string }`                                               |
+| `<input {...input.number(name: string) />`                     | `{ [name: string]: string }`                                               |
+| `<input {...input.range(name: string) />`                      | `{ [name: string]: string }`                                               |
+| `<input {...input.tel(name: string) />`                        | `{ [name: string]: string }`                                               |
+| `<input {...input.radio(name: string, ownValue: string) />`    | `{ [name: string]: string }`                                               |
+| `<input {...input.checkbox(name: string, ownValue: string) />` | `{ [name: string]: Array<string> }`                                        |
+| `<input {...input.checkbox(name: string) />`                   | `{ [name: string]: boolean }`                                              |
+| `<input {...input.date(name: string) />`                       | `{ [name: string]: string }`                                               |
+| `<input {...input.month(name: string) />`                      | `{ [name: string]: string }`                                               |
+| `<input {...input.week(name: string) />`                       | `{ [name: string]: string }`                                               |
+| `<input {...input.time(name: string) />`                       | `{ [name: string]: string }`                                               |
+| `<select {...input.select(name: string) />`                    | `{ [name: string]: string }`                                               |
+| `<select {...input.selectMultiple(name: string) />`            | `{ [name: string]: Array<string> }`                                        |
+| `<textarea {...input.textarea(name: string) />`                | `{ [name: string]: string }`                                               |
+| `<label {...input.label(name: string, value?: string)} />`     | N/A – `input.label()` is stateless and thus does not affect the form state |
 
 ## License
 

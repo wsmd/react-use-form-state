@@ -7,6 +7,10 @@
     "consistent-return": "off",
     "getter-return": "off",
     "arrow-parens": ["error", "as-needed"],
-    "react/jsx-filename-extension": ["error", { "extensions": [".js", ".jsx"] }]
+    "react/jsx-filename-extension": [
+      "error",
+      { "extensions": [".js", ".jsx"] }
+    ],
+    "import/prefer-default-export": false
   }
 }

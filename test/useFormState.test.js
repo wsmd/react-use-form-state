@@ -130,6 +130,7 @@ describe('input type methods return correct props object', () => {
       id: expect.any(String),
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
+      value: '',
     });
   });
 
@@ -148,6 +149,26 @@ describe('input type methods return correct props object', () => {
       onBlur: expect.any(Function),
     });
   });
+
+  /**
+   * Stringify non-string ownValue of checkbox and radio
+   */
+  it.each`
+    type          | ownValue      | expected
+    ${'array'}    | ${[1, 2]}     | ${'1,2'}
+    ${'boolean'}  | ${false}      | ${'false'}
+    ${'number'}   | ${1}          | ${'1'}
+    ${'object'}   | ${{}}         | ${'[object Object]'}
+    ${'function'} | ${() => {}}   | ${''}
+    ${'Symbol'}   | ${Symbol('')} | ${''}
+  `(
+    'stringify ownValue of type $type for checkbox and radio',
+    ({ ownValue, expected }) => {
+      const [, input] = useFormState();
+      expect(input.checkbox('option1', ownValue).value).toEqual(expected);
+      expect(input.radio('option2', ownValue).value).toEqual(expected);
+    },
+  );
 
   /**
    * Select doesn't need a type
@@ -248,9 +269,9 @@ describe('inputs receive default values from initial state', () => {
     const initialState = { option1: true };
     const [, input] = useFormState(initialState);
     expect(input.checkbox('option1').checked).toEqual(true);
-    expect(input.checkbox('option1').value).toEqual(undefined);
+    expect(input.checkbox('option1').value).toEqual('');
     expect(input.checkbox('option2').checked).toEqual(false);
-    expect(input.checkbox('option2').value).toEqual(undefined);
+    expect(input.checkbox('option2').value).toEqual('');
   });
 
   it('sets initial "checked" for type "radio"', () => {
