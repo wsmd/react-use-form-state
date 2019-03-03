@@ -10,7 +10,7 @@ interface UseFormStateHook {
     options?: Partial<FormOptions<any>>,
   ): [FormState<any>, Inputs<any>];
 
-  <T extends StateShape<T> = any>(
+  <T extends StateShape<T>>(
     initialState?: Partial<T> | null,
     options?: Partial<FormOptions<T>>,
   ): [FormState<T>, Inputs<T>];
