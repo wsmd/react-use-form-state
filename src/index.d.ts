@@ -2,12 +2,21 @@
 // Project: https://github.com/wsmd/react-use-form-state
 // Definitions by: Waseem Dahman <https://github.com/wsmd>
 
-export function useFormState<
-  T extends { [key in keyof T]: string | string[] | number | boolean }
->(
-  initialState?: Partial<T> | null,
-  options?: Partial<FormOptions<T>>,
-): [FormState<T>, Inputs];
+type StateShape<T> = { [key in keyof T]: string | string[] | number | boolean };
+
+interface UseFormStateHook {
+  (
+    initialState?: Partial<StateShape<any>> | null,
+    options?: Partial<FormOptions<any>>,
+  ): [FormState<any>, Inputs<any>];
+
+  <T extends StateShape<T> = any>(
+    initialState?: Partial<T> | null,
+    options?: Partial<FormOptions<T>>,
+  ): [FormState<T>, Inputs<T>];
+}
+
+export const useFormState: UseFormStateHook;
 
 interface FormState<T> {
   values: StateValues<T>;
@@ -43,34 +52,34 @@ type StateValidity<T> = { readonly [A in keyof T]: Maybe<boolean> } & {
 
 // Inputs
 
-interface Inputs {
-  selectMultiple(name: string): Omit<BaseInputProps, 'type'> & MultipleProp;
-  select(name: string): Omit<BaseInputProps, 'type'>;
-  email(name: string): BaseInputProps;
-  color(name: string): BaseInputProps;
-  password(name: string): BaseInputProps;
-  text(name: string): BaseInputProps;
-  textarea(name: string): Omit<BaseInputProps, 'type'>;
-  url(name: string): BaseInputProps;
-  search(name: string): BaseInputProps;
-  number(name: string): BaseInputProps;
-  range(name: string): BaseInputProps;
-  tel(name: string): BaseInputProps;
-  radio(name: string, ownValue: OwnValue): RadioProps;
+interface Inputs<T> {
+  selectMultiple(name: keyof T): Omit<BaseInputProps, 'type'> & MultipleProp;
+  select(name: keyof T): Omit<BaseInputProps, 'type'>;
+  email(name: keyof T): BaseInputProps;
+  color(name: keyof T): BaseInputProps;
+  password(name: keyof T): BaseInputProps;
+  text(name: keyof T): BaseInputProps;
+  textarea(name: keyof T): Omit<BaseInputProps, 'type'>;
+  url(name: keyof T): BaseInputProps;
+  search(name: keyof T): BaseInputProps;
+  number(name: keyof T): BaseInputProps;
+  range(name: keyof T): BaseInputProps;
+  tel(name: keyof T): BaseInputProps;
+  radio(name: keyof T, ownValue: OwnValue): RadioProps;
   /**
    * Checkbox inputs with a value will be treated as a collection of choices.
    * Their values in in the form state will be of type Array<string>
    */
-  checkbox(name: string, ownValue: OwnValue): CheckboxProps;
+  checkbox(name: keyof T, ownValue: OwnValue): CheckboxProps;
   /**
    * Checkbox inputs without a value will be treated as toggles. Their values in
    * in the form state will be of type boolean
    */
-  checkbox(name: string): CheckboxProps;
-  date(name: string): BaseInputProps;
-  month(name: string): BaseInputProps;
-  week(name: string): BaseInputProps;
-  time(name: string): BaseInputProps;
+  checkbox(name: keyof T): CheckboxProps;
+  date(name: keyof T): BaseInputProps;
+  month(name: keyof T): BaseInputProps;
+  week(name: keyof T): BaseInputProps;
+  time(name: keyof T): BaseInputProps;
 }
 
 type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;

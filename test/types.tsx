@@ -5,17 +5,21 @@ useFormState();
 useFormState({});
 useFormState(null);
 
+interface FormFields {
+  name: string;
+  colors: string[];
+  power_level: number;
+  remember_me: boolean;
+}
+
 const initialState = {
-  username: 'wsmd',
-  colors: ['yellow', 'red'],
-  power_level: 9000,
-  remember_me: true,
+  name: 'wsmd',
 };
 
-const [formState, input] = useFormState(initialState, {
+const [formState, input] = useFormState<FormFields>(initialState, {
   onChange(e, stateValues, nextStateValues) {
     const { name, value } = e.target;
-    if (name === 'username') {
+    if (name === 'name') {
       // string
       stateValues[name].toLowerCase();
     }
@@ -32,7 +36,7 @@ const [formState, input] = useFormState(initialState, {
   },
 });
 
-let username: string = formState.values.username;
+let name: string = formState.values.name;
 
 formState.values.colors.forEach(color => console.log(color));
 
@@ -90,3 +94,11 @@ const [typedState] = useFormState<ConnectFormState>({
 });
 
 const { port, host }: { port: string; host: string } = typedState.values;
+
+// untyped
+
+const [state, { text }] = useFormState({
+  foo: 1,
+});
+state.values.bar;
+text('test');
