@@ -1,6 +1,7 @@
 import { useReducer } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
+import { parseInputArgs } from './parseInputArgs';
 import {
   TYPES,
   SELECT,
@@ -25,7 +26,9 @@ export default function useFormState(initialState, options) {
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
 
-  const createPropsGetter = type => (name, ownValue) => {
+  const createPropsGetter = type => (...args) => {
+    const { name, ownValue, ...inputOptions } = parseInputArgs(args);
+
     const hasOwnValue = !!toString(ownValue);
     const hasValueInState = state[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
@@ -125,6 +128,7 @@ export default function useFormState(initialState, options) {
         const newState = { ...state, ...partialNewState };
 
         formOptions.onChange(e, state, newState);
+        inputOptions.onChange(e);
 
         setState(partialNewState);
       },
@@ -132,9 +136,17 @@ export default function useFormState(initialState, options) {
         if (!touched[name]) {
           formOptions.onTouched(e);
         }
+
+        inputOptions.onBlur(e);
         formOptions.onBlur(e);
+
+        let isValid = e.target.validity.valid;
+        if (typeof inputOptions.validate === 'function') {
+          isValid = inputOptions.validate(e.target.value);
+        }
+
         setTouchedState({ [name]: true });
-        setValidityState({ [name]: e.target.validity.valid });
+        setValidityState({ [name]: isValid });
       },
     };
 

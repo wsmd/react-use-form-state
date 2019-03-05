@@ -265,7 +265,7 @@ describe('onChange updates inputs value', () => {
   );
 
   it.each(numericInputs)('updates value for type "%s"', type => {
-    const { change, input } = renderInput(type);
+    const { change, input } = renderInput(type, 'input-name');
     change({ value: '10' });
     expect(input).toHaveAttribute('value', '10');
   });
@@ -282,7 +282,7 @@ describe('onChange updates inputs value', () => {
     ['time', '02:00'],
     ['month', '2018-11'],
   ])('updates value for type %s', (type, value) => {
-    const { change, input } = renderInput(type);
+    const { change, input } = renderInput(type, 'input-name');
     change({ value });
     expect(input).toHaveAttribute('value', value);
   });
