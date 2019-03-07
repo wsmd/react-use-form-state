@@ -81,7 +81,7 @@ export default function useFormState(initialState, options) {
 
     const inputProps = {
       name,
-      id: idGetter(name, ownValue),
+      id: idGetter(name, toString(ownValue)),
       get type() {
         if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA)
           return type;
