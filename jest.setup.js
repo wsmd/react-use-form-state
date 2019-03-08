@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
-import spyMatchers from 'expect/build/spy_matchers';
+import spyMatchers from 'expect/build/spyMatchers';
 
 import 'jest-dom/extend-expect';
 import 'react-testing-library/cleanup-after-each';
