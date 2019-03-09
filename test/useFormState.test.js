@@ -448,19 +448,33 @@ describe('Input IDs', () => {
   });
 
   it('sets a custom id when formOptions.inputIds is set to a function', () => {
-    const inputIds = jest.fn((name, value) => `${name}.${value}`);
-    const [, input] = useFormState(null, { inputIds });
+    const customInputFormat = jest.fn((name, value) =>
+      value ? `form-${name}-${value}` : `form-${name}`,
+    );
+    const [, input] = useFormState(null, { inputIds: customInputFormat });
 
-    const inputProps = input.checkbox('name', 0);
-    expect(inputProps.id).toEqual('name.0');
-    expect(inputIds).toHaveBeenCalledWith('name', '0');
+    // inputs with own values (e.g. radio button)
 
-    const labelProps = input.label('name', 0);
-    expect(labelProps.htmlFor).toEqual('name.0');
-    expect(inputIds).toHaveBeenCalledTimes(2);
+    const radioProps = input.radio('option', 0);
+    expect(radioProps.id).toEqual('form-option-0');
+    expect(customInputFormat).toHaveBeenCalledWith('option', '0');
+
+    const radioLabelProps = input.label('option', 0);
+    expect(radioLabelProps.htmlFor).toEqual('form-option-0');
+    expect(customInputFormat).toHaveBeenNthCalledWith(2, 'option', '0');
+
+    // inputs with no own values (e.g. text input)
+
+    const textProps = input.text('name');
+    expect(textProps.id).toEqual('form-name');
+    expect(customInputFormat).toHaveBeenLastCalledWith('name');
+
+    const textLabelProps = input.label('name');
+    expect(textLabelProps.htmlFor).toEqual('form-name');
+    expect(customInputFormat).toHaveBeenNthCalledWith(3, 'name');
   });
 
-  it('does not return IDs when formOptions.inputIds is false', () => {
+  it('does not return IDs when formOptions.inputIds is set to false', () => {
     const [, input] = useFormState(null, { inputIds: false });
     const nameInputProps = input.checkbox('name', 0);
     const nameLabelProps = input.label('name', 0);

@@ -1,7 +1,7 @@
 import { useReducer } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
-import { defaultIdGetter, useInputIdGetter } from './inputIds';
+import { useInputIdGetter } from './inputIds';
 import {
   TYPES,
   SELECT,
@@ -19,7 +19,7 @@ const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
-  inputIds: defaultIdGetter,
+  inputIds: true,
 };
 
 export default function useFormState(initialState, options) {
@@ -81,11 +81,14 @@ export default function useFormState(initialState, options) {
         return getInputId(name, ownValue);
       },
       get type() {
-        if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA)
+        if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA) {
           return type;
+        }
       },
       get multiple() {
-        if (type === SELECT_MULTIPLE) return true;
+        if (type === SELECT_MULTIPLE) {
+          return true;
+        }
       },
       get checked() {
         if (isRadio) {

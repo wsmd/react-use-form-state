@@ -306,7 +306,7 @@ const [formState, inputs] = useFormState(null, {
 
 One of the following:
 
-`false` to prevent [input types](#input-types) from creating `id` attributes on inputs.
+`boolean` indicating whether [input types](#input-types) should create an `id` attribute on inputs (defaults to `true`).
 
 ```js
 const [formState, inputs] = useFormState(null, {
@@ -319,7 +319,7 @@ Or a custom id formatter: a function that gets called with the input's name and 
 
 ```js
 const [formState, inputs] = useFormState(null, {
- // custom id format
+ // custom id formatter
   inputIds: (name, ownValue) =>
     ownValue ? `MyForm-${name}-${ownValue}` : `MyForm-${name}`,
 });
@@ -348,7 +348,7 @@ Form state consists of three nested objects:
 ```ts
 formState = {
   values: {
-    [inputName: string]: string | string[],
+    [inputName: string]: string | string[] | boolean,
   },
   validity: {
     [inputName: string]: boolean,
