@@ -80,6 +80,8 @@ interface Inputs<T> {
   month(name: keyof T): BaseInputProps;
   week(name: keyof T): BaseInputProps;
   time(name: keyof T): BaseInputProps;
+  label(name: string, value?: string): LabelProps;
+  id(name: string, value?: string): string;
 }
 
 type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -87,6 +89,7 @@ type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 type OwnValue = string | number | boolean | string[];
 
 interface BaseInputProps {
+  id: string;
   onChange(e: any): void;
   onBlur(e: any): void;
   value: string;
@@ -102,6 +105,10 @@ interface RadioProps extends CheckboxProps {}
 
 interface MultipleProp {
   multiple: boolean;
+}
+
+interface LabelProps {
+  htmlFor: string;
 }
 
 // Utils

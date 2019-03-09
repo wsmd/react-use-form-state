@@ -2,12 +2,15 @@ import { useReducer } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
 import {
+  ID_PREFIX,
   TYPES,
   SELECT,
   CHECKBOX,
   RADIO,
   TEXTAREA,
   SELECT_MULTIPLE,
+  LABEL,
+  ID,
 } from './constants';
 
 function noop() {}
@@ -17,6 +20,13 @@ const defaultFromOptions = {
   onBlur: noop,
   onTouched: noop,
 };
+
+const idGetter = (name, value) =>
+  [ID_PREFIX, name, value].filter(part => !!part).join('__');
+
+const labelPropsGetter = (...args) => ({
+  htmlFor: idGetter(...args),
+});
 
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFromOptions, ...options };
@@ -71,6 +81,7 @@ export default function useFormState(initialState, options) {
 
     const inputProps = {
       name,
+      id: idGetter(name, toString(ownValue)),
       get type() {
         if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA)
           return type;
@@ -146,5 +157,13 @@ export default function useFormState(initialState, options) {
     {},
   );
 
-  return [{ values: state, validity, touched }, inputPropsCreators];
+  const otherCreators = {
+    [LABEL]: labelPropsGetter,
+    [ID]: idGetter,
+  };
+
+  return [
+    { values: state, validity, touched },
+    { ...inputPropsCreators, ...otherCreators },
+  ];
 }

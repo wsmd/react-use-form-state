@@ -78,6 +78,10 @@ formState.validity.username;
 
 <textarea {...input.textarea('name')} />;
 
+<label {...input.label('name')} />;
+
+input.id('name');
+
 // typed state
 
 interface ConnectFormState {
