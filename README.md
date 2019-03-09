@@ -30,7 +30,7 @@
   - [Initial State](#initial-state)
   - [Global Handlers](#global-handlers)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
-  - [Labels](#labels)
+  - [Labels and Ids](#labels-and-ids)
 - [Working with TypeScript](#working-with-typescript)
 - [API](#api)
   - [`initialState`](#initialstate)
@@ -173,7 +173,7 @@ function LoginForm({ onSubmit }) {
   );
 }
 ```
-### Labels
+### Labels and Ids
 
 A label can be paired to a specific input by passing the same parameters to
 `input.label()`. This will populate the label's `htmlFor` attribute.
@@ -208,7 +208,15 @@ return (
 );
 ```
 
-By default, all calls to [inputs types](#input-types) will pass an `id` prop to the input itself using its name and own value. To disable this behavior or to customize the id format, see [`formOptions.inputIds`](#formoptionsinputids).
+By default, calls to [inputs types](#input-types) will generate and pass an `id` prop to the input itself using its name and own value.
+
+Note that this will override the `id` prop if specified before calling the input functions. If you want the `id` to take precedence, it must be passed _after_ calling the input types like this:
+
+```jsx
+<input {...text('username')} id="signup-username" />
+```
+
+To disable the automatic creation of ids or customize their format, see [`formOptions.inputIds`](#formoptionsinputids).
 
 ## Working with TypeScript
 
@@ -324,6 +332,8 @@ const [formState, inputs] = useFormState(null, {
     ownValue ? `MyForm-${name}-${ownValue}` : `MyForm-${name}`,
 });
 ```
+
+Note that when `inputIds` is set to `false`, calls to `input.label` and `input.id` will be a no-op.
 
 ### `[formState, inputs]`
 

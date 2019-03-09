@@ -81,8 +81,8 @@ interface Inputs<T> {
   month(name: keyof T): BaseInputProps;
   week(name: keyof T): BaseInputProps;
   time(name: keyof T): BaseInputProps;
-  label(name: string, value?: string): LabelProps;
-  id(name: string, value?: string): string;
+  label(name: keyof T, ownValue?: OwnValue): Partial<LabelProps>;
+  id(name: keyof T, ownValue?: OwnValue): Maybe<string>;
 }
 
 type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;

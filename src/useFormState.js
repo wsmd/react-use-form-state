@@ -1,7 +1,7 @@
 import { useReducer } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
-import { useInputIdGetter } from './inputIds';
+import { useInputIds } from './useInputIds';
 import {
   TYPES,
   SELECT,
@@ -29,7 +29,7 @@ export default function useFormState(initialState, options) {
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
 
-  const getInputId = useInputIdGetter(formOptions.inputIds);
+  const { getId, getIdAsProps } = useInputIds(formOptions.inputIds);
 
   const createPropsGetter = type => (name, ownValue) => {
     const hasOwnValue = !!toString(ownValue);
@@ -77,9 +77,6 @@ export default function useFormState(initialState, options) {
 
     const inputProps = {
       name,
-      get id() {
-        return getInputId(name, ownValue);
-      },
       get type() {
         if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA) {
           return type;
@@ -148,6 +145,7 @@ export default function useFormState(initialState, options) {
         setTouchedState({ [name]: true });
         setValidityState({ [name]: e.target.validity.valid });
       },
+      ...getIdAsProps('id', name, ownValue),
     };
 
     return inputProps;
@@ -158,16 +156,12 @@ export default function useFormState(initialState, options) {
     {},
   );
 
-  const labelPropsGetter = (name, value) => ({
-    htmlFor: getInputId(name, value),
-  });
-
   return [
     { values: state, validity, touched },
     {
       ...inputPropsCreators,
-      [LABEL]: labelPropsGetter,
-      [ID]: getInputId,
+      [LABEL]: (name, ownValue) => getIdAsProps('htmlFor', name, ownValue),
+      [ID]: getId,
     },
   ];
 }

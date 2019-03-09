@@ -478,7 +478,7 @@ describe('Input IDs', () => {
     const [, input] = useFormState(null, { inputIds: false });
     const nameInputProps = input.checkbox('name', 0);
     const nameLabelProps = input.label('name', 0);
-    expect(nameInputProps.id).toBe(undefined);
-    expect(nameLabelProps.htmlFor).toBe(undefined);
+    expect(nameInputProps).not.toHaveProperty('id');
+    expect(nameLabelProps).not.toHaveProperty('htmlFor');
   });
 });

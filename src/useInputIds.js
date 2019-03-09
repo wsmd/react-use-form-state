@@ -6,11 +6,8 @@ const ID_PREFIX = '__ufs';
 const defaultIdGetter = (name, value) =>
   [ID_PREFIX, name, value].filter(part => !!part).join('__');
 
-/**
- * @param {function|boolean} implementation
- */
-export function useInputIdGetter(implementation) {
-  return useCallback(
+export function useInputIds(implementation) {
+  const getId = useCallback(
     (name, ownValue) => {
       let idGetter;
       if (typeof implementation === 'function') {
@@ -27,4 +24,14 @@ export function useInputIdGetter(implementation) {
     },
     [implementation],
   );
+
+  const getIdAsProps = useCallback(
+    (prop, name, ownValue) => {
+      const id = getId(name, ownValue);
+      return id === undefined ? {} : { [prop]: id };
+    },
+    [getId],
+  );
+
+  return { getId, getIdAsProps };
 }
