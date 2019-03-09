@@ -84,3 +84,15 @@ export function mockReactUseReducer() {
     if (spy.mockRestore) spy.mockRestore();
   });
 }
+
+const useCallbackMock = callback => callback;
+
+export function mockReactUseCallback() {
+  let spy;
+  beforeAll(() => {
+    spy = jest.spyOn(React, 'useCallback').mockImplementation(useCallbackMock);
+  });
+  afterAll(() => {
+    if (spy.mockRestore) spy.mockRestore();
+  });
+}

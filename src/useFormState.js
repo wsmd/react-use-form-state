@@ -1,8 +1,8 @@
 import { useReducer } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
+import { defaultIdGetter, useInputIdGetter } from './inputIds';
 import {
-  ID_PREFIX,
   TYPES,
   SELECT,
   CHECKBOX,
@@ -19,14 +19,8 @@ const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
+  inputIds: defaultIdGetter,
 };
-
-const idGetter = (name, value) =>
-  [ID_PREFIX, name, value].filter(part => !!part).join('__');
-
-const labelPropsGetter = (...args) => ({
-  htmlFor: idGetter(...args),
-});
 
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFromOptions, ...options };
@@ -34,6 +28,8 @@ export default function useFormState(initialState, options) {
   const [state, setState] = useReducer(stateReducer, initialState || {});
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
+
+  const getInputId = useInputIdGetter(formOptions.inputIds);
 
   const createPropsGetter = type => (name, ownValue) => {
     const hasOwnValue = !!toString(ownValue);
@@ -81,7 +77,9 @@ export default function useFormState(initialState, options) {
 
     const inputProps = {
       name,
-      id: idGetter(name, toString(ownValue)),
+      get id() {
+        return getInputId(name, ownValue);
+      },
       get type() {
         if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA)
           return type;
@@ -157,13 +155,16 @@ export default function useFormState(initialState, options) {
     {},
   );
 
-  const otherCreators = {
-    [LABEL]: labelPropsGetter,
-    [ID]: idGetter,
-  };
+  const labelPropsGetter = (name, value) => ({
+    htmlFor: getInputId(name, value),
+  });
 
   return [
     { values: state, validity, touched },
-    { ...inputPropsCreators, ...otherCreators },
+    {
+      ...inputPropsCreators,
+      [LABEL]: labelPropsGetter,
+      [ID]: getInputId,
+    },
   ];
 }

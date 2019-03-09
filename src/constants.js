@@ -45,5 +45,3 @@ export const TYPES = [
   URL,
   WEEK,
 ];
-
-export const ID_PREFIX = '__ufs';

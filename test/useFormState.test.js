@@ -1,5 +1,12 @@
-import useFormState from '../src/useFormState';
-import { renderInput, renderSelect, mockReactUseReducer } from './test-utils';
+import { useFormState } from '../src';
+import {
+  renderInput,
+  renderSelect,
+  mockReactUseReducer,
+  mockReactUseCallback,
+} from './test-utils';
+
+mockReactUseCallback();
 
 const textLikeInputs = ['text', 'email', 'password', 'search', 'tel', 'url'];
 const timeInputs = ['date', 'month', 'time', 'week'];
@@ -431,5 +438,33 @@ describe('Input IDs', () => {
     const { id: inputId } = input.text('name');
     const getterId = input.id('name');
     expect(getterId).toBe(inputId);
+  });
+
+  it('sets matching IDs for inputs and labels with non string values', () => {
+    const [, input] = useFormState();
+    const { id: inputId } = input.checkbox('name', 0);
+    const { htmlFor: labelId } = input.label('name', 0);
+    expect(labelId).toBe(inputId);
+  });
+
+  it('sets a custom id when formOptions.inputIds is set to a function', () => {
+    const inputIds = jest.fn((name, value) => `${name}.${value}`);
+    const [, input] = useFormState(null, { inputIds });
+
+    const inputProps = input.checkbox('name', 0);
+    expect(inputProps.id).toEqual('name.0');
+    expect(inputIds).toHaveBeenCalledWith('name', '0');
+
+    const labelProps = input.label('name', 0);
+    expect(labelProps.htmlFor).toEqual('name.0');
+    expect(inputIds).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not return IDs when formOptions.inputIds is false', () => {
+    const [, input] = useFormState(null, { inputIds: false });
+    const nameInputProps = input.checkbox('name', 0);
+    const nameLabelProps = input.label('name', 0);
+    expect(nameInputProps.id).toBe(undefined);
+    expect(nameLabelProps.htmlFor).toBe(undefined);
   });
 });

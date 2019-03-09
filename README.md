@@ -38,6 +38,7 @@
     - [`formOptions.onBlur`](#formoptionsonblur)
     - [`formOptions.onChange`](#formoptionsonchange)
     - [`formOptions.onTouched`](#formoptionsontouched)
+    - [`formOptions.inputIds`](#formoptionsinputids)
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
     - [Input Types](#input-types)
@@ -207,6 +208,8 @@ return (
 );
 ```
 
+By default, all calls to [inputs types](#input-types) will pass an `id` prop to the input itself using its name and own value. To disable this behavior or to customize the id format, see [`formOptions.inputIds`](#formoptionsinputids).
+
 ## Working with TypeScript
 
 When working with TypeScript, the compiler needs to know what values and inputs `useFormState` is expected to be working with.
@@ -296,6 +299,29 @@ const [formState, inputs] = useFormState(null, {
     // accessing the inputs target that triggered the blur event
     const { name, value, ...target } = e.target;
   }
+});
+```
+
+#### `formOptions.inputIds`
+
+One of the following:
+
+`false` to prevent [input types](#input-types) from creating `id` attributes on inputs.
+
+```js
+const [formState, inputs] = useFormState(null, {
+  // disables creating input ids
+  inputIds: false,
+});
+```
+
+Or a custom id formatter: a function that gets called with the input's name and own value, and expected to return a unique string (using these parameters) that will be as the input id.
+
+```js
+const [formState, inputs] = useFormState(null, {
+ // custom id format
+  inputIds: (name, ownValue) =>
+    ownValue ? `MyForm-${name}-${ownValue}` : `MyForm-${name}`,
 });
 ```
 
