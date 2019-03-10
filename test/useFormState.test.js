@@ -244,6 +244,7 @@ describe('passing an object to input type method', () => {
   it('returns correct props for type "text"', () => {
     const [, input] = useFormState({ username: 'wsmd' });
     expect(input.text({ name: 'username' })).toEqual({
+      id: expect.any(String),
       type: 'text',
       name: 'username',
       value: 'wsmd',
@@ -255,6 +256,7 @@ describe('passing an object to input type method', () => {
   it('returns correct props for type "checkbox"', () => {
     const [, input] = useFormState();
     expect(input.checkbox({ name: 'options', value: 0 })).toEqual({
+      id: expect.any(String),
       type: 'checkbox',
       checked: false,
       name: 'options',
