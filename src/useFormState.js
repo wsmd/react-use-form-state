@@ -1,7 +1,8 @@
-import { useReducer, useRef, useCallback } from 'react';
+import { useReducer } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
 import { parseInputArgs } from './parseInputArgs';
+import { useMarkAsDirty } from './useMarkAsDirty';
 import {
   ID_PREFIX,
   TYPES,
@@ -28,15 +29,6 @@ const idGetter = (name, value) =>
 const labelPropsGetter = (...args) => ({
   htmlFor: idGetter(...args),
 });
-
-function useMarkAsDirty() {
-  const dirty = useRef({});
-  const isDirty = useCallback(name => dirty.current[name], []);
-  const setDirty = useCallback((name, value) => {
-    dirty.current[name] = value;
-  }, []);
-  return { setDirty, isDirty };
-}
 
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFromOptions, ...options };
@@ -178,7 +170,7 @@ export default function useFormState(initialState, options) {
         /**
          * Limiting input validation on blur to:
          * A) when it's either touched for the time
-         * B) marked as dirty due to a change
+         * B) when it's marked as dirty due to a value change
          */
         if (!touched[name] || isDirty(name)) {
           setValidityState({ [name]: getValidationResult(e) });
