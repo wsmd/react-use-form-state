@@ -158,7 +158,7 @@ export default function useFormState(initialState, options) {
         formOptions.onBlur(e);
 
         let isValid = e.target.validity.valid;
-        if (hasCustomValidation && inputOptions.validateOnBlur) {
+        if (hasCustomValidation) {
           isValid = inputOptions.validate({ value: e.target.value });
         }
 

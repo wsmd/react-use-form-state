@@ -291,13 +291,24 @@ describe('passing an object to input type method with callbacks', () => {
     const { fire, stateChangeHandler } = renderWithFormState(
       (state, { text }) => <input {...text({ name: 'name', validate })} />,
     );
+
     fire('change', { value: 'shall not pass' });
     expect(stateChangeHandler).toHaveBeenLastCalledWith(
       expect.objectContaining({ validity: { name: false } }),
     );
+
+    // making sure we're ignoring HTML5 validity on onBlur
+    fire('blur');
+    expect(stateChangeHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({ validity: { name: false } }),
+    );
+
     fire('change', { value: 'shall pass' });
     expect(stateChangeHandler).toHaveBeenLastCalledWith(
-      expect.objectContaining({ validity: { name: true }, touched: {} }),
+      expect.objectContaining({
+        validity: { name: true },
+        touched: { name: true },
+      }),
     );
   });
 
