@@ -94,6 +94,10 @@ formState.validity.username;
   })}
 />;
 
+<label {...input.label('name')} />;
+
+input.id('name');
+
 // typed state
 
 interface ConnectFormState {

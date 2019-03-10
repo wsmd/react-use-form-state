@@ -22,6 +22,9 @@ export const WEEK = 'week';
  */
 export const DATETIME_LOCAL = 'datetime-local';
 
+export const LABEL = 'label';
+export const ID = 'id';
+
 export const TYPES = [
   CHECKBOX,
   COLOR,
@@ -42,3 +45,5 @@ export const TYPES = [
   URL,
   WEEK,
 ];
+
+export const ID_PREFIX = '__ufs';
