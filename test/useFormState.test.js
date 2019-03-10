@@ -1,11 +1,11 @@
 import React from 'react';
 import { useFormState } from '../src';
 import {
-  renderInput,
-  renderSelect,
+  mockReactUseCallback,
   mockReactUseReducer,
   mockReactUseRef,
-  mockReactUseCallback,
+  renderInput,
+  renderSelect,
   renderWithFormState,
 } from './test-utils';
 
@@ -215,24 +215,6 @@ describe('input type methods return correct props object', () => {
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
-  });
-
-  /**
-   * Label only needs a htmlFor
-   */
-  it('returns props from type "label"', () => {
-    const [, input] = useFormState(null, { createIds: true });
-    expect(input.label('name')).toEqual({
-      htmlFor: expect.any(String),
-    });
-  });
-
-  /**
-   * ID returns a single value instead of an object
-   */
-  it('returns string from type "id"', () => {
-    const [, input] = useFormState(null, { createIds: true });
-    expect(input.id('name')).toEqual(expect.any(String));
   });
 });
 
@@ -508,79 +490,5 @@ describe('Input blur behavior', () => {
       validity: { name: true },
       touched: { name: true },
     });
-  });
-});
-
-describe('Input IDs', () => {
-  mockReactUseReducer();
-
-  it('generates unique IDs for inputs with different names', () => {
-    const [, input] = useFormState(null, { createIds: true });
-    const { id: firstId } = input.text('firstName');
-    const { id: lastId } = input.text('lastName');
-    expect(firstId).not.toBe(lastId);
-  });
-
-  it('generates unique IDs for inputs with the same name and different values', () => {
-    const [, input] = useFormState(null, { createIds: true });
-    const { id: freeId } = input.radio('plan', 'free');
-    const { id: premiumId } = input.radio('plan', 'premium');
-    expect(freeId).not.toBe(premiumId);
-  });
-
-  it('sets matching IDs for inputs and labels', () => {
-    const [, input] = useFormState(null, { createIds: true });
-    const { id: inputId } = input.text('name');
-    const { htmlFor: labelId } = input.label('name');
-    expect(labelId).toBe(inputId);
-  });
-
-  it('sets matching IDs for inputs and the ID getter', () => {
-    const [, input] = useFormState(null, { createIds: true });
-    const { id: inputId } = input.text('name');
-    const getterId = input.id('name');
-    expect(getterId).toBe(inputId);
-  });
-
-  it('sets matching IDs for inputs and labels with non string values', () => {
-    const [, input] = useFormState(null, { createIds: true });
-    const { id: inputId } = input.checkbox('name', 0);
-    const { htmlFor: labelId } = input.label('name', 0);
-    expect(labelId).toBe(inputId);
-  });
-
-  it('sets a custom id when formOptions.createIds is set to a function', () => {
-    const customInputFormat = jest.fn((name, value) =>
-      value ? `form-${name}-${value}` : `form-${name}`,
-    );
-    const [, input] = useFormState(null, { createIds: customInputFormat });
-
-    // inputs with own values (e.g. radio button)
-
-    const radioProps = input.radio('option', 0);
-    expect(radioProps.id).toEqual('form-option-0');
-    expect(customInputFormat).toHaveBeenCalledWith('option', '0');
-
-    const radioLabelProps = input.label('option', 0);
-    expect(radioLabelProps.htmlFor).toEqual('form-option-0');
-    expect(customInputFormat).toHaveBeenNthCalledWith(2, 'option', '0');
-
-    // inputs with no own values (e.g. text input)
-
-    const textProps = input.text('name');
-    expect(textProps.id).toEqual('form-name');
-    expect(customInputFormat).toHaveBeenLastCalledWith('name');
-
-    const textLabelProps = input.label('name');
-    expect(textLabelProps.htmlFor).toEqual('form-name');
-    expect(customInputFormat).toHaveBeenNthCalledWith(3, 'name');
-  });
-
-  it('does not return IDs when formOptions.createIds is set to false', () => {
-    const [, input] = useFormState();
-    const nameInputProps = input.checkbox('name', 0);
-    const nameLabelProps = input.label('name', 0);
-    expect(nameInputProps).not.toHaveProperty('id');
-    expect(nameLabelProps).not.toHaveProperty('htmlFor');
   });
 });
