@@ -103,3 +103,31 @@ export function mockReactUseReducer() {
     if (spy.mockRestore) spy.mockRestore();
   });
 }
+
+const useRefMock = () => {
+  let ref;
+  return value => {
+    if (!ref) ref = { current: value };
+    return ref;
+  };
+};
+
+export function mockReactUseRef() {
+  let spy;
+  beforeEach(() => {
+    spy = jest.spyOn(React, 'useRef').mockImplementation(useRefMock());
+  });
+  afterEach(() => spy.mockRestore());
+}
+
+const useCallbackMock = callback => callback;
+
+export function mockReactUseCallback() {
+  let spy;
+  beforeAll(() => {
+    spy = jest.spyOn(React, 'useCallback').mockImplementation(useCallbackMock);
+  });
+  afterAll(() => {
+    if (spy.mockRestore) spy.mockRestore();
+  });
+}

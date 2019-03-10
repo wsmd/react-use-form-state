@@ -4,8 +4,13 @@ import {
   renderInput,
   renderSelect,
   mockReactUseReducer,
+  mockReactUseRef,
+  mockReactUseCallback,
   renderWithFormState,
 } from './test-utils';
+
+mockReactUseCallback();
+mockReactUseRef();
 
 const textLikeInputs = ['text', 'email', 'password', 'search', 'tel', 'url'];
 const timeInputs = ['date', 'month', 'time', 'week'];
@@ -287,7 +292,7 @@ describe('passing an object to input type method with callbacks', () => {
   });
 
   it('calls custom input validate function', () => {
-    const validate = jest.fn(({ value }) => value === 'shall pass');
+    const validate = jest.fn(value => value === 'shall pass');
     const { fire, stateChangeHandler } = renderWithFormState(
       (state, { text }) => <input {...text({ name: 'name', validate })} />,
     );
@@ -313,8 +318,8 @@ describe('passing an object to input type method with callbacks', () => {
   });
 
   it('calls custom input validate function on blur', () => {
-    const validate = jest.fn(({ value }) => value === 'shall pass');
-    const { stateChangeHandler, fire } = renderWithFormState(
+    const validate = jest.fn(value => value === 'shall pass');
+    const { stateChangeHandler, fire, input } = renderWithFormState(
       (state, { text }) => (
         <input {...text({ name: 'name', validate, validateOnBlur: true })} />
       ),
@@ -327,14 +332,18 @@ describe('passing an object to input type method with callbacks', () => {
     );
 
     fire('blur');
-    expect(validate).toHaveBeenCalledWith({ value: 'shall not pass' });
+    expect(validate).toHaveBeenCalledWith('shall not pass', {
+      name: 'shall not pass',
+    });
     expect(stateChangeHandler).toHaveBeenLastCalledWith(
       expect.objectContaining({ validity: { name: false } }),
     );
 
     fire('change', { value: 'shall pass' });
     fire('blur');
-    expect(validate).toHaveBeenCalledWith({ value: 'shall pass' });
+    expect(validate).toHaveBeenCalledWith('shall pass', {
+      name: 'shall pass',
+    });
     expect(stateChangeHandler).toHaveBeenLastCalledWith(
       expect.objectContaining({ validity: { name: true } }),
     );
