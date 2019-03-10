@@ -73,6 +73,25 @@ export function renderSelect(type, name, values) {
   };
 }
 
+/**
+ * @todo refactor other tests to use a more generic renderer like this
+ */
+export function renderWithFormState(children) {
+  const stateChangeHandler = jest.fn();
+  const Wrapper = () => {
+    const [state, inputs] = useFormState();
+    stateChangeHandler(state);
+    return <>{children(state, inputs)}</>;
+  };
+  const { container } = render(<Wrapper />);
+  return {
+    stateChangeHandler,
+    input: container.firstChild,
+    fire: (event, target) =>
+      fireEvent[event](container.firstChild, target ? { target } : undefined),
+  };
+}
+
 const useReducerMock = (reducer, initialState = {}) => [initialState, noop];
 
 export function mockReactUseReducer() {
@@ -83,6 +102,22 @@ export function mockReactUseReducer() {
   afterAll(() => {
     if (spy.mockRestore) spy.mockRestore();
   });
+}
+
+const useRefMock = () => {
+  let ref;
+  return value => {
+    if (!ref) ref = { current: value };
+    return ref;
+  };
+};
+
+export function mockReactUseRef() {
+  let spy;
+  beforeEach(() => {
+    spy = jest.spyOn(React, 'useRef').mockImplementation(useRefMock());
+  });
+  afterEach(() => spy.mockRestore());
 }
 
 const useCallbackMock = callback => callback;

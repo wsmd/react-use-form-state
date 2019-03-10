@@ -55,7 +55,8 @@ let rememberMe: boolean = formState.values.remember_me;
 formState.touched.colors;
 formState.validity.username;
 
-<input {...input.checkbox('name', 'value')} />;
+<input {...input.checkbox('remember_me')} />;
+<input {...input.checkbox('colors', 'red')} />;
 <input {...input.radio('name', 'value')} />;
 <input {...input.radio('name', true)} />;
 <input {...input.radio('name', 123)} />;
@@ -78,6 +79,22 @@ formState.validity.username;
 <select {...input.selectMultiple('name')} />;
 
 <textarea {...input.textarea('name')} />;
+
+<input {...input.text({ name: 'name' })} />;
+<input {...input.radio({ name: 'colors', value: 'a' })} />;
+<input {...input.checkbox({ name: 'colors', value: '' })} />;
+<input {...input.checkbox({ name: 'colors' })} />;
+
+<input
+  {...input.text({
+    name: 'name',
+    validateOnBlur: true,
+    validate: (value, values) =>
+      value.length >= 3 && parseInt(values.power_level) > 9000,
+    onChange: e => console.log(e.target.value),
+    onBlur: e => console.log(e.target.value),
+  })}
+/>;
 
 <label {...input.label('name')} />;
 
@@ -102,8 +119,13 @@ const { port, host }: { port: string; host: string } = typedState.values;
 
 // untyped
 
-const [state, { text }] = useFormState({
+const [state, { text, radio, checkbox }] = useFormState({
   foo: 1,
 });
 state.values.bar;
 text('test');
+text({ name: 'text', validateOnBlur: true });
+radio('option', 'a');
+radio({ name: 'option', value: 'a' });
+checkbox({ name: 'option' });
+checkbox({ name: 'option', value: 1 });

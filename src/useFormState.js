@@ -1,7 +1,9 @@
 import { useReducer } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
+import { parseInputArgs } from './parseInputArgs';
 import { useInputIds } from './useInputIds';
+import { useMarkAsDirty } from './useMarkAsDirty';
 import {
   TYPES,
   SELECT,
@@ -30,8 +32,11 @@ export default function useFormState(initialState, options) {
   const [validity, setValidityState] = useReducer(stateReducer, {});
 
   const { getId, getIdAsProps } = useInputIds(formOptions.inputIds);
+  const { setDirty, isDirty } = useMarkAsDirty();
 
-  const createPropsGetter = type => (name, ownValue) => {
+  const createPropsGetter = type => (...args) => {
+    const { name, ownValue, ...inputOptions } = parseInputArgs(args);
+
     const hasOwnValue = !!toString(ownValue);
     const hasValueInState = state[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
@@ -73,6 +78,13 @@ export default function useFormState(initialState, options) {
           option.selected ? [...values, option.value] : values,
         [],
       );
+    }
+
+    function getValidationResult(e, values = state) {
+      if (typeof inputOptions.validate === 'function') {
+        return !!inputOptions.validate(e.target.value, values);
+      }
+      return e.target.validity.valid;
     }
 
     const inputProps = {
@@ -122,6 +134,7 @@ export default function useFormState(initialState, options) {
         return hasValueInState ? state[name] : '';
       },
       onChange(e) {
+        setDirty(name, true);
         let { value } = e.target;
         if (isCheckbox) {
           value = getNextCheckboxValue(e);
@@ -134,16 +147,32 @@ export default function useFormState(initialState, options) {
         const newState = { ...state, ...partialNewState };
 
         formOptions.onChange(e, state, newState);
+        inputOptions.onChange(e);
+
+        if (!inputOptions.validateOnBlur) {
+          setValidityState({ [name]: getValidationResult(e, newState) });
+        }
 
         setState(partialNewState);
       },
       onBlur(e) {
         if (!touched[name]) {
+          setTouchedState({ [name]: true });
           formOptions.onTouched(e);
         }
+
+        inputOptions.onBlur(e);
         formOptions.onBlur(e);
-        setTouchedState({ [name]: true });
-        setValidityState({ [name]: e.target.validity.valid });
+
+        /**
+         * Limiting input validation on blur to:
+         * A) when it's either touched for the time
+         * B) when it's marked as dirty due to a value change
+         */
+        if (!touched[name] || isDirty(name)) {
+          setValidityState({ [name]: getValidationResult(e) });
+          setDirty(name, false);
+        }
       },
       ...getIdAsProps('id', name, ownValue),
     };
