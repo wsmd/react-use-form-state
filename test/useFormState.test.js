@@ -1,5 +1,12 @@
+import React from 'react';
+import { render, fireEvent } from 'react-testing-library';
 import useFormState from '../src/useFormState';
-import { renderInput, renderSelect, mockReactUseReducer } from './test-utils';
+import {
+  renderInput,
+  renderSelect,
+  mockReactUseReducer,
+  renderWithFormState,
+} from './test-utils';
 
 const textLikeInputs = ['text', 'email', 'password', 'search', 'tel', 'url'];
 const timeInputs = ['date', 'month', 'time', 'week'];
@@ -202,6 +209,96 @@ describe('input type methods return correct props object', () => {
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
+  });
+});
+
+describe('passing an object to input type method', () => {
+  mockReactUseReducer();
+
+  it('returns correct props for type "text"', () => {
+    const [, input] = useFormState({ username: 'wsmd' });
+    expect(input.text({ name: 'username' })).toEqual({
+      type: 'text',
+      name: 'username',
+      value: 'wsmd',
+      onChange: expect.any(Function),
+      onBlur: expect.any(Function),
+    });
+  });
+
+  it('returns correct props for type "checkbox"', () => {
+    const [, input] = useFormState();
+    expect(input.checkbox({ name: 'options', value: 0 })).toEqual({
+      type: 'checkbox',
+      checked: false,
+      name: 'options',
+      value: '0',
+      onChange: expect.any(Function),
+      onBlur: expect.any(Function),
+    });
+  });
+});
+
+describe('passing an object to input type method with callbacks', () => {
+  it('calls input onChange', () => {
+    const onChange = jest.fn();
+    const { fire } = renderWithFormState((state, { text }) => (
+      <input {...text({ name: 'name', onChange })} />
+    ));
+    fire('change', { value: 'test' });
+    expect(onChange).toHaveBeenCalledWith(expect.any(Object));
+  });
+
+  it('calls input onBlur', () => {
+    const onBlur = jest.fn();
+    const { fire } = renderWithFormState((state, { text }) => (
+      <input {...text({ name: 'name', onBlur })} />
+    ));
+    fire('blur');
+    expect(onBlur).toHaveBeenCalledWith(expect.any(Object));
+  });
+
+  it('calls custom input validate function', () => {
+    const validate = jest.fn(({ value }) => value === 'shall pass');
+    const { fire, stateChangeHandler } = renderWithFormState(
+      (state, { text }) => <input {...text({ name: 'name', validate })} />,
+    );
+    fire('change', { value: 'shall not pass' });
+    expect(stateChangeHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({ validity: { name: false } }),
+    );
+    fire('change', { value: 'shall pass' });
+    expect(stateChangeHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({ validity: { name: true }, touched: {} }),
+    );
+  });
+
+  it('calls custom input validate function on blur', () => {
+    const validate = jest.fn(({ value }) => value === 'shall pass');
+    const { stateChangeHandler, fire } = renderWithFormState(
+      (state, { text }) => (
+        <input {...text({ name: 'name', validate, validateOnBlur: true })} />
+      ),
+    );
+
+    fire('change', { value: 'shall not pass' });
+    expect(validate).not.toHaveBeenCalled();
+    expect(stateChangeHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({ validity: {} }),
+    );
+
+    fire('blur');
+    expect(validate).toHaveBeenCalledWith({ value: 'shall not pass' });
+    expect(stateChangeHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({ validity: { name: false } }),
+    );
+
+    fire('change', { value: 'shall pass' });
+    fire('blur');
+    expect(validate).toHaveBeenCalledWith({ value: 'shall pass' });
+    expect(stateChangeHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({ validity: { name: true } }),
+    );
   });
 });
 

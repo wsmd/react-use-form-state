@@ -31,6 +31,7 @@ export default function useFormState(initialState, options) {
 
     const hasOwnValue = !!toString(ownValue);
     const hasValueInState = state[name] !== undefined;
+    const hasCustomValidation = typeof inputOptions.validate === 'function';
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
     const isSelectMultiple = type === SELECT_MULTIPLE;
@@ -130,6 +131,11 @@ export default function useFormState(initialState, options) {
         formOptions.onChange(e, state, newState);
         inputOptions.onChange(e);
 
+        if (hasCustomValidation && !inputOptions.validateOnBlur) {
+          const isValid = inputOptions.validate({ value: e.target.value });
+          setValidityState({ [name]: isValid });
+        }
+
         setState(partialNewState);
       },
       onBlur(e) {
@@ -141,8 +147,8 @@ export default function useFormState(initialState, options) {
         formOptions.onBlur(e);
 
         let isValid = e.target.validity.valid;
-        if (typeof inputOptions.validate === 'function') {
-          isValid = inputOptions.validate(e.target.value);
+        if (hasCustomValidation && inputOptions.validateOnBlur) {
+          isValid = inputOptions.validate({ value: e.target.value });
         }
 
         setTouchedState({ [name]: true });

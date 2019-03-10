@@ -4,6 +4,7 @@ const defaultInputOptions = {
   onChange: noop,
   onBlur: noop,
   validate: null,
+  validateOnBlur: false,
 };
 
 export function parseInputArgs(args) {
