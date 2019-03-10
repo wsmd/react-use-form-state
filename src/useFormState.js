@@ -2,7 +2,7 @@ import { useReducer } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
 import { parseInputArgs } from './parseInputArgs';
-import { useInputIds } from './useInputIds';
+import { useInputId } from './useInputId';
 import { useMarkAsDirty } from './useMarkAsDirty';
 import {
   TYPES,
@@ -21,7 +21,7 @@ const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
-  inputIds: true,
+  createIds: false,
 };
 
 export default function useFormState(initialState, options) {
@@ -31,7 +31,7 @@ export default function useFormState(initialState, options) {
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
 
-  const { getId, getIdAsProps } = useInputIds(formOptions.inputIds);
+  const { getId, getIdProp } = useInputId(formOptions.createIds);
   const { setDirty, isDirty } = useMarkAsDirty();
 
   const createPropsGetter = type => (...args) => {
@@ -174,7 +174,7 @@ export default function useFormState(initialState, options) {
           setDirty(name, false);
         }
       },
-      ...getIdAsProps('id', name, ownValue),
+      ...getIdProp('id', name, ownValue),
     };
 
     return inputProps;
@@ -189,7 +189,7 @@ export default function useFormState(initialState, options) {
     { values: state, validity, touched },
     {
       ...inputPropsCreators,
-      [LABEL]: (name, ownValue) => getIdAsProps('htmlFor', name, ownValue),
+      [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
       [ID]: getId,
     },
   ];

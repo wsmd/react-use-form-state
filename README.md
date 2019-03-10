@@ -39,7 +39,7 @@
     - [`formOptions.onBlur`](#formoptionsonblur)
     - [`formOptions.onChange`](#formoptionsonchange)
     - [`formOptions.onTouched`](#formoptionsontouched)
-    - [`formOptions.inputIds`](#formoptionsinputids)
+    - [`formOptions.createIds`](#formoptionscreateids)
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
     - [Input Types](#input-types)
@@ -209,13 +209,16 @@ function LoginForm({ onSubmit }) {
   );
 }
 ```
+
 ### Labels and Ids
 
 A label can be paired to a specific input by passing the same parameters to
 `input.label()`. This will populate the label's `htmlFor` attribute.
 
 ```js
-const [formState, { label, text, radio }] = useFormState();
+const [formState, { label, text, radio }] = useFormState(initialState, {
+  createIds: true, // enable automatic creation of id and htmlFor props
+});
 
 return (
   <form>
@@ -244,7 +247,9 @@ return (
 );
 ```
 
-By default, calls to [inputs types](#input-types) will generate and pass an `id` prop to the input itself using its name and own value.
+To enable the automatic creation of ids or to customize their format, see [`formOptions.createIds`](#formoptionscreateids).
+
+When this option is enabled, calls to [inputs types](#input-types) will generate and pass an `id` prop to the input itself using its name and own value.
 
 Note that this will override the `id` prop if specified before calling the input functions. If you want the `id` to take precedence, it must be passed _after_ calling the input types like this:
 
@@ -252,7 +257,6 @@ Note that this will override the `id` prop if specified before calling the input
 <input {...text('username')} id="signup-username" />
 ```
 
-To disable the automatic creation of ids or customize their format, see [`formOptions.inputIds`](#formoptionsinputids).
 
 ## Working with TypeScript
 
@@ -346,16 +350,17 @@ const [formState, inputs] = useFormState(null, {
 });
 ```
 
-#### `formOptions.inputIds`
+#### `formOptions.createIds`
 
-One of the following:
+Indicates whether `useFormState` should generate and pass an `id` attribute to its fields. This is helpful when [working with labels](#labels-and-ids).
 
-`boolean` indicating whether [input types](#input-types) should create an `id` attribute on inputs (defaults to `true`).
+It can be one of the following:
+
+A `boolean` indicating whether [input types](#input-types) should pass an `id` attribute to the inputs (set to `false` by default).
 
 ```js
 const [formState, inputs] = useFormState(null, {
-  // disables creating input ids
-  inputIds: false,
+  createIds: true,
 });
 ```
 
@@ -363,13 +368,12 @@ Or a custom id formatter: a function that gets called with the input's name and 
 
 ```js
 const [formState, inputs] = useFormState(null, {
- // custom id formatter
-  inputIds: (name, ownValue) =>
+  createIds: (name, ownValue) =>
     ownValue ? `MyForm-${name}-${ownValue}` : `MyForm-${name}`,
 });
 ```
 
-Note that when `inputIds` is set to `false`, calls to `input.label` and `input.id` will be a no-op.
+Note that when `createIds` is set to `false`, calls to `input.label` and `input.id` will be a no-op.
 
 ### `[formState, inputs]`
 
