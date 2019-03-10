@@ -43,7 +43,6 @@ export default function useFormState(initialState, options) {
 
     const hasOwnValue = !!toString(ownValue);
     const hasValueInState = state[name] !== undefined;
-    const hasCustomValidation = typeof inputOptions.validate === 'function';
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
     const isSelectMultiple = type === SELECT_MULTIPLE;
@@ -86,7 +85,7 @@ export default function useFormState(initialState, options) {
     }
 
     function getValidationResult(e, values = state) {
-      if (hasCustomValidation) {
+      if (typeof inputOptions.validate === 'function') {
         return !!inputOptions.validate(e.target.value, values);
       }
       return e.target.validity.valid;
