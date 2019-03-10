@@ -52,37 +52,59 @@ type StateValidity<T> = { readonly [A in keyof T]: Maybe<boolean> } & {
 
 // Inputs
 
-interface Inputs<T> {
-  selectMultiple(name: keyof T): Omit<BaseInputProps, 'type'> & MultipleProp;
-  select(name: keyof T): Omit<BaseInputProps, 'type'>;
-  email(name: keyof T): BaseInputProps;
-  color(name: keyof T): BaseInputProps;
-  password(name: keyof T): BaseInputProps;
-  text(name: keyof T): BaseInputProps;
-  textarea(name: keyof T): Omit<BaseInputProps, 'type'>;
-  url(name: keyof T): BaseInputProps;
-  search(name: keyof T): BaseInputProps;
-  number(name: keyof T): BaseInputProps;
-  range(name: keyof T): BaseInputProps;
-  tel(name: keyof T): BaseInputProps;
-  radio(name: keyof T, ownValue: OwnValue): RadioProps;
+interface Inputs<T, Name = keyof T> {
+  // prettier-ignore
+  selectMultiple: InputInitializer<T, Args<Name>, Omit<BaseInputProps, 'type'> & MultipleProp>;
+  select: InputInitializer<T, Args<Name>, Omit<BaseInputProps, 'type'>>;
+  email: InputInitializer<T, Args<Name>, BaseInputProps>;
+  color: InputInitializer<T, Args<Name>, BaseInputProps>;
+  password: InputInitializer<T, Args<Name>, BaseInputProps>;
+  text: InputInitializer<T, Args<Name>, BaseInputProps>;
+  textarea: InputInitializer<T, Args<Name>, Omit<BaseInputProps, 'type'>>;
+  url: InputInitializer<T, Args<Name>, BaseInputProps>;
+  search: InputInitializer<T, Args<Name>, BaseInputProps>;
+  number: InputInitializer<T, Args<Name>, BaseInputProps>;
+  range: InputInitializer<T, Args<Name>, BaseInputProps>;
+  tel: InputInitializer<T, Args<Name>, BaseInputProps>;
+  radio: InputInitializer<T, Args<Name, OwnValue>, RadioProps>;
+  date: InputInitializer<T, Args<Name>, BaseInputProps>;
+  month: InputInitializer<T, Args<Name>, BaseInputProps>;
+  week: InputInitializer<T, Args<Name>, BaseInputProps>;
+  time: InputInitializer<T, Args<Name>, BaseInputProps>;
   /**
    * Checkbox inputs with a value will be treated as a collection of choices.
-   * Their values in in the form state will be of type Array<string>
-   */
-  checkbox(name: keyof T, ownValue: OwnValue): CheckboxProps;
-  /**
+   * Their values in in the form state will be of type Array<string>.
+   *
    * Checkbox inputs without a value will be treated as toggles. Their values in
    * in the form state will be of type boolean
    */
-  checkbox(name: keyof T): CheckboxProps;
-  date(name: keyof T): BaseInputProps;
-  month(name: keyof T): BaseInputProps;
-  week(name: keyof T): BaseInputProps;
-  time(name: keyof T): BaseInputProps;
+  checkbox(name: Name, ownValue?: OwnValue): CheckboxProps;
+  checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps;
+
   label(name: string, value?: string): LabelProps;
   id(name: string, value?: string): string;
 }
+
+interface InputInitializer<T, Args extends any[], ReturnValue> {
+  (...args: Args): ReturnValue;
+  (options: InputOptions<T, Args[0], Args[1]>): ReturnValue;
+}
+
+type InputOptions<T, Name, Value = void> = {
+  name: Name;
+  validateOnBlur?: boolean;
+  validate?(value: string, values: StateValues<T>): boolean;
+  onChange?(e: React.ChangeEvent<InputElement>): void;
+  onBlur?(e: React.FocusEvent<InputElement>): void;
+} & WithValue<Value>;
+
+type WithValue<V> = V extends OwnValue
+  ? { value: OwnValue }
+  : V extends undefined
+  ? { value?: OwnValue }
+  : {};
+
+type Args<Name, Value = void> = [Name, Value];
 
 type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 

@@ -29,6 +29,7 @@
   - [Basic Usage](#basic-usage)
   - [Initial State](#initial-state)
   - [Global Handlers](#global-handlers)
+  - [Advanced Input Options](#advanced-input-options)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
   - [Labels](#labels)
 - [Working with TypeScript](#working-with-typescript)
@@ -41,6 +42,7 @@
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
     - [Input Types](#input-types)
+    - [Input Options](#input-options)
 - [License](#license)
 
 </p>
@@ -156,9 +158,43 @@ export default function RentCarForm() {
 }
 ```
 
+### Advanced Input Options
+
+`useFormState` provides a quick and simple API to get started with building a from and managing its state. It also supports [HTML5 from validation](https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Form_validation) out of the box.
+
+```jsx
+<input {...password('password')} required minLength="8" />
+```
+
+While this covers that majority of validation cases, there are times when you need to attach custom event handlers or perform custom validation.
+
+For this, all [input functions](#input-types) provide an alternate API that allows you attach input-level event handlers such as `onChange` and `onBlur`, as well as providing custom validation logic.
+
+```jsx
+export default function SignUpForm() {
+  const [state, { text, password }] = useFormState();
+  return (
+    <>
+      <input {...text('username')} required />
+      <input
+        {...password({
+          name: 'password',
+          onChange: e => console.log('password input changed!'),
+          onBlur: e => console.log('password input lost focus!'),
+          validateOnBlur: true,
+          validate: (value, values) =>
+            !value.includes(values.username) &&
+            STRONG_PASSWORD_REGEX.test(value),
+        })}
+      />
+    </>
+  );
+};
+```
+
 ### Without Using a `<form />` Element
 
-`react-use-form-state` is not limited to actual forms. It can be used anywhere inputs are used.
+`useFormState` is not limited to actual forms. It can be used anywhere inputs are used.
 
 ```jsx
 function LoginForm({ onSubmit }) {
@@ -322,7 +358,7 @@ Form state consists of three nested objects:
 ```ts
 formState = {
   values: {
-    [inputName: string]: string | string[],
+    [inputName: string]: string | string[] | boolean,
   },
   validity: {
     [inputName: string]: boolean,
@@ -367,6 +403,31 @@ The following types are currently supported:
 | `<select {...input.selectMultiple(name: string) />`            | `{ [name: string]: Array<string> }`                                        |
 | `<textarea {...input.textarea(name: string) />`                | `{ [name: string]: string }`                                               |
 | `<label {...input.label(name: string, value?: string)} />`     | N/A – `input.label()` is stateless and thus does not affect the form state |
+
+#### Input Options
+
+Alternatively, input type functions can be called with an object as the first argument. This object is used to [extend the functionality](#advanced-input-options) of the input. This includes attaching event handlers and performing input-level custom validation.
+
+```jsx
+<input
+  {...text({
+    name: 'username',
+    validate: value => validateUsername(value),
+    validateOnBlur: true,
+  })}
+/>
+```
+
+The following options can be passed:
+
+| key                                                     | Description                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name: string`                                          | Required. The name of the input.                                                                                                                                                                                                                                |
+| `value: string`                                         | The input's own value. Only required by the `radio` input, and optional for the `checkbox` input.                                                                                                                                                               |
+| `onChange(e): void`                                     | Optional. A change event handler that gets passed the input's `change` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                |
+| `onBlur(e): void`                                       | Optional. A blur event handler that gets passed the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                    |
+| `validate(value: string, values: StateValues): boolean` | Optional. An input validation function that gets passed the input value and all input values in the state. It's expected to return a boolean indicating whether the input's value is valid. HTML5 validation rules are ignored when this function is specified. |
+| `validateOnBlur: boolean`                               | Optional. `false` by default. When set to `true` and the `validate` function is provided, the function will be called when the input loses focus. If not specified, the `validate` function will be called on value change.                                     |
 
 ## License
 
