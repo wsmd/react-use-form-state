@@ -20,7 +20,7 @@ const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
-  createIds: false,
+  withIds: false,
 };
 
 export default function useFormState(initialState, options) {
@@ -30,7 +30,7 @@ export default function useFormState(initialState, options) {
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
 
-  const { getIdProp } = useInputId(formOptions.createIds);
+  const { getIdProp } = useInputId(formOptions.withIds);
   const { setDirty, isDirty } = useMarkAsDirty();
 
   const createPropsGetter = type => (...args) => {

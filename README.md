@@ -39,7 +39,7 @@
     - [`formOptions.onBlur`](#formoptionsonblur)
     - [`formOptions.onChange`](#formoptionsonchange)
     - [`formOptions.onTouched`](#formoptionsontouched)
-    - [`formOptions.createIds`](#formoptionscreateids)
+    - [`formOptions.withIds`](#formoptionswithids)
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
     - [Input Types](#input-types)
@@ -214,11 +214,11 @@ function LoginForm({ onSubmit }) {
 
 As a convenience, `useFormState` provides an optional API that helps with pairing a label to a specific input.
 
-When [`formOptions.createIds`](#formoptionscreateids) is enabled, a label can be paired to an [input](#input-types) by using `input.label()`. This will populate the label's `htmlFor` attribute for an input with the same parameters.
+When [`formOptions.withIds`](#formoptionswithids) is enabled, a label can be paired to an [input](#input-types) by using `input.label()`. This will populate the label's `htmlFor` attribute for an input with the same parameters.
 
 ```js
 const [formState, { label, text, radio }] = useFormState(initialState, {
-  createIds: true, // enable automatic creation of id and htmlFor props
+  withIds: true, // enable automatic creation of id and htmlFor props
 });
 
 return (
@@ -333,7 +333,7 @@ const [formState, inputs] = useFormState(null, {
 });
 ```
 
-#### `formOptions.createIds`
+#### `formOptions.withIds`
 
 Indicates whether `useFormState` should generate and pass an `id` attribute to its fields. This is helpful when [working with labels](#labels-and-ids).
 
@@ -343,7 +343,7 @@ A `boolean` indicating whether [input types](#input-types) should pass an `id` a
 
 ```js
 const [formState, inputs] = useFormState(null, {
-  createIds: true,
+  withIds: true,
 });
 ```
 
@@ -351,12 +351,12 @@ Or a custom id formatter: a function that gets called with the input's name and 
 
 ```js
 const [formState, inputs] = useFormState(null, {
-  createIds: (name, ownValue) =>
+  withIds: (name, ownValue) =>
     ownValue ? `MyForm-${name}-${ownValue}` : `MyForm-${name}`,
 });
 ```
 
-Note that when `createIds` is set to `false`, applying `input.label()` will be a no-op.
+Note that when `withIds` is set to `false`, applying `input.label()` will be a no-op.
 
 ### `[formState, inputs]`
 
