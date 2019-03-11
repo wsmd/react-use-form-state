@@ -12,7 +12,6 @@ import {
   TEXTAREA,
   SELECT_MULTIPLE,
   LABEL,
-  ID,
 } from './constants';
 
 function noop() {}
@@ -31,7 +30,7 @@ export default function useFormState(initialState, options) {
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
 
-  const { getId, getIdProp } = useInputId(formOptions.createIds);
+  const { getIdProp } = useInputId(formOptions.createIds);
   const { setDirty, isDirty } = useMarkAsDirty();
 
   const createPropsGetter = type => (...args) => {
@@ -190,7 +189,6 @@ export default function useFormState(initialState, options) {
     {
       ...inputPropsCreators,
       [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
-      [ID]: getId,
     },
   ];
 }

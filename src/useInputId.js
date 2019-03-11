@@ -1,37 +1,33 @@
 import { useCallback } from 'react';
 import { toString } from './toString';
 
-const ID_PREFIX = '__ufs';
-
-const defaultIdGetter = (name, value) =>
-  [ID_PREFIX, name, value].filter(part => !!part).join('__');
+const defaultCreateId = (name, value) =>
+  ['__ufs', name, value].filter(Boolean).join('__');
 
 export function useInputId(implementation) {
   const getId = useCallback(
     (name, ownValue) => {
-      let idGetter;
-      if (typeof implementation === 'function') {
-        idGetter = implementation;
-      } else if (implementation === false) {
-        idGetter = () => {}; // noop
+      let createId;
+      if (!implementation) {
+        createId = () => {}; // noop
+      } else if (typeof implementation === 'function') {
+        createId = implementation;
       } else {
-        idGetter = defaultIdGetter;
+        createId = defaultCreateId;
       }
-      if (toString(ownValue)) {
-        return idGetter(name, toString(ownValue));
-      }
-      return idGetter(name);
+      const value = toString(ownValue);
+      return value ? createId(name, value) : createId(name);
     },
     [implementation],
   );
 
   const getIdProp = useCallback(
-    (prop, name, ownValue) => {
-      const id = getId(name, ownValue);
+    (prop, name, value) => {
+      const id = getId(name, value);
       return id === undefined ? {} : { [prop]: id };
     },
     [getId],
   );
 
-  return { getId, getIdProp };
+  return { getIdProp };
 }

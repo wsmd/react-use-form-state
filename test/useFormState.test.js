@@ -38,7 +38,6 @@ describe('useFormState API', () => {
     'selectMultiple',
     'textarea',
     'label',
-    'id',
   ])('has a method for type "%s"', type => {
     const result = useFormState();
     expect(result[1][type]).toBeInstanceOf(Function);

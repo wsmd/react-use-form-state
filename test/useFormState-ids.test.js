@@ -9,14 +9,14 @@ describe('Input IDs', () => {
   /**
    * Label only needs a htmlFor
    */
-  it('input method returns props from type "label"', () => {
+  it('input method correct props from type "label"', () => {
     const [, input] = useFormState(null, { createIds: true });
     expect(input.label('name')).toEqual({
       htmlFor: expect.any(String),
     });
   });
 
-  it('input method returns an "id" prop', () => {
+  it('input method has an "id" prop', () => {
     const [, input] = useFormState(null, { createIds: true });
     expect(input.text('name')).toHaveProperty('id', expect.any(String));
   });
@@ -40,13 +40,6 @@ describe('Input IDs', () => {
     const { id: inputId } = input.text('name');
     const { htmlFor: labelId } = input.label('name');
     expect(labelId).toBe(inputId);
-  });
-
-  it('sets matching IDs for inputs and the ID getter', () => {
-    const [, input] = useFormState(null, { createIds: true });
-    const { id: inputId } = input.text('name');
-    const getterId = input.id('name');
-    expect(getterId).toBe(inputId);
   });
 
   it('sets matching IDs for inputs and labels with non string values', () => {
