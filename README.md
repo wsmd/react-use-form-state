@@ -39,6 +39,7 @@
     - [`formOptions.onBlur`](#formoptionsonblur)
     - [`formOptions.onChange`](#formoptionsonchange)
     - [`formOptions.onTouched`](#formoptionsontouched)
+    - [`formOptions.withIds`](#formoptionswithids)
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
     - [Input Types](#input-types)
@@ -208,13 +209,17 @@ function LoginForm({ onSubmit }) {
   );
 }
 ```
+
 ### Labels
 
-A label can be paired to a specific input by passing the same parameters to
-`input.label()`. This will populate the label's `htmlFor` attribute.
+As a convenience, `useFormState` provides an optional API that helps with pairing a label to a specific input.
+
+When [`formOptions.withIds`](#formoptionswithids) is enabled, a label can be paired to an [input](#input-types) by using `input.label()`. This will populate the label's `htmlFor` attribute for an input with the same parameters.
 
 ```js
-const [formState, { label, text, radio }] = useFormState();
+const [formState, { label, text, radio }] = useFormState(initialState, {
+  withIds: true, // enable automatic creation of id and htmlFor props
+});
 
 return (
   <form>
@@ -230,17 +235,10 @@ return (
 );
 ```
 
-An input's generated ID can also be queried with the `id` getter.
+Note that this will override any existing `id` prop if specified before calling the input functions. If you want the `id` to take precedence, it must be passed _after_ calling the input types like this:
 
 ```jsx
-const [formState, { id, text }] = useFormState();
-
-return (
-  <>
-    <input {...text('name')} />
-    <p>The input's ID is {id('name')}</p>
-  </>
-);
+<input {...text('username')} id="signup-username" />
 ```
 
 ## Working with TypeScript
@@ -334,6 +332,31 @@ const [formState, inputs] = useFormState(null, {
   }
 });
 ```
+
+#### `formOptions.withIds`
+
+Indicates whether `useFormState` should generate and pass an `id` attribute to its fields. This is helpful when [working with labels](#labels-and-ids).
+
+It can be one of the following:
+
+A `boolean` indicating whether [input types](#input-types) should pass an `id` attribute to the inputs (set to `false` by default).
+
+```js
+const [formState, inputs] = useFormState(null, {
+  withIds: true,
+});
+```
+
+Or a custom id formatter: a function that gets called with the input's name and own value, and expected to return a unique string (using these parameters) that will be as the input id.
+
+```js
+const [formState, inputs] = useFormState(null, {
+  withIds: (name, ownValue) =>
+    ownValue ? `MyForm-${name}-${ownValue}` : `MyForm-${name}`,
+});
+```
+
+Note that when `withIds` is set to `false`, applying `input.label()` will be a no-op.
 
 ### `[formState, inputs]`
 

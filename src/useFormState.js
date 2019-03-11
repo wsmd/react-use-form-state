@@ -2,9 +2,9 @@ import { useReducer } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
 import { parseInputArgs } from './parseInputArgs';
+import { useInputId } from './useInputId';
 import { useMarkAsDirty } from './useMarkAsDirty';
 import {
-  ID_PREFIX,
   TYPES,
   SELECT,
   CHECKBOX,
@@ -12,7 +12,6 @@ import {
   TEXTAREA,
   SELECT_MULTIPLE,
   LABEL,
-  ID,
 } from './constants';
 
 function noop() {}
@@ -21,14 +20,8 @@ const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
+  withIds: false,
 };
-
-const idGetter = (name, value) =>
-  [ID_PREFIX, name, value].filter(part => !!part).join('__');
-
-const labelPropsGetter = (...args) => ({
-  htmlFor: idGetter(...args),
-});
 
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFromOptions, ...options };
@@ -36,6 +29,8 @@ export default function useFormState(initialState, options) {
   const [state, setState] = useReducer(stateReducer, initialState || {});
   const [touched, setTouchedState] = useReducer(stateReducer, {});
   const [validity, setValidityState] = useReducer(stateReducer, {});
+
+  const { getIdProp } = useInputId(formOptions.withIds);
   const { setDirty, isDirty } = useMarkAsDirty();
 
   const createPropsGetter = type => (...args) => {
@@ -93,13 +88,15 @@ export default function useFormState(initialState, options) {
 
     const inputProps = {
       name,
-      id: idGetter(name, toString(ownValue)),
       get type() {
-        if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA)
+        if (type !== SELECT && type !== SELECT_MULTIPLE && type !== TEXTAREA) {
           return type;
+        }
       },
       get multiple() {
-        if (type === SELECT_MULTIPLE) return true;
+        if (type === SELECT_MULTIPLE) {
+          return true;
+        }
       },
       get checked() {
         if (isRadio) {
@@ -176,6 +173,7 @@ export default function useFormState(initialState, options) {
           setDirty(name, false);
         }
       },
+      ...getIdProp('id', name, ownValue),
     };
 
     return inputProps;
@@ -186,13 +184,11 @@ export default function useFormState(initialState, options) {
     {},
   );
 
-  const otherCreators = {
-    [LABEL]: labelPropsGetter,
-    [ID]: idGetter,
-  };
-
   return [
     { values: state, validity, touched },
-    { ...inputPropsCreators, ...otherCreators },
+    {
+      ...inputPropsCreators,
+      [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
+    },
   ];
 }

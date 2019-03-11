@@ -34,6 +34,7 @@ const [formState, input] = useFormState<FormFields>(initialState, {
   onTouched(e) {
     const { name, value } = e.target;
   },
+  withIds: (name, value) => (value ? `${name}.${value.toLowerCase()}` : name),
 });
 
 let name: string = formState.values.name;

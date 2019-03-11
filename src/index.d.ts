@@ -32,6 +32,7 @@ interface FormOptions<T> {
   ): void;
   onBlur(e: React.FocusEvent<InputElement>): void;
   onTouched(e: React.FocusEvent<InputElement>): void;
+  withIds: boolean | ((name: string, value?: string) => string);
 }
 
 // prettier-ignore

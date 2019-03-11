@@ -16,14 +16,12 @@ export const TEXTAREA = 'textarea';
 export const TIME = 'time';
 export const URL = 'url';
 export const WEEK = 'week';
+export const LABEL = 'label';
 
 /**
  * @todo add support for datetime-local
  */
 export const DATETIME_LOCAL = 'datetime-local';
-
-export const LABEL = 'label';
-export const ID = 'id';
 
 export const TYPES = [
   CHECKBOX,
@@ -45,5 +43,3 @@ export const TYPES = [
   URL,
   WEEK,
 ];
-
-export const ID_PREFIX = '__ufs';
