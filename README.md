@@ -31,7 +31,7 @@
   - [Global Handlers](#global-handlers)
   - [Advanced Input Options](#advanced-input-options)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
-  - [Labels and Ids](#labels-and-ids)
+  - [Labels](#labels)
 - [Working with TypeScript](#working-with-typescript)
 - [API](#api)
   - [`initialState`](#initialstate)
@@ -210,10 +210,11 @@ function LoginForm({ onSubmit }) {
 }
 ```
 
-### Labels and Ids
+### Labels
 
-A label can be paired to a specific input by passing the same parameters to
-`input.label()`. This will populate the label's `htmlFor` attribute.
+As a convenience, `useFormState` provides an optional API that helps with pairing a label to a specific input.
+
+When [`formOptions.createIds`](#formoptionscreateids) is enabled, a label can be paired to an [input](#input-types) by using `input.label()`. This will populate the label's `htmlFor` attribute for an input with the same parameters.
 
 ```js
 const [formState, { label, text, radio }] = useFormState(initialState, {
@@ -234,29 +235,11 @@ return (
 );
 ```
 
-An input's generated ID can also be queried with the `id` getter.
-
-```jsx
-const [formState, { id, text }] = useFormState();
-
-return (
-  <>
-    <input {...text('name')} />
-    <p>The input's ID is {id('name')}</p>
-  </>
-);
-```
-
-To enable the automatic creation of ids or to customize their format, see [`formOptions.createIds`](#formoptionscreateids).
-
-When this option is enabled, calls to [inputs types](#input-types) will generate and pass an `id` prop to the input itself using its name and own value.
-
-Note that this will override the `id` prop if specified before calling the input functions. If you want the `id` to take precedence, it must be passed _after_ calling the input types like this:
+Note that this will override any existing `id` prop if specified before calling the input functions. If you want the `id` to take precedence, it must be passed _after_ calling the input types like this:
 
 ```jsx
 <input {...text('username')} id="signup-username" />
 ```
-
 
 ## Working with TypeScript
 
@@ -373,7 +356,7 @@ const [formState, inputs] = useFormState(null, {
 });
 ```
 
-Note that when `createIds` is set to `false`, calls to `input.label` and `input.id` will be a no-op.
+Note that when `createIds` is set to `false`, applying `input.label()` will be a no-op.
 
 ### `[formState, inputs]`
 
