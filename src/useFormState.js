@@ -20,6 +20,8 @@ const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
+  onSubmit: noop,
+  onReset: noop,
   withIds: false,
 };
 
@@ -184,11 +186,35 @@ export default function useFormState(initialState, options) {
     {},
   );
 
+  // Form
+
+  function submitForm(e) {
+    e.preventDefault();
+    formOptions.onSubmit();
+  }
+
+  function resetForm() {
+    setState(null);
+    setTouchedState(null);
+    setValidityState(null);
+    formOptions.onReset();
+  }
+
+  const formProps = {
+    onSubmit: submitForm,
+  };
+
+  const form = {
+    bind: formProps,
+    reset: resetForm,
+  };
+
   return [
     { values: state, validity, touched },
     {
       ...inputPropsCreators,
       [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
+      form,
     },
   ];
 }
