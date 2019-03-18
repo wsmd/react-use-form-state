@@ -81,7 +81,7 @@ export default function useFormState(initialState, options) {
 
     function getValidationResult(e, values = state) {
       if (typeof inputOptions.validate === 'function') {
-        return !!inputOptions.validate(e.target.value, values);
+        return !!inputOptions.validate(e.target.value, values, e);
       }
       return e.target.validity.valid;
     }
