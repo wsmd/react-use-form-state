@@ -183,7 +183,8 @@ export default function SignUpForm() {
           onChange: e => console.log('password input changed!'),
           onBlur: e => console.log('password input lost focus!'),
           validateOnBlur: true,
-          validate: (value, values) =>
+          validate: (value, values, event) =>
+            event.target.validity.valid &&
             !value.includes(values.username) &&
             STRONG_PASSWORD_REGEX.test(value),
         })}
@@ -449,7 +450,7 @@ The following options can be passed:
 | `value: string`                                         | The input's own value. Only required by the `radio` input, and optional for the `checkbox` input.                                                                                                                                                               |
 | `onChange(e): void`                                     | Optional. A change event handler that gets passed the input's `change` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                |
 | `onBlur(e): void`                                       | Optional. A blur event handler that gets passed the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                    |
-| `validate(value: string, values: StateValues): boolean` | Optional. An input validation function that gets passed the input value and all input values in the state. It's expected to return a boolean indicating whether the input's value is valid. HTML5 validation rules are ignored when this function is specified. |
+| `validate(value: string, values: StateValues, event: Event): boolean` | Optional. An input validation function that gets passed the input value, all input values in the state, and the change event. It's expected to return a boolean indicating whether the input's value is valid. HTML5 validation rules are ignored when this function is specified. |
 | `validateOnBlur: boolean`                               | Optional. `false` by default. When set to `true` and the `validate` function is provided, the function will be called when the input loses focus. If not specified, the `validate` function will be called on value change.                                     |
 
 ## License

@@ -306,7 +306,7 @@ describe('passing an object to input type method with callbacks', () => {
     fire('blur');
     expect(validate).toHaveBeenCalledWith('shall not pass', {
       name: 'shall not pass',
-    });
+    }, expect.any(Object));
     expect(stateChangeHandler).toHaveBeenLastCalledWith(
       expect.objectContaining({ validity: { name: false } }),
     );
@@ -315,7 +315,7 @@ describe('passing an object to input type method with callbacks', () => {
     fire('blur');
     expect(validate).toHaveBeenCalledWith('shall pass', {
       name: 'shall pass',
-    });
+    }, expect.any(Object));
     expect(stateChangeHandler).toHaveBeenLastCalledWith(
       expect.objectContaining({ validity: { name: true } }),
     );
