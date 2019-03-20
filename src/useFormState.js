@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useReducer, useRef } from 'react';
 import { stateReducer } from './stateReducer';
 import { toString } from './toString';
 import { parseInputArgs } from './parseInputArgs';
@@ -23,24 +23,44 @@ const defaultFromOptions = {
   withIds: false,
 };
 
+function useCache() {
+  const cacheRef = useRef(new Map());
+  return (key, value, cache = cacheRef.current) =>
+    cache.get(key) || cache.set(key, value).get(key);
+}
+
+const ON_CHANGE_HANDLER = 0;
+const ON_BLUR_HANDLER = 1;
+
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFromOptions, ...options };
 
-  const [state, setState] = useReducer(stateReducer, initialState || {});
-  const [touched, setTouchedState] = useReducer(stateReducer, {});
-  const [validity, setValidityState] = useReducer(stateReducer, {});
+  const [__VALUES__, setValues] = useReducer(stateReducer, initialState || {});
+  const [__TOUCHED__, setTouched] = useReducer(stateReducer, {});
+  const [__VALIDITY__, setValidity] = useReducer(stateReducer, {});
 
   const { getIdProp } = useInputId(formOptions.withIds);
   const { setDirty, isDirty } = useMarkAsDirty();
+
+  const state = useRef();
+  state.current = {
+    values: __VALUES__,
+    touched: __TOUCHED__,
+    validity: __VALIDITY__,
+  };
+
+  const resolveCached = useCache();
 
   const createPropsGetter = type => (...args) => {
     const { name, ownValue, ...inputOptions } = parseInputArgs(args);
 
     const hasOwnValue = !!toString(ownValue);
-    const hasValueInState = state[name] !== undefined;
+    const hasValueInState = state.current.values[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
     const isSelectMultiple = type === SELECT_MULTIPLE;
+
+    const key = `${type}.${name}.${toString(ownValue)}`;
 
     function setInitialValue() {
       let value = '';
@@ -54,7 +74,7 @@ export default function useFormState(initialState, options) {
       if (isSelectMultiple) {
         value = [];
       }
-      setState({ [name]: value });
+      setValues({ [name]: value });
     }
 
     function getNextCheckboxValue(e) {
@@ -62,7 +82,7 @@ export default function useFormState(initialState, options) {
       if (!hasOwnValue) {
         return checked;
       }
-      const checkedValues = new Set(state[name]);
+      const checkedValues = new Set(state.current.values[name]);
       if (checked) {
         checkedValues.add(value);
       } else {
@@ -79,7 +99,7 @@ export default function useFormState(initialState, options) {
       );
     }
 
-    function getValidationResult(e, values = state) {
+    function getValidationResult(e, values) {
       if (typeof inputOptions.validate === 'function') {
         return !!inputOptions.validate(e.target.value, values, e);
       }
@@ -99,12 +119,13 @@ export default function useFormState(initialState, options) {
         }
       },
       get checked() {
+        const { values } = state.current;
         if (isRadio) {
-          return state[name] === toString(ownValue);
+          return values[name] === toString(ownValue);
         }
         if (isCheckbox) {
           if (!hasOwnValue) {
-            return state[name] || false;
+            return values[name] || false;
           }
           /**
            * @todo Handle the case where two checkbox inputs share the same
@@ -113,7 +134,7 @@ export default function useFormState(initialState, options) {
            * <input {...input.checkbox('option1', 'value_of_option1')} />
            */
           return hasValueInState
-            ? state[name].includes(toString(ownValue))
+            ? values[name].includes(toString(ownValue))
             : false;
         }
       },
@@ -130,9 +151,9 @@ export default function useFormState(initialState, options) {
         if (isCheckbox || isRadio) {
           return toString(ownValue);
         }
-        return hasValueInState ? state[name] : '';
+        return hasValueInState ? state.current.values[name] : '';
       },
-      onChange(e) {
+      onChange: resolveCached(ON_BLUR_HANDLER + key, e => {
         setDirty(name, true);
         let { value } = e.target;
         if (isCheckbox) {
@@ -143,20 +164,20 @@ export default function useFormState(initialState, options) {
         }
 
         const partialNewState = { [name]: value };
-        const newState = { ...state, ...partialNewState };
+        const newValues = { ...state, ...partialNewState };
 
-        formOptions.onChange(e, state, newState);
+        formOptions.onChange(e, state.current.values, newValues);
         inputOptions.onChange(e);
 
         if (!inputOptions.validateOnBlur) {
-          setValidityState({ [name]: getValidationResult(e, newState) });
+          setValidity({ [name]: getValidationResult(e, newValues) });
         }
 
-        setState(partialNewState);
-      },
-      onBlur(e) {
-        if (!touched[name]) {
-          setTouchedState({ [name]: true });
+        setValues(partialNewState);
+      }),
+      onBlur: resolveCached(ON_CHANGE_HANDLER + key, e => {
+        if (!state.current.touched[name]) {
+          setTouched({ [name]: true });
           formOptions.onTouched(e);
         }
 
@@ -168,11 +189,11 @@ export default function useFormState(initialState, options) {
          * A) when it's either touched for the time
          * B) when it's marked as dirty due to a value change
          */
-        if (!touched[name] || isDirty(name)) {
-          setValidityState({ [name]: getValidationResult(e) });
+        if (!state.current.touched[name] || isDirty(name)) {
+          setValidity({ [name]: getValidationResult(e, state.current.values) });
           setDirty(name, false);
         }
-      },
+      }),
       ...getIdProp('id', name, ownValue),
     };
 
@@ -185,7 +206,7 @@ export default function useFormState(initialState, options) {
   );
 
   return [
-    { values: state, validity, touched },
+    state.current,
     {
       ...inputPropsCreators,
       [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
