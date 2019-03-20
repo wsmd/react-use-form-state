@@ -26,12 +26,12 @@ interface FormState<T> {
 
 interface FormOptions<T> {
   onChange(
-    e: React.ChangeEvent<InputElement>,
+    event: React.ChangeEvent<InputElement>,
     stateValues: StateValues<T>,
     nextStateValues: StateValues<T>,
   ): void;
-  onBlur(e: React.FocusEvent<InputElement>): void;
-  onTouched(e: React.FocusEvent<InputElement>): void;
+  onBlur(event: React.FocusEvent<InputElement>): void;
+  onTouched(event: React.FocusEvent<InputElement>): void;
   withIds: boolean | ((name: string, value?: string) => string);
 }
 
@@ -94,9 +94,13 @@ interface InputInitializer<T, Args extends any[], ReturnValue> {
 type InputOptions<T, Name, Value = void> = {
   name: Name;
   validateOnBlur?: boolean;
-  validate?(value: string, values: StateValues<T>): boolean;
-  onChange?(e: React.ChangeEvent<InputElement>): void;
-  onBlur?(e: React.FocusEvent<InputElement>): void;
+  validate?(
+    value: string,
+    values: StateValues<T>,
+    event: React.ChangeEvent<InputElement> | React.FocusEvent<InputElement>,
+  ): boolean;
+  onChange?(event: React.ChangeEvent<InputElement>): void;
+  onBlur?(event: React.FocusEvent<InputElement>): void;
 } & WithValue<Value>;
 
 type WithValue<V> = V extends OwnValue
@@ -113,8 +117,8 @@ type OwnValue = string | number | boolean | string[];
 
 interface BaseInputProps {
   id: string;
-  onChange(e: any): void;
-  onBlur(e: any): void;
+  onChange(event: any): void;
+  onBlur(event: any): void;
   value: string;
   name: string;
   type: string;

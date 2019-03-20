@@ -89,8 +89,10 @@ formState.validity.username;
   {...input.text({
     name: 'name',
     validateOnBlur: true,
-    validate: (value, values) =>
-      value.length >= 3 && parseInt(values.power_level) > 9000,
+    validate: (value, values, event) =>
+      event.target.validity.valid &&
+      value.length >= 3 &&
+      parseInt(values.power_level) > 9000,
     onChange: e => console.log(e.target.value),
     onBlur: e => console.log(e.target.value),
   })}
