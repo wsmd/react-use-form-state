@@ -1,10 +1,10 @@
 import React from 'react';
-import { renderWithHook } from './test-utils';
+import { renderWithFormState } from './test-utils';
 
 describe('useFormState options', () => {
   it('calls options.onChange when an input changes', async () => {
     const changeHandler = jest.fn();
-    const { change } = renderWithHook(
+    const { change } = renderWithFormState(
       ([, { text }]) => <input {...text('username')} />,
       null,
       { onChange: changeHandler },
@@ -19,7 +19,7 @@ describe('useFormState options', () => {
 
   it('calls options.onBlur when an input changes', () => {
     const blurHandler = jest.fn();
-    const { blur } = renderWithHook(
+    const { blur } = renderWithFormState(
       ([, { text }]) => <input {...text('username')} />,
       null,
       { onBlur: blurHandler },
@@ -32,7 +32,7 @@ describe('useFormState options', () => {
 
   it('calls options.onTouched when an input changes', () => {
     const touchedHandler = jest.fn();
-    const { blur } = renderWithHook(
+    const { blur } = renderWithFormState(
       ([, { text }]) => <input {...text('username')} />,
       null,
       { onTouched: touchedHandler },

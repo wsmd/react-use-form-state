@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormState } from '../src';
-import { renderHook, renderWithHook, InputTypes } from './test-utils';
+import { renderWithFormState, renderHook, InputTypes } from './test-utils';
 
 describe('input type methods return correct props object', () => {
   /**
@@ -212,7 +212,7 @@ describe('onChange updates inputs value', () => {
   it.each([...InputTypes.textLike, 'textarea'])(
     'updates value for type "%s"',
     type => {
-      const { change, root } = renderWithHook(([, inputs]) => (
+      const { change, root } = renderWithFormState(([, inputs]) => (
         <input {...inputs[type]('input-name')} />
       ));
       change({ value: `value for ${type}` });
@@ -221,7 +221,7 @@ describe('onChange updates inputs value', () => {
   );
 
   it.each(InputTypes.numeric)('updates value for type "%s"', type => {
-    const { change, root } = renderWithHook(([, inputs]) => (
+    const { change, root } = renderWithFormState(([, inputs]) => (
       <input {...inputs[type]('input-name')} />
     ));
     change({ value: '10' });
@@ -229,7 +229,7 @@ describe('onChange updates inputs value', () => {
   });
 
   it('updates value for type "color"', () => {
-    const { change, root } = renderWithHook(([, { color }]) => (
+    const { change, root } = renderWithFormState(([, { color }]) => (
       <input {...color('input-name')} />
     ));
     change({ value: '#ffffff' });
@@ -242,7 +242,7 @@ describe('onChange updates inputs value', () => {
     ['time', '02:00'],
     ['month', '2018-11'],
   ])('updates value for type %s', (type, value) => {
-    const { change, root } = renderWithHook(([, inputs]) => (
+    const { change, root } = renderWithFormState(([, inputs]) => (
       <input {...inputs[type]('input-name')} />
     ));
     change({ value });
@@ -252,7 +252,7 @@ describe('onChange updates inputs value', () => {
   it('updates value for type "checkbox"', () => {
     const name = 'collection';
     const value = 'item';
-    const { click, formState } = renderWithHook(([, { checkbox }]) => (
+    const { click, formState } = renderWithFormState(([, { checkbox }]) => (
       <input {...checkbox(name, value)} />
     ));
 
@@ -269,7 +269,7 @@ describe('onChange updates inputs value', () => {
 
   it('updates value for type "checkbox" without a value', () => {
     const name = 'remember_me';
-    const { click, formState } = renderWithHook(([, { checkbox }]) => (
+    const { click, formState } = renderWithFormState(([, { checkbox }]) => (
       <input {...checkbox(name)} />
     ));
 
@@ -285,7 +285,7 @@ describe('onChange updates inputs value', () => {
   });
 
   it('updates value for type "radio"', () => {
-    const { formState, click } = renderWithHook(([, { radio }]) => (
+    const { formState, click } = renderWithFormState(([, { radio }]) => (
       <input {...radio('radio', 'option')} />
     ));
     expect(formState.current).toEqual(
@@ -298,7 +298,7 @@ describe('onChange updates inputs value', () => {
   });
 
   it('updates value for type "select"', () => {
-    const { formState, change } = renderWithHook(([, { select }]) => (
+    const { formState, change } = renderWithFormState(([, { select }]) => (
       <select {...select('select')}>
         <option value="option_1" />
         <option value="option_2" />
@@ -314,7 +314,7 @@ describe('onChange updates inputs value', () => {
   });
 
   it('updates value for type "selectMultiple"', () => {
-    const { formState, change, root: select } = renderWithHook(
+    const { formState, change, root: select } = renderWithFormState(
       ([, { selectMultiple }]) => (
         <select {...selectMultiple('select')}>
           <option value="option_1" />
@@ -351,7 +351,7 @@ describe('onChange updates inputs value', () => {
 describe('passing an object to input type method', () => {
   it('calls input onChange', () => {
     const onChange = jest.fn();
-    const { change } = renderWithHook(([, { text }]) => (
+    const { change } = renderWithFormState(([, { text }]) => (
       <input {...text({ name: 'name', onChange })} />
     ));
     change({ value: 'test' });
@@ -360,7 +360,7 @@ describe('passing an object to input type method', () => {
 
   it('calls input onBlur', () => {
     const onBlur = jest.fn();
-    const { blur } = renderWithHook(([, { text }]) => (
+    const { blur } = renderWithFormState(([, { text }]) => (
       <input {...text({ name: 'name', onBlur })} />
     ));
     blur();
@@ -370,7 +370,7 @@ describe('passing an object to input type method', () => {
 
 describe('Input blur behavior', () => {
   it('marks input as touched on blur', () => {
-    const { blur, formState } = renderWithHook(([, { text }]) => (
+    const { blur, formState } = renderWithFormState(([, { text }]) => (
       <input {...text('name')} />
     ));
     blur();
@@ -382,7 +382,7 @@ describe('Input blur behavior', () => {
   });
 
   it('marks input as invalid on blur', () => {
-    const { blur, formState } = renderWithHook(([, { text }]) => (
+    const { blur, formState } = renderWithFormState(([, { text }]) => (
       <input {...text('name')} required />
     ));
     blur();

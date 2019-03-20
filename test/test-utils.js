@@ -10,11 +10,11 @@ export const InputTypes = {
   numeric: ['number', 'range'],
 };
 
-export function renderWithHook(renderFn, ...hookArgs) {
+export function renderWithFormState(renderFn, ...useFormStateArgs) {
   const formStateRef = { current: null };
 
   const Wrapper = ({ children }) => {
-    const [state, inputs] = useFormState(...hookArgs);
+    const [state, inputs] = useFormState(...useFormStateArgs);
     formStateRef.current = state;
     return children([state, inputs]);
   };
@@ -26,11 +26,10 @@ export function renderWithHook(renderFn, ...hookArgs) {
   };
 
   return {
-    root: container.firstChild,
-    fire,
-    formState: formStateRef,
-    click: (...args) => fire('click', ...args),
     blur: (...args) => fire('blur', ...args),
     change: (...args) => fire('change', ...args),
+    click: (...args) => fire('click', ...args),
+    formState: formStateRef,
+    root: container.firstChild,
   };
 }

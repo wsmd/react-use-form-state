@@ -1,10 +1,10 @@
 import React from 'react';
-import { renderWithHook } from './test-utils';
+import { renderWithFormState } from './test-utils';
 
 describe('passing a custom input validate function', () => {
   it('calls custom input validate function', () => {
     const validate = jest.fn(value => value === 'shall pass');
-    const { change, blur, formState } = renderWithHook(([, { text }]) => (
+    const { change, blur, formState } = renderWithFormState(([, { text }]) => (
       <input {...text({ name: 'name', validate })} />
     ));
 
@@ -30,7 +30,7 @@ describe('passing a custom input validate function', () => {
 
   it('calls custom input validate function on blur', () => {
     const validate = jest.fn(value => value === 'shall pass');
-    const { formState, change, blur } = renderWithHook(([, { text }]) => (
+    const { formState, change, blur } = renderWithFormState(([, { text }]) => (
       <input {...text({ name: 'name', validate, validateOnBlur: true })} />
     ));
 
