@@ -252,16 +252,16 @@ describe('onChange updates inputs value', () => {
   it('updates value for type "checkbox"', () => {
     const name = 'collection';
     const value = 'item';
-    const { fire, formState } = renderWithHook(([, { checkbox }]) => (
+    const { click, formState } = renderWithHook(([, { checkbox }]) => (
       <input {...checkbox(name, value)} />
     ));
 
-    fire('click');
+    click();
     expect(formState.current).toEqual(
       expect.objectContaining({ values: { [name]: [value] } }),
     );
 
-    fire('click');
+    click();
     expect(formState.current).toEqual(
       expect.objectContaining({ values: { [name]: [] } }),
     );
@@ -269,29 +269,29 @@ describe('onChange updates inputs value', () => {
 
   it('updates value for type "checkbox" without a value', () => {
     const name = 'remember_me';
-    const { fire, formState } = renderWithHook(([, { checkbox }]) => (
+    const { click, formState } = renderWithHook(([, { checkbox }]) => (
       <input {...checkbox(name)} />
     ));
 
-    fire('click');
+    click();
     expect(formState.current).toEqual(
       expect.objectContaining({ values: { [name]: true } }),
     );
 
-    fire('click');
+    click();
     expect(formState.current).toEqual(
       expect.objectContaining({ values: { [name]: false } }),
     );
   });
 
   it('updates value for type "radio"', () => {
-    const { formState, fire } = renderWithHook(([, { radio }]) => (
+    const { formState, click } = renderWithHook(([, { radio }]) => (
       <input {...radio('radio', 'option')} />
     ));
     expect(formState.current).toEqual(
       expect.objectContaining({ values: { radio: '' } }),
     );
-    fire('click');
+    click();
     expect(formState.current).toEqual(
       expect.objectContaining({ values: { radio: 'option' } }),
     );
