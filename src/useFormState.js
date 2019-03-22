@@ -1,9 +1,9 @@
-import { useReducer } from 'react';
-import { stateReducer } from './stateReducer';
 import { toString } from './toString';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useMarkAsDirty } from './useMarkAsDirty';
+import { useCache } from './useCache';
+import { useState } from './useState';
 import {
   TYPES,
   SELECT,
@@ -12,6 +12,8 @@ import {
   TEXTAREA,
   SELECT_MULTIPLE,
   LABEL,
+  ON_CHANGE_HANDLER,
+  ON_BLUR_HANDLER,
 } from './constants';
 
 function noop() {}
@@ -26,21 +28,22 @@ const defaultFromOptions = {
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFromOptions, ...options };
 
-  const [state, setState] = useReducer(stateReducer, initialState || {});
-  const [touched, setTouchedState] = useReducer(stateReducer, {});
-  const [validity, setValidityState] = useReducer(stateReducer, {});
-
+  const formState = useState({ initialState });
   const { getIdProp } = useInputId(formOptions.withIds);
   const { setDirty, isDirty } = useMarkAsDirty();
+
+  const callbacks = useCache();
 
   const createPropsGetter = type => (...args) => {
     const { name, ownValue, ...inputOptions } = parseInputArgs(args);
 
     const hasOwnValue = !!toString(ownValue);
-    const hasValueInState = state[name] !== undefined;
+    const hasValueInState = formState.current.values[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
     const isSelectMultiple = type === SELECT_MULTIPLE;
+
+    const key = `${type}.${name}.${toString(ownValue)}`;
 
     function setInitialValue() {
       let value = '';
@@ -54,7 +57,7 @@ export default function useFormState(initialState, options) {
       if (isSelectMultiple) {
         value = [];
       }
-      setState({ [name]: value });
+      formState.setValues({ [name]: value });
     }
 
     function getNextCheckboxValue(e) {
@@ -62,7 +65,7 @@ export default function useFormState(initialState, options) {
       if (!hasOwnValue) {
         return checked;
       }
-      const checkedValues = new Set(state[name]);
+      const checkedValues = new Set(formState.current.values[name]);
       if (checked) {
         checkedValues.add(value);
       } else {
@@ -79,7 +82,7 @@ export default function useFormState(initialState, options) {
       );
     }
 
-    function getValidationResult(e, values = state) {
+    function getValidationResult(e, values) {
       if (typeof inputOptions.validate === 'function') {
         return !!inputOptions.validate(e.target.value, values, e);
       }
@@ -99,12 +102,13 @@ export default function useFormState(initialState, options) {
         }
       },
       get checked() {
+        const { values } = formState.current;
         if (isRadio) {
-          return state[name] === toString(ownValue);
+          return values[name] === toString(ownValue);
         }
         if (isCheckbox) {
           if (!hasOwnValue) {
-            return state[name] || false;
+            return values[name] || false;
           }
           /**
            * @todo Handle the case where two checkbox inputs share the same
@@ -113,7 +117,7 @@ export default function useFormState(initialState, options) {
            * <input {...input.checkbox('option1', 'value_of_option1')} />
            */
           return hasValueInState
-            ? state[name].includes(toString(ownValue))
+            ? values[name].includes(toString(ownValue))
             : false;
         }
       },
@@ -130,9 +134,9 @@ export default function useFormState(initialState, options) {
         if (isCheckbox || isRadio) {
           return toString(ownValue);
         }
-        return hasValueInState ? state[name] : '';
+        return hasValueInState ? formState.current.values[name] : '';
       },
-      onChange(e) {
+      onChange: callbacks.getOrSet(ON_BLUR_HANDLER + key, e => {
         setDirty(name, true);
         let { value } = e.target;
         if (isCheckbox) {
@@ -143,20 +147,20 @@ export default function useFormState(initialState, options) {
         }
 
         const partialNewState = { [name]: value };
-        const newState = { ...state, ...partialNewState };
+        const newValues = { ...formState.current, ...partialNewState };
 
-        formOptions.onChange(e, state, newState);
+        formOptions.onChange(e, formState.current.values, newValues);
         inputOptions.onChange(e);
 
         if (!inputOptions.validateOnBlur) {
-          setValidityState({ [name]: getValidationResult(e, newState) });
+          formState.setValidity({ [name]: getValidationResult(e, newValues) });
         }
 
-        setState(partialNewState);
-      },
-      onBlur(e) {
-        if (!touched[name]) {
-          setTouchedState({ [name]: true });
+        formState.setValues(partialNewState);
+      }),
+      onBlur: callbacks.getOrSet(ON_CHANGE_HANDLER + key, e => {
+        if (!formState.current.touched[name]) {
+          formState.setTouched({ [name]: true });
           formOptions.onTouched(e);
         }
 
@@ -168,11 +172,13 @@ export default function useFormState(initialState, options) {
          * A) when it's either touched for the time
          * B) when it's marked as dirty due to a value change
          */
-        if (!touched[name] || isDirty(name)) {
-          setValidityState({ [name]: getValidationResult(e) });
+        if (!formState.current.touched[name] || isDirty(name)) {
+          formState.setValidity({
+            [name]: getValidationResult(e, formState.current.values),
+          });
           setDirty(name, false);
         }
-      },
+      }),
       ...getIdProp('id', name, ownValue),
     };
 
@@ -185,7 +191,7 @@ export default function useFormState(initialState, options) {
   );
 
   return [
-    { values: state, validity, touched },
+    formState.current,
     {
       ...inputPropsCreators,
       [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
