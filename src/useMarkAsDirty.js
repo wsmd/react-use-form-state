@@ -1,10 +1,9 @@
-import { useRef, useCallback } from 'react';
+import { useCache } from './useCache';
 
 export function useMarkAsDirty() {
-  const dirty = useRef({});
-  const isDirty = useCallback(name => dirty.current[name], []);
-  const setDirty = useCallback((name, value) => {
-    dirty.current[name] = value;
-  }, []);
-  return { setDirty, isDirty };
+  const dirty = useCache();
+  return {
+    setDirty: dirty.set,
+    isDirty: dirty.has,
+  };
 }
