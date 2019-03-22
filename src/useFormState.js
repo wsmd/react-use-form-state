@@ -12,6 +12,8 @@ import {
   TEXTAREA,
   SELECT_MULTIPLE,
   LABEL,
+  ON_CHANGE_HANDLER,
+  ON_BLUR_HANDLER,
 } from './constants';
 
 function noop() {}
@@ -22,9 +24,6 @@ const defaultFromOptions = {
   onTouched: noop,
   withIds: false,
 };
-
-const ON_CHANGE_HANDLER = 0;
-const ON_BLUR_HANDLER = 1;
 
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFromOptions, ...options };
