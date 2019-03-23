@@ -5,7 +5,12 @@ describe('useFormState API', () => {
   it('returns an array matching [formState, input]', () => {
     const { result } = renderHook(() => useFormState());
     expect(result.current).toEqual([
-      { values: {}, validity: {}, touched: {} },
+      {
+        values: {},
+        validity: {},
+        touched: {},
+        errors: {},
+      },
       expect.any(Object),
     ]);
   });

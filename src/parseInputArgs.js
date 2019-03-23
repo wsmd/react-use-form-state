@@ -1,4 +1,4 @@
-const noop = () => {};
+import { noop } from './utils';
 
 const defaultInputOptions = {
   onChange: noop,

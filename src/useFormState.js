@@ -1,4 +1,4 @@
-import { toString } from './toString';
+import { toString, noop, omit, isFunction } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useMarkAsDirty } from './useMarkAsDirty';
@@ -15,8 +15,6 @@ import {
   ON_CHANGE_HANDLER,
   ON_BLUR_HANDLER,
 } from './constants';
-
-function noop() {}
 
 const defaultFromOptions = {
   onChange: noop,
@@ -82,11 +80,22 @@ export default function useFormState(initialState, options) {
       );
     }
 
-    function getValidationResult(e, values) {
-      if (typeof inputOptions.validate === 'function') {
-        return !!inputOptions.validate(e.target.value, values, e);
+    function validate(e, values = formState.current.values) {
+      const validationResult = isFunction(inputOptions.validate)
+        ? inputOptions.validate(e.target.value, values, e)
+        : e.target.validity.valid;
+      // eslint-disable-next-line eqeqeq
+      if (validationResult === true || validationResult == undefined) {
+        formState.setValidity({ [name]: true });
+        if (formState.current.errors[name] !== undefined) {
+          formState.setError(omit(name));
+        }
+      } else {
+        formState.setValidity({ [name]: false });
+        if (validationResult) {
+          formState.setError({ [name]: validationResult });
+        }
       }
-      return e.target.validity.valid;
     }
 
     const inputProps = {
@@ -153,7 +162,7 @@ export default function useFormState(initialState, options) {
         inputOptions.onChange(e);
 
         if (!inputOptions.validateOnBlur) {
-          formState.setValidity({ [name]: getValidationResult(e, newValues) });
+          validate(e, newValues);
         }
 
         formState.setValues(partialNewState);
@@ -173,9 +182,7 @@ export default function useFormState(initialState, options) {
          * B) when it's marked as dirty due to a value change
          */
         if (!formState.current.touched[name] || isDirty(name)) {
-          formState.setValidity({
-            [name]: getValidationResult(e, formState.current.values),
-          });
+          validate(e);
           setDirty(name, false);
         }
       }),

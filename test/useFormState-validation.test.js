@@ -1,5 +1,6 @@
 import React from 'react';
-import { renderWithFormState } from './test-utils';
+import { renderWithFormState, renderHook } from './test-utils';
+import { useFormState } from '../src';
 
 describe('passing a custom input validate function', () => {
   it('calls custom input validate function', () => {
@@ -60,5 +61,26 @@ describe('passing a custom input validate function', () => {
     expect(formState.current).toEqual(
       expect.objectContaining({ validity: { name: true } }),
     );
+  });
+
+  it('has an errors object', () => {
+    const { result } = renderHook(() => useFormState());
+    const [formState] = result.current;
+    expect(formState).toHaveProperty('errors', {});
+  });
+
+  it('sets a custom error when validates return non-true', () => {
+    const validate = jest.fn(val => (val === 'pass' ? true : 'wrong!'));
+    const { formState, change } = renderWithFormState(([, { text }]) => (
+      <input {...text({ name: 'name', validate })} />
+    ));
+
+    change({ value: 'fail' });
+    expect(formState.current.validity).toHaveProperty('name', false);
+    expect(formState.current.errors).toHaveProperty('name', 'wrong!');
+
+    change({ value: 'pass' });
+    expect(formState.current.validity).toHaveProperty('name', true);
+    expect(formState.current.errors).not.toHaveProperty('name');
   });
 });
