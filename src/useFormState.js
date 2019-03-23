@@ -1,7 +1,6 @@
 import { toString, noop, omit, isFunction } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
-import { useMarkAsDirty } from './useMarkAsDirty';
 import { useCache } from './useCache';
 import { useState } from './useState';
 import {
@@ -28,8 +27,7 @@ export default function useFormState(initialState, options) {
 
   const formState = useState({ initialState });
   const { getIdProp } = useInputId(formOptions.withIds);
-  const { setDirty, isDirty } = useMarkAsDirty();
-
+  const { set: setDirty, has: isDirty } = useCache();
   const callbacks = useCache();
 
   const createPropsGetter = type => (...args) => {
@@ -81,21 +79,21 @@ export default function useFormState(initialState, options) {
     }
 
     function validate(e, values = formState.current.values) {
-      const validationResult = isFunction(inputOptions.validate)
-        ? inputOptions.validate(e.target.value, values, e)
-        : e.target.validity.valid;
-      // eslint-disable-next-line eqeqeq
-      if (validationResult === true || validationResult == undefined) {
-        formState.setValidity({ [name]: true });
-        if (formState.current.errors[name] !== undefined) {
-          formState.setError(omit(name));
+      let error;
+      let isValid = true;
+      if (isFunction(inputOptions.validate)) {
+        const result = inputOptions.validate(e.target.value, values, e);
+        // eslint-disable-next-line eqeqeq
+        if (result !== true && result != undefined) {
+          isValid = false;
+          error = result;
         }
       } else {
-        formState.setValidity({ [name]: false });
-        if (validationResult) {
-          formState.setError({ [name]: validationResult });
-        }
+        isValid = e.target.validity.valid;
+        error = !isValid && e.target.validationMessage;
       }
+      formState.setValidity({ [name]: isValid });
+      formState.setError(error ? { [name]: error } : omit(name));
     }
 
     const inputProps = {
@@ -156,7 +154,7 @@ export default function useFormState(initialState, options) {
         }
 
         const partialNewState = { [name]: value };
-        const newValues = { ...formState.current, ...partialNewState };
+        const newValues = { ...formState.current.values, ...partialNewState };
 
         formOptions.onChange(e, formState.current.values, newValues);
         inputOptions.onChange(e);
