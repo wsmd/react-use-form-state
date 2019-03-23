@@ -30,6 +30,7 @@
   - [Initial State](#initial-state)
   - [Global Handlers](#global-handlers)
   - [Advanced Input Options](#advanced-input-options)
+  - [Custom Input Validation](#custom-input-validation)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
   - [Labels](#labels)
 - [Working with TypeScript](#working-with-typescript)
@@ -98,17 +99,20 @@ From the example above, as the user fills in the form, `formState` will look som
     "password": "1234",
     "plan": "free",
   },
+  "touched": {
+    "name": true,
+    "email": true,
+    "password": true,
+    "plan": true,
+  },
   "validity": {
     "name": true,
     "email": true,
     "password": false,
     "plan": true,
   },
-  "touched": {
-    "name": true,
-    "email": true,
-    "password": true,
-    "plan": true,
+  "errors": {
+    "password": "Please lengthen this text to 8 characters or more",
   }
 }
 ```
@@ -182,17 +186,65 @@ export default function SignUpForm() {
           name: 'password',
           onChange: e => console.log('password input changed!'),
           onBlur: e => console.log('password input lost focus!'),
+          validate: (value, values, e) => validatePassword(value),
           validateOnBlur: true,
-          validate: (value, values, event) =>
-            event.target.validity.valid &&
-            !value.includes(values.username) &&
-            STRONG_PASSWORD_REGEX.test(value),
         })}
       />
     </>
   );
 };
 ```
+
+### Custom Input Validation
+
+The example above [demonstrates](#advanced-input-options) how you can determine the validity of an input by passing a `validate()` method. You can also specify custom validation errors using the same method.
+
+The input is considered **valid** if this method returns `true` or `undefined`.
+
+Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. This value is used as a **custom validation error** that can be retrieved from [`state.errors`](#form-state).
+
+```jsx
+export default function SignUpForm() {
+  const [state, { text, password }] = useFormState();
+  return (
+    <>
+      <input
+        {...password({
+          name: 'password',
+          validate: (value, values, event) => {
+            if (!value.trim()) {
+              return 'Password is required';
+            }
+            if (!STRONG_PASSWORD_REGEX.test(value)) {
+              return 'Password is not strong enough';
+            }
+            if (value.includes(values.username)) {
+              return 'Password should not contain your username';
+            }
+          }
+        })}
+      />
+    </>
+  );
+};
+```
+
+If the input's value is invalid based on the rules specified above, the form state will look similar to this:
+
+```js
+{
+  validity: {
+    password: false,
+  },
+  errors: {
+    // When validate() returns any truthy value other than true, the value can
+    // be retrieved here. Useful for more complex error objects.
+    password: 'Password should not contain your username'
+  }
+}
+```
+
+If the `validate()` method is not specified, `useFormState` will fallback to the HTML5 constrains validation to determine the validity of the input along with the corresponding error message.
 
 ### Without Using a `<form />` Element
 
@@ -377,6 +429,7 @@ Form state consists of three nested objects:
 
 - `values`: an object holding the state of each input being rendered.
 - `validity`: an object indicating whether the value of each input is valid.
+- `errors`: an object holding all errors resulting from input validations.
 - `touched`: an object indicating whether the input was touched (focused) by the user.
 
 ```ts
@@ -385,10 +438,13 @@ formState = {
     [inputName: string]: string | string[] | boolean,
   },
   validity: {
-    [inputName: string]: boolean,
+    [inputName: string]?: boolean,
+  },
+  errors: {
+    [input: name]?: any,
   },
   touched: {
-    [inputName: string]: boolean,
+    [inputName: string]?: boolean,
   },
 }
 ```
@@ -405,8 +461,8 @@ An object with keys as input types. Each type is a function that returns the app
 
 The following types are currently supported:
 
-| Type and Usage                                                 | State Shape                                                                |
-| -------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Type and Usage                                                  | State Shape                                                                |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `<input {...input.email(name: string)} />`                      | `{ [name: string]: string }`                                               |
 | `<input {...input.color(name: string)} />`                      | `{ [name: string]: string }`                                               |
 | `<input {...input.password(name: string)} />`                   | `{ [name: string]: string }`                                               |
@@ -426,7 +482,7 @@ The following types are currently supported:
 | `<select {...input.select(name: string)} />`                    | `{ [name: string]: string }`                                               |
 | `<select {...input.selectMultiple(name: string)} />`            | `{ [name: string]: Array<string> }`                                        |
 | `<textarea {...input.textarea(name: string)} />`                | `{ [name: string]: string }`                                               |
-| `<label {...input.label(name: string, value?: string)} />`     | N/A – `input.label()` is stateless and thus does not affect the form state |
+| `<label {...input.label(name: string, value?: string)} />`      | N/A – `input.label()` is stateless and thus does not affect the form state |
 
 #### Input Options
 
@@ -444,14 +500,14 @@ Alternatively, input type functions can be called with an object as the first ar
 
 The following options can be passed:
 
-| key                                                     | Description                                                                                                                                                                                                                                                     |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name: string`                                          | Required. The name of the input.                                                                                                                                                                                                                                |
-| `value: string`                                         | The input's own value. Only required by the `radio` input, and optional for the `checkbox` input.                                                                                                                                                               |
-| `onChange(e): void`                                     | Optional. A change event handler that gets passed the input's `change` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                |
-| `onBlur(e): void`                                       | Optional. A blur event handler that gets passed the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                    |
-| `validate(value: string, values: StateValues, event: Event): boolean` | Optional. An input validation function that gets passed the input value, all input values in the state, and the change event. It's expected to return a boolean indicating whether the input's value is valid. HTML5 validation rules are ignored when this function is specified. |
-| `validateOnBlur: boolean`                               | Optional. `false` by default. When set to `true` and the `validate` function is provided, the function will be called when the input loses focus. If not specified, the `validate` function will be called on value change.                                     |
+| key                                                               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name: string`                                                    | Required. The name of the input.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `value: string`                                                   | The input's own value. Only required by the `radio` input, and optional for the `checkbox` input.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `onChange(e): void`                                               | Optional. A change event handler that gets passed the input's `change` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `onBlur(e): void`                                                 | Optional. A blur event handler that gets passed the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `validate(value: string, values: StateValues, event: Event): any` | Optional. An input validation function that determines whether the input value is valid. It gets passed the input value, all input values in the form, and the change/blur event. The input is considered **valid** if this method returns `true` or `undefined`. Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. Such values are used a **custom validation errors** that can be retrieved from [`state.errors`](#form-state). HTML5 validation rules are ignored when this function is specified. |
+| `validateOnBlur: boolean`                                         | Optional. `false` by default. When set to `true` and the `validate` function is provided, the function will be called when the input loses focus. If not specified, the `validate` function will be called on value change.                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ## License
 
