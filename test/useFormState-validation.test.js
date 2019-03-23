@@ -2,65 +2,72 @@ import React from 'react';
 import { renderWithFormState, renderHook } from './test-utils';
 import { useFormState } from '../src';
 
+const INPUT_CHANGE_EVENT = expect.any(Object);
+
 describe('passing a custom input validate function', () => {
-  it('calls custom input validate function', () => {
-    const validate = jest.fn(value => value === 'shall pass');
+  it('calls input validate function', () => {
+    const validate = jest.fn(() => false);
     const { change, blur, formState } = renderWithFormState(([, { text }]) => (
       <input {...text({ name: 'name', validate })} />
     ));
 
-    change({ value: 'shall not pass' });
-    expect(formState.current).toEqual(
-      expect.objectContaining({ validity: { name: false } }),
+    expect(validate).not.toHaveBeenCalledWith();
+    change({ value: 'test' });
+    expect(validate).toHaveBeenCalledWith(
+      'test',
+      { name: 'test' },
+      INPUT_CHANGE_EVENT,
     );
 
-    // making sure we're ignoring HTML5 validity on onBlur
+    // making sure we're ignoring HTML5 validity on onBlur (input will be set as valid otherwise)
     blur();
-    expect(formState.current).toEqual(
-      expect.objectContaining({ validity: { name: false } }),
-    );
-
-    change({ value: 'shall pass' });
-    expect(formState.current).toEqual(
-      expect.objectContaining({
-        validity: { name: true },
-        touched: { name: true },
-      }),
-    );
+    expect(formState.current.validity).toHaveProperty('name', false);
   });
 
-  it('calls custom input validate function on blur', () => {
-    const validate = jest.fn(value => value === 'shall pass');
-    const { formState, change, blur } = renderWithFormState(([, { text }]) => (
+  it('calls input validate function on blur with validateOnBlur', () => {
+    const validate = jest.fn(() => false);
+    const { change, blur } = renderWithFormState(([, { text }]) => (
       <input {...text({ name: 'name', validate, validateOnBlur: true })} />
     ));
 
-    change({ value: 'shall not pass' });
-    expect(validate).not.toHaveBeenCalled();
-    expect(formState.current).toEqual(
-      expect.objectContaining({ validity: {} }),
-    );
-
+    change({ value: 'test' });
+    expect(validate).not.toHaveBeenCalledWith();
     blur();
     expect(validate).toHaveBeenCalledWith(
-      'shall not pass',
-      { name: 'shall not pass' },
-      expect.any(Object),
+      'test',
+      { name: 'test' },
+      INPUT_CHANGE_EVENT,
     );
-    expect(formState.current).toEqual(
-      expect.objectContaining({ validity: { name: false } }),
-    );
+  });
 
-    change({ value: 'shall pass' });
-    blur();
-    expect(validate).toHaveBeenCalledWith(
-      'shall pass',
-      { name: 'shall pass' },
-      expect.any(Object),
-    );
-    expect(formState.current).toEqual(
-      expect.objectContaining({ validity: { name: true } }),
-    );
+  it('marks input as valid', () => {
+    const { change, formState } = renderWithFormState(([, { text }]) => (
+      <input
+        {...text({
+          name: 'name',
+          validate(value) {
+            if (value === 'fail') return false;
+            if (value === 'pass') return true;
+          },
+        })}
+      />
+    ));
+    change({ value: 'pass' });
+    expect(formState.current.validity).toHaveProperty('name', true);
+    change({ value: 'other' });
+    expect(formState.current.validity).toHaveProperty('name', true);
+  });
+
+  it('marks input as invalid', () => {
+    const validate = value => value !== 'fail';
+    const { change, formState } = renderWithFormState(([, { text }]) => (
+      <input {...text({ name: 'name', validate })} />
+    ));
+    change({ value: 'fail' });
+    expect(formState.current.validity).toHaveProperty('name', false);
+    expect(formState.current.errors).not.toHaveProperty('name', false);
+    change({ value: 'pass' });
+    expect(formState.current.validity).toHaveProperty('name', true);
   });
 
   it('has an errors object', () => {
@@ -69,7 +76,7 @@ describe('passing a custom input validate function', () => {
     expect(formState).toHaveProperty('errors', {});
   });
 
-  it('sets a custom error when validates return non-true', () => {
+  it('sets a custom error when validates return an error', () => {
     const validate = jest.fn(val => (val === 'pass' ? true : 'wrong!'));
     const { formState, change } = renderWithFormState(([, { text }]) => (
       <input {...text({ name: 'name', validate })} />
