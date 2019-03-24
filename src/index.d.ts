@@ -98,7 +98,7 @@ type InputOptions<T, Name, Value = void> = {
     value: string,
     values: StateValues<T>,
     event: React.ChangeEvent<InputElement> | React.FocusEvent<InputElement>,
-  ): boolean;
+  ): any;
   onChange?(event: React.ChangeEvent<InputElement>): void;
   onBlur?(event: React.FocusEvent<InputElement>): void;
 } & WithValue<Value>;

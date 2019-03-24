@@ -377,6 +377,7 @@ describe('Input blur behavior', () => {
     expect(formState.current).toEqual({
       values: { name: '' },
       validity: { name: true },
+      errors: {},
       touched: { name: true },
     });
   });
@@ -389,6 +390,9 @@ describe('Input blur behavior', () => {
     expect(formState.current).toEqual({
       values: { name: '' },
       validity: { name: false },
+      errors: {
+        name: expect.any(String),
+      },
       touched: { name: true },
     });
   });

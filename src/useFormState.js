@@ -1,7 +1,6 @@
-import { toString } from './toString';
+import { toString, noop, omit, isFunction, isEmpty } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
-import { useMarkAsDirty } from './useMarkAsDirty';
 import { useCache } from './useCache';
 import { useState } from './useState';
 import {
@@ -16,8 +15,6 @@ import {
   ON_BLUR_HANDLER,
 } from './constants';
 
-function noop() {}
-
 const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
@@ -30,8 +27,7 @@ export default function useFormState(initialState, options) {
 
   const formState = useState({ initialState });
   const { getIdProp } = useInputId(formOptions.withIds);
-  const { setDirty, isDirty } = useMarkAsDirty();
-
+  const { set: setDirty, has: isDirty } = useCache();
   const callbacks = useCache();
 
   const createPropsGetter = type => (...args) => {
@@ -82,11 +78,21 @@ export default function useFormState(initialState, options) {
       );
     }
 
-    function getValidationResult(e, values) {
-      if (typeof inputOptions.validate === 'function') {
-        return !!inputOptions.validate(e.target.value, values, e);
+    function validate(e, values = formState.current.values) {
+      let error;
+      let isValid = true;
+      if (isFunction(inputOptions.validate)) {
+        const result = inputOptions.validate(e.target.value, values, e);
+        if (result !== true && result != null) {
+          isValid = false;
+          error = result !== false ? result : '';
+        }
+      } else {
+        isValid = e.target.validity.valid;
+        error = e.target.validationMessage;
       }
-      return e.target.validity.valid;
+      formState.setValidity({ [name]: isValid });
+      formState.setError(isEmpty(error) ? omit(name) : { [name]: error });
     }
 
     const inputProps = {
@@ -147,13 +153,13 @@ export default function useFormState(initialState, options) {
         }
 
         const partialNewState = { [name]: value };
-        const newValues = { ...formState.current, ...partialNewState };
+        const newValues = { ...formState.current.values, ...partialNewState };
 
         formOptions.onChange(e, formState.current.values, newValues);
         inputOptions.onChange(e);
 
         if (!inputOptions.validateOnBlur) {
-          formState.setValidity({ [name]: getValidationResult(e, newValues) });
+          validate(e, newValues);
         }
 
         formState.setValues(partialNewState);
@@ -173,9 +179,7 @@ export default function useFormState(initialState, options) {
          * B) when it's marked as dirty due to a value change
          */
         if (!formState.current.touched[name] || isDirty(name)) {
-          formState.setValidity({
-            [name]: getValidationResult(e, formState.current.values),
-          });
+          validate(e);
           setDirty(name, false);
         }
       }),
