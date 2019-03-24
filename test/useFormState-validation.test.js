@@ -90,4 +90,34 @@ describe('passing a custom input validate function', () => {
     expect(formState.current.validity).toHaveProperty('name', true);
     expect(formState.current.errors).not.toHaveProperty('name');
   });
+
+  it.each([
+    ['empty array', []],
+    ['empty object', {}],
+    ['empty Set', new Set()],
+    ['empty Map', new Map()],
+    ['empty string', ''],
+    ['boolean (false)', false],
+  ])('does not treat %s as validation error', (name, testValue) => {
+    const { formState, change } = renderWithFormState(([, { text }]) => (
+      <input {...text({ name: 'name', validate: () => testValue })} />
+    ));
+    change({ value: 'a' });
+    expect(formState.current.errors).not.toHaveProperty('name');
+  });
+
+  it.each([
+    ['array', ['error']],
+    ['object', { error: 'error' }],
+    ['Set', new Set(['error'])],
+    ['Map', new Map([['error', 'error']])],
+    ['string', 'error'],
+    ['number', 0],
+  ])('treats %s as validation error', (name, testValue) => {
+    const { formState, change } = renderWithFormState(([, { text }]) => (
+      <input {...text({ name: 'name', validate: () => testValue })} />
+    ));
+    change({ value: 'a' });
+    expect(formState.current.errors).toHaveProperty('name', testValue);
+  });
 });

@@ -98,6 +98,22 @@ formState.validity.username;
   })}
 />;
 
+<input
+  {...input.text({
+    name: 'name',
+    validate: value => {
+      const errors = {} as any;
+      if (!value.trim()) {
+        errors.required = 'Password is required';
+      }
+      if (!/foobar/.test(value)) {
+        errors.weakPassword = 'Password is not strong enough';
+      }
+      return errors;
+    },
+  })}
+/>;
+
 <label {...input.label('name')} />;
 
 input.id('name');

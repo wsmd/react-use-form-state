@@ -201,32 +201,27 @@ The example above [demonstrates](#advanced-input-options) how you can determine 
 
 The input is considered **valid** if this method returns `true` or `undefined`.
 
-Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. This value is used as a **custom validation error** that can be retrieved from [`state.errors`](#form-state).
+Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. This returned value is used as a **custom validation error** that can be retrieved from [`state.errors`](#form-state).
+
+For convenience, empty collection values such empty objects, empty arrays, empty maps, empty sets are not considered invalidation errors, and if returned the input will be valid.
 
 ```jsx
-export default function SignUpForm() {
-  const [state, { text, password }] = useFormState();
-  return (
-    <>
-      <input
-        {...password({
-          name: 'password',
-          validate: (value, values, event) => {
-            if (!value.trim()) {
-              return 'Password is required';
-            }
-            if (!STRONG_PASSWORD_REGEX.test(value)) {
-              return 'Password is not strong enough';
-            }
-            if (value.includes(values.username)) {
-              return 'Password should not contain your username';
-            }
-          }
-        })}
-      />
-    </>
-  );
-};
+<input
+  {...password({
+    name: 'password',
+
+    // can also return objects, arrays, etc, for more complex error objects
+    validate: (value, values, event) => {
+      if (!value.trim()) {
+        return 'Password is required';
+      }
+      if (!STRONG_PASSWORD_REGEX.test(value)) {
+        return 'Password is not strong enough';
+      }
+    },
+
+  })}
+/>
 ```
 
 If the input's value is invalid based on the rules specified above, the form state will look similar to this:
@@ -237,9 +232,7 @@ If the input's value is invalid based on the rules specified above, the form sta
     password: false,
   },
   errors: {
-    // When validate() returns any truthy value other than true, the value can
-    // be retrieved here. Useful for more complex error objects.
-    password: 'Password should not contain your username'
+    password: 'Password is not strong enough',
   }
 }
 ```

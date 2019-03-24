@@ -1,4 +1,4 @@
-import { toString, noop, omit, isFunction } from './utils';
+import { toString, noop, omit, isFunction, isEmpty } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useCache } from './useCache';
@@ -83,17 +83,16 @@ export default function useFormState(initialState, options) {
       let isValid = true;
       if (isFunction(inputOptions.validate)) {
         const result = inputOptions.validate(e.target.value, values, e);
-        // eslint-disable-next-line eqeqeq
-        if (result !== true && result != undefined) {
+        if (result !== true && result != null) {
           isValid = false;
-          error = result;
+          error = result !== isValid ? result : '';
         }
       } else {
         isValid = e.target.validity.valid;
-        error = !isValid && e.target.validationMessage;
+        error = e.target.validationMessage;
       }
       formState.setValidity({ [name]: isValid });
-      formState.setError(error ? { [name]: error } : omit(name));
+      formState.setError(isEmpty(error) ? omit(name) : { [name]: error });
     }
 
     const inputProps = {

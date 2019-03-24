@@ -32,3 +32,24 @@ export function toString(value) {
 export function isFunction(value) {
   return typeof value === 'function';
 }
+
+const objectToString = value => Object.prototype.toString.call(value);
+
+export function isEmpty(value) {
+  if (value == null) {
+    return true;
+  }
+  if (Array.isArray(value) || typeof value === 'string') {
+    return !value.length;
+  }
+  if (
+    objectToString(value) === '[object Map]' ||
+    objectToString(value) === '[object Set]'
+  ) {
+    return !value.size;
+  }
+  if (objectToString(value) === '[object Object]') {
+    return !Object.keys(value).length;
+  }
+  return false;
+}
