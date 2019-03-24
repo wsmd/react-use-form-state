@@ -98,6 +98,7 @@ describe('passing a custom input validate function', () => {
     ['empty Map', new Map()],
     ['empty string', ''],
     ['boolean (false)', false],
+    ['null', null],
   ])('does not treat %s as validation error', (name, testValue) => {
     const { formState, change } = renderWithFormState(([, { text }]) => (
       <input {...text({ name: 'name', validate: () => testValue })} />

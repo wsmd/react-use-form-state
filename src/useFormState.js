@@ -85,7 +85,7 @@ export default function useFormState(initialState, options) {
         const result = inputOptions.validate(e.target.value, values, e);
         if (result !== true && result != null) {
           isValid = false;
-          error = result !== isValid ? result : '';
+          error = result !== false ? result : '';
         }
       } else {
         isValid = e.target.validity.valid;
