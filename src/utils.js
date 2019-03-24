@@ -35,6 +35,10 @@ export function isFunction(value) {
 
 const objectToString = value => Object.prototype.toString.call(value);
 
+/**
+ * Determines if a value is an empty collection (object, array, string, map, set)
+ * @note this returns false for anything else.
+ */
 export function isEmpty(value) {
   if (value == null) {
     return true;

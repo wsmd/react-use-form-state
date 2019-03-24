@@ -203,7 +203,7 @@ The input is considered **valid** if this method returns `true` or `undefined`.
 
 Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. This returned value is used as a **custom validation error** that can be retrieved from [`state.errors`](#form-state).
 
-For convenience, empty collection values such empty objects, empty arrays, empty maps, empty sets are not considered invalidation errors, and if returned the input will be valid.
+For convenience, empty collection values such as empty objects, empty arrays, empty maps, empty sets are not considered invalidation errors, and if returned the input will be valid.
 
 ```jsx
 <input
@@ -237,7 +237,7 @@ If the input's value is invalid based on the rules specified above, the form sta
 }
 ```
 
-If the `validate()` method is not specified, `useFormState` will fallback to the HTML5 constrains validation to determine the validity of the input along with the corresponding error message.
+If the `validate()` method is not specified, `useFormState` will fallback to the HTML5 constrains validation to determine the validity of the input along with the appropriate error message.
 
 ### Without Using a `<form />` Element
 
