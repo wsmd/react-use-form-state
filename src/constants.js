@@ -7,6 +7,7 @@ export const NUMBER = 'number';
 export const PASSWORD = 'password';
 export const RADIO = 'radio';
 export const RANGE = 'range';
+export const RAW = 'raw';
 export const SEARCH = 'search';
 export const SELECT = 'select';
 export const SELECT_MULTIPLE = 'selectMultiple';
@@ -33,6 +34,7 @@ export const TYPES = [
   PASSWORD,
   RADIO,
   RANGE,
+  RAW,
   SEARCH,
   SELECT,
   SELECT_MULTIPLE,

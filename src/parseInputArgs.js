@@ -16,6 +16,7 @@ export function parseInputArgs(args) {
   } else {
     [{ name, value: ownValue, ...options }] = args;
   }
+
   return {
     name,
     ownValue,

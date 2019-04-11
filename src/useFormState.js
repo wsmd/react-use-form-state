@@ -8,6 +8,7 @@ import {
   SELECT,
   CHECKBOX,
   RADIO,
+  RAW,
   TEXTAREA,
   SELECT_MULTIPLE,
   LABEL,
@@ -33,13 +34,16 @@ export default function useFormState(initialState, options) {
   const createPropsGetter = type => (...args) => {
     const { name, ownValue, ...inputOptions } = parseInputArgs(args);
 
-    const hasOwnValue = !!toString(ownValue);
-    const hasValueInState = formState.current.values[name] !== undefined;
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
     const isSelectMultiple = type === SELECT_MULTIPLE;
+    const isRaw = type === RAW;
+    const hasOwnValue = isRaw ? !!ownValue : !!toString(ownValue);
+    const hasValueInState = formState.current.values[name] !== undefined;
 
-    const key = `${type}.${name}.${toString(ownValue)}`;
+    const key = `${type}.${name}.${
+      isRaw ? JSON.stringify(ownValue) : toString(ownValue)
+    }`;
 
     function setInitialValue() {
       let value = '';
@@ -82,12 +86,13 @@ export default function useFormState(initialState, options) {
       let error;
       let isValid = true;
       if (isFunction(inputOptions.validate)) {
-        const result = inputOptions.validate(e.target.value, values, e);
+        const value = isRaw ? e : e.target.value;
+        const result = inputOptions.validate(value, values, e);
         if (result !== true && result != null) {
           isValid = false;
           error = result !== false ? result : '';
         }
-      } else {
+      } else if (!isRaw) {
         isValid = e.target.validity.valid;
         error = e.target.validationMessage;
       }
@@ -129,7 +134,7 @@ export default function useFormState(initialState, options) {
       },
       get value() {
         // auto populating initial state values on first render
-        if (!hasValueInState) {
+        if (!hasValueInState && !isRaw) {
           setInitialValue();
         }
         /**
@@ -140,16 +145,29 @@ export default function useFormState(initialState, options) {
         if (isCheckbox || isRadio) {
           return toString(ownValue);
         }
+
+        if (isRaw) {
+          // Return `undefined` if we don't have the value.
+          return formState.current.values[name];
+        }
+
         return hasValueInState ? formState.current.values[name] : '';
       },
       onChange: callbacks.getOrSet(ON_BLUR_HANDLER + key, e => {
         setDirty(name, true);
-        let { value } = e.target;
+        let value = isRaw ? e : e.target.value;
         if (isCheckbox) {
           value = getNextCheckboxValue(e);
         }
         if (isSelectMultiple) {
           value = getNextSelectMultipleValue(e);
+        }
+
+        // Mark raw fields as touched on change, since we might not get an
+        // `onBlur` event from them.
+        if (isRaw && !inputOptions.supportOnBlur && !formState.current.touched[name]) {
+          formState.setTouched({ [name]: true });
+          formOptions.onTouched(e);
         }
 
         const partialNewState = { [name]: value };
@@ -179,14 +197,24 @@ export default function useFormState(initialState, options) {
          * B) when it's marked as dirty due to a value change
          */
         if (!formState.current.touched[name] || isDirty(name)) {
-          validate(e);
+          if (isRaw) {
+            validate(formState.current.values[name]);
+          } else {
+            validate(e);
+          }
           setDirty(name, false);
         }
       }),
       ...getIdProp('id', name, ownValue),
     };
 
-    return inputProps;
+    return isRaw
+      ? {
+          onChange: inputProps.onChange,
+          onBlur: inputOptions.supportOnBlur ? inputProps.onBlur : undefined,
+          value: inputProps.value,
+        }
+      : inputProps;
   };
 
   const inputPropsCreators = TYPES.reduce(

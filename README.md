@@ -287,6 +287,36 @@ Note that this will override any existing `id` prop if specified before calling 
 <input {...text('username')} id="signup-username" />
 ```
 
+## Custom Controls
+
+`useFormState` provides a `raw` type for working with controls that do not use React's [`SyntheticEvent`](https://reactjs.org/docs/events.html) system.  For example, controls like [react-select](https://react-select.com/home) or [react-datepicker](https://www.npmjs.com/package/react-datepicker) have `onChange` and `value` props that expect a raw value instead of an event.
+
+To use this, your custom component should support an `onChange()` event which takes the value as a parameter, and a `value` prop which is expected to contain the value.  Note that if no default value is given, the component will receive a `value` prop of `undefined`.
+
+```js
+import DatePicker from 'react-datepicker';
+
+function Widget() {
+  const [formState, { raw }] = userFormState({ date: new Date() });
+
+  return <>
+    <DatePicker {...raw('date')} />
+  </>;
+}
+```
+
+By default, no `onBlur()` prop is passed to the custom component, but if you have a component which supports `onBlur`, you can instruct `useFormState` to pass one.  `onBlur()` will not be passed any value.
+
+```js
+function Widget() {
+  const [formState, { raw }] = userFormState({ date: new Date() });
+
+  return <>
+    <CustomComponentWithOnBlur {...raw({ name: 'date', supportOnBlur: true })} />
+  </>;
+}
+```
+
 ## Working with TypeScript
 
 When working with TypeScript, the compiler needs to know what values and inputs `useFormState` is expected to be working with.
@@ -476,6 +506,7 @@ The following types are currently supported:
 | `<select {...input.selectMultiple(name: string)} />`            | `{ [name: string]: Array<string> }`                                        |
 | `<textarea {...input.textarea(name: string)} />`                | `{ [name: string]: string }`                                               |
 | `<label {...input.label(name: string, value?: string)} />`      | N/A – `input.label()` is stateless and thus does not affect the form state |
+| `<CustomControl {...input.raw(name: string)} />`                | `{ [name: string]: any }`                                                  |
 
 #### Input Options
 
@@ -501,6 +532,7 @@ The following options can be passed:
 | `onBlur(e): void`                                                 | Optional. A blur event handler that gets passed the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `validate(value: string, values: StateValues, event: Event): any` | Optional. An input validation function that determines whether the input value is valid. It gets passed the input value, all input values in the form, and the change/blur event. The input is considered **valid** if this method returns `true` or `undefined`. Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. Such values are used a **custom validation errors** that can be retrieved from [`state.errors`](#form-state). HTML5 validation rules are ignored when this function is specified. |
 | `validateOnBlur: boolean`                                         | Optional. `false` by default. When set to `true` and the `validate` function is provided, the function will be called when the input loses focus. If not specified, the `validate` function will be called on value change.                                                                                                                                                                                                                                                                                                                                                                                   |
+| `supportOnBlur: boolean`                                          | Optional. `false` by default. This only applies to "raw" inputs.  When `true`, the input will be marked as touched when the `onBlur()` event handler is called.  For custom controls that do not support `onBlur`, setting this to `false` will make it so inputs will be marked as touched when `onChange()` is called, instead, and no `onBlur()` handler will be passed to the control.                                                                                                                                                                                                            |
 
 ## License
 
