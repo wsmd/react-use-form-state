@@ -313,6 +313,30 @@ formState.values.doesNotExist
 
 By default, `useFormState` will use the type `any` for the form state and its inputs if no type argument is provided. Therefore, it is recommended that you provide one.
 
+By default, the `errors` property will contain strings.  If you return complex error objects from custom validation, you can provide an error type:
+
+```ts
+interface I18nError {
+  en: string;
+  fr: string;
+}
+
+const [formState, { text }] = useFormState<LoginFormFields, StateErrors<LoginFormFields, I18nError>();
+
+formState.errors.username; // Will be undefined, a string, or an I18nError.
+```
+
+Or, if you want more type safety (where some fields return complex errors and some return strings, for example) you can specify the entire schema of the errors object:
+
+```ts
+interface LoginFormErrors {
+  username?: I18nError;
+  password?: string;
+}
+
+const [formState, { text }] = useFormState<LoginFormFields, LoginFormErrors>();
+```
+
 ## API
 
 ```js

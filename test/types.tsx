@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFormState } from '../src';
+import { useFormState, StateErrors } from '../src';
 
 useFormState();
 useFormState({});
@@ -54,6 +54,11 @@ let rememberMe: boolean = formState.values.remember_me;
  */
 formState.touched.colors;
 formState.validity.username;
+
+if (formState.errors.colors) {
+  // string
+  formState.errors.colors;
+}
 
 <input {...input.checkbox('remember_me')} />;
 <input {...input.checkbox('colors', 'red')} />;
@@ -113,6 +118,46 @@ formState.validity.username;
     },
   })}
 />;
+
+// Custom validation error types
+function CustomErrorTypes() {
+  interface I18nError {
+    en: string;
+    fr: string;
+  }
+
+  interface FormErrors {
+    name?: string;
+    colors?: I18nError;
+    power_level?: string;
+    remember_me?: string;
+  }
+
+  const [formState, input] = useFormState<FormFields, FormErrors>(
+    initialState,
+    {},
+  );
+
+  if (formState.errors.colors && typeof formState.errors.colors !== 'string') {
+    formState.errors.colors.en;
+  }
+}
+
+function CustomErrorTypesWithStateErrors() {
+  interface I18nError {
+    en: string;
+    fr: string;
+  }
+
+  const [formState, input] = useFormState<
+    FormFields,
+    StateErrors<FormFields, I18nError>
+  >(initialState, {});
+
+  if (formState.errors.colors && typeof formState.errors.colors !== 'string') {
+    formState.errors.colors.en;
+  }
+}
 
 <label {...input.label('name')} />;
 
