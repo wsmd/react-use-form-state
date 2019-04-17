@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFormState, StateErrors } from '../src';
+import { useFormState } from '../src';
 
 useFormState();
 useFormState({});
@@ -149,9 +149,13 @@ function CustomErrorTypesWithStateErrors() {
     fr: string;
   }
 
+  interface FormFieldsErrors {
+    colors?: string | I18nError;
+  }
+
   const [formState, input] = useFormState<
     FormFields,
-    StateErrors<FormFields, I18nError>
+    FormFieldsErrors
   >(initialState, {});
 
   if (formState.errors.colors && typeof formState.errors.colors !== 'string') {

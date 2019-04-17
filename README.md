@@ -321,20 +321,14 @@ interface I18nError {
   fr: string;
 }
 
-const [formState, { text }] = useFormState<LoginFormFields, StateErrors<LoginFormFields, I18nError>();
-
-formState.errors.username; // Will be undefined, a string, or an I18nError.
-```
-
-Or, if you want more type safety (where some fields return complex errors and some return strings, for example) you can specify the entire schema of the errors object:
-
-```ts
 interface LoginFormErrors {
-  username?: I18nError;
+  username?: string | I18nError;
   password?: string;
 }
 
 const [formState, { text }] = useFormState<LoginFormFields, LoginFormErrors>();
+
+formState.errors.username; // Will be undefined, a string, or an I18nError.
 ```
 
 ## API

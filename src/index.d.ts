@@ -52,7 +52,7 @@ type StateValidity<T> = { readonly [A in keyof T]: Maybe<boolean> } & {
   readonly [key: string]: Maybe<boolean>;
 };
 
-export type StateErrors<T, E = string> = {
+type StateErrors<T, E = string> = {
   readonly [A in keyof T]?: E | string
 };
 
