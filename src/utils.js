@@ -33,6 +33,14 @@ export function isFunction(value) {
   return typeof value === 'function';
 }
 
+/**
+ * @param {any} value
+ * @return {value is string}
+ */
+export function isString(value) {
+  return typeof value === 'string';
+}
+
 const objectToString = value => Object.prototype.toString.call(value);
 
 /**

@@ -1,4 +1,5 @@
-import { toString, noop, omit, isFunction, isEmpty } from './utils';
+// @ts-check
+import { toString, noop, omit, isFunction, isEmpty, isString } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useCache } from './useCache';
@@ -13,6 +14,7 @@ import {
   LABEL,
   ON_CHANGE_HANDLER,
   ON_BLUR_HANDLER,
+  CONSOLE_TAG,
 } from './constants';
 
 const defaultFromOptions = {
@@ -30,6 +32,8 @@ export default function useFormState(initialState, options) {
   const { set: setDirty, has: isDirty } = useCache();
   const callbacks = useCache();
 
+  const missingValidateWarnings = useCache();
+
   const createPropsGetter = type => (...args) => {
     const { name, ownValue, ...inputOptions } = parseInputArgs(args);
 
@@ -42,6 +46,9 @@ export default function useFormState(initialState, options) {
     const key = `${type}.${name}.${toString(ownValue)}`;
 
     function setInitialValue() {
+      /**
+       * @type {string | string[] |boolean}
+       */
       let value = '';
       if (isCheckbox) {
         /**
@@ -78,16 +85,42 @@ export default function useFormState(initialState, options) {
       );
     }
 
+    /**
+     * @param {React.ChangeEvent<HTMLInputElement> | string} e event or value
+     * @param {string[]} values
+     */
     function validate(e, values = formState.current.values) {
       let error;
       let isValid = true;
-      if (isFunction(inputOptions.validate)) {
-        const result = inputOptions.validate(e.target.value, values, e);
+
+      const value = isString(e) ? e : e.target.value;
+
+      const customValidate =
+        isFunction(inputOptions.validate) && inputOptions.validate;
+
+      if (isString(e) && !customValidate) {
+        if (process.env.NODE_ENV === 'development') {
+          if (!missingValidateWarnings.has(key)) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              CONSOLE_TAG,
+              `You provided a custom value for input "${name}" without a ` +
+                'custom validate method. As a result, validation of this input ' +
+                'will be set to "true" automatically. If you need to ' +
+                'validate this input, provided a custom validation option',
+            );
+            missingValidateWarnings.set(key, true);
+          }
+        }
+      }
+
+      if (customValidate) {
+        const result = customValidate(value, values, e);
         if (result !== true && result != null) {
           isValid = false;
           error = result !== false ? result : '';
         }
-      } else {
+      } else if (!isString(e)) {
         isValid = e.target.validity.valid;
         error = e.target.validationMessage;
       }
@@ -144,7 +177,12 @@ export default function useFormState(initialState, options) {
       },
       onChange: callbacks.getOrSet(ON_BLUR_HANDLER + key, e => {
         setDirty(name, true);
-        let { value } = e.target;
+        const hasCustomValue = inputOptions.onChange(e);
+        let value = hasCustomValue != null ? hasCustomValue : e.target.value;
+
+        /**
+         * @todo check if `e` is syntactic event
+         */
         if (isCheckbox) {
           value = getNextCheckboxValue(e);
         }
@@ -156,7 +194,6 @@ export default function useFormState(initialState, options) {
         const newValues = { ...formState.current.values, ...partialNewState };
 
         formOptions.onChange(e, formState.current.values, newValues);
-        inputOptions.onChange(e);
 
         if (!inputOptions.validateOnBlur) {
           validate(e, newValues);
