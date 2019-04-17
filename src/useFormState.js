@@ -1,4 +1,3 @@
-// @ts-check
 import { toString, noop, omit, isFunction, isEmpty, isString } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
@@ -46,9 +45,6 @@ export default function useFormState(initialState, options) {
     const key = `${type}.${name}.${toString(ownValue)}`;
 
     function setInitialValue() {
-      /**
-       * @type {string | string[] |boolean}
-       */
       let value = '';
       if (isCheckbox) {
         /**
@@ -85,10 +81,6 @@ export default function useFormState(initialState, options) {
       );
     }
 
-    /**
-     * @param {React.ChangeEvent<HTMLInputElement> | string} e event or value
-     * @param {string[]} values
-     */
     function validate(e, values = formState.current.values) {
       let error;
       let isValid = true;
@@ -126,6 +118,13 @@ export default function useFormState(initialState, options) {
       }
       formState.setValidity({ [name]: isValid });
       formState.setError(isEmpty(error) ? omit(name) : { [name]: error });
+    }
+
+    function touch(e) {
+      if (!formState.current.touched[name]) {
+        formState.setTouched({ [name]: true });
+        formOptions.onTouched(e);
+      }
     }
 
     const inputProps = {
@@ -198,15 +197,14 @@ export default function useFormState(initialState, options) {
         if (!inputOptions.validateOnBlur) {
           validate(e, newValues);
         }
+        if (inputOptions.touchedOnChange) {
+          touch(e);
+        }
 
         formState.setValues(partialNewState);
       }),
       onBlur: callbacks.getOrSet(ON_CHANGE_HANDLER + key, e => {
-        if (!formState.current.touched[name]) {
-          formState.setTouched({ [name]: true });
-          formOptions.onTouched(e);
-        }
-
+        touch(e);
         inputOptions.onBlur(e);
         formOptions.onBlur(e);
 
