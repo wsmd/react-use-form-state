@@ -10,18 +10,19 @@ interface UseFormStateHook {
     options?: Partial<FormOptions<any>>,
   ): [FormState<any>, Inputs<any>];
 
-  <T extends StateShape<T>>(
+  <T extends StateShape<T>, E = StateErrors<T, string>>(
     initialState?: Partial<T> | null,
     options?: Partial<FormOptions<T>>,
-  ): [FormState<T>, Inputs<T>];
+  ): [FormState<T, E>, Inputs<T>];
 }
 
 export const useFormState: UseFormStateHook;
 
-interface FormState<T> {
+interface FormState<T, E = StateErrors<T, string>> {
   values: StateValues<T>;
   validity: StateValidity<T>;
   touched: StateValidity<T>;
+  errors: E;
 }
 
 interface FormOptions<T> {
@@ -49,6 +50,10 @@ type StateValues<T> = {
 
 type StateValidity<T> = { readonly [A in keyof T]: Maybe<boolean> } & {
   readonly [key: string]: Maybe<boolean>;
+};
+
+type StateErrors<T, E = string> = {
+  readonly [A in keyof T]?: E | string
 };
 
 // Inputs
