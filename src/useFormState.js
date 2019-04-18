@@ -90,8 +90,8 @@ export default function useFormState(initialState, options) {
       const customValidate =
         isFunction(inputOptions.validate) && inputOptions.validate;
 
-      if (isString(e) && !customValidate) {
-        if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') {
+        if (isString(e) && !customValidate) {
           if (!missingValidateWarnings.has(key)) {
             // eslint-disable-next-line no-console
             console.warn(
