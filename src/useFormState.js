@@ -14,6 +14,7 @@ import {
   LABEL,
   ON_CHANGE_HANDLER,
   ON_BLUR_HANDLER,
+  CONSOLE_TAG,
 } from './constants';
 
 const defaultFromOptions = {
@@ -31,19 +32,32 @@ export default function useFormState(initialState, options) {
   const { set: setDirty, has: isDirty } = useCache();
   const callbacks = useCache();
 
+  const devWarnings = useCache();
+
+  function warn(key, type, message) {
+    if (!devWarnings.has(`${type}:${key}`)) {
+      devWarnings.set(`${type}:${key}`, true);
+      // eslint-disable-next-line no-console
+      console.warn(CONSOLE_TAG, message);
+    }
+  }
+
   const createPropsGetter = type => (...args) => {
     const { name, ownValue, ...inputOptions } = parseInputArgs(args);
 
+    const hasOwnValue = !!toString(ownValue);
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
     const isSelectMultiple = type === SELECT_MULTIPLE;
     const isRaw = type === RAW;
-    const hasOwnValue = isRaw ? !!ownValue : !!toString(ownValue);
     const hasValueInState = formState.current.values[name] !== undefined;
 
-    const key = `${type}.${name}.${
-      isRaw ? JSON.stringify(ownValue) : toString(ownValue)
-    }`;
+    // This is used to cache input props that shouldn't change across
+    // re-renders.  Note that for `raw` values, `toString(ownValue)`
+    // will return '[object Object]'.  This means we can't have multiple
+    // raw inputs with the same name and different values, but this is
+    // probably fine.
+    const key = `${type}.${name}.${toString(ownValue)}`;
 
     function setInitialValue() {
       let value = '';
@@ -95,9 +109,25 @@ export default function useFormState(initialState, options) {
       } else if (!isRaw) {
         isValid = e.target.validity.valid;
         error = e.target.validationMessage;
+      } else if (process.env.NODE_ENV === 'development') {
+        warn(
+          key,
+          'missingValidate',
+          `You provided a custom value for input "${name}" without a ` +
+            'custom validate method. As a result, validation of this input ' +
+            'will be set to "true" automatically. If you need to ' +
+            'validate this input, provided a custom validation option.',
+        );
       }
       formState.setValidity({ [name]: isValid });
       formState.setError(isEmpty(error) ? omit(name) : { [name]: error });
+    }
+
+    function touch(e) {
+      if (!formState.current.touched[name]) {
+        formState.setTouched({ [name]: true });
+        formOptions.onTouched(e);
+      }
     }
 
     const inputProps = {
@@ -155,26 +185,39 @@ export default function useFormState(initialState, options) {
       },
       onChange: callbacks.getOrSet(ON_BLUR_HANDLER + key, e => {
         setDirty(name, true);
-        let value = isRaw ? e : e.target.value;
-        if (isCheckbox) {
-          value = getNextCheckboxValue(e);
-        }
-        if (isSelectMultiple) {
-          value = getNextSelectMultipleValue(e);
+        let value;
+        if (isRaw) {
+          value = inputOptions.onChange(e);
+          if (process.env.NODE_ENV === 'development') {
+            if (value === undefined) {
+              warn(
+                key,
+                'onChangeUndefined',
+                `You used onChange() for input ${name} with raw(), but didn't return a value!`,
+              );
+            }
+          }
+        } else {
+          if (isCheckbox) {
+            value = getNextCheckboxValue(e);
+          } else if (isSelectMultiple) {
+            value = getNextSelectMultipleValue(e);
+          } else {
+            ({ value } = e.target);
+          }
+          inputOptions.onChange(e);
         }
 
         // Mark raw fields as touched on change, since we might not get an
         // `onBlur` event from them.
-        if (isRaw && !inputOptions.supportOnBlur && !formState.current.touched[name]) {
-          formState.setTouched({ [name]: true });
-          formOptions.onTouched(e);
+        if (inputOptions.touchOnChange) {
+          touch(e);
         }
 
         const partialNewState = { [name]: value };
         const newValues = { ...formState.current.values, ...partialNewState };
 
         formOptions.onChange(e, formState.current.values, newValues);
-        inputOptions.onChange(e);
 
         if (!inputOptions.validateOnBlur) {
           validate(e, newValues);
@@ -182,36 +225,34 @@ export default function useFormState(initialState, options) {
 
         formState.setValues(partialNewState);
       }),
-      onBlur: callbacks.getOrSet(ON_CHANGE_HANDLER + key, e => {
-        if (!formState.current.touched[name]) {
-          formState.setTouched({ [name]: true });
-          formOptions.onTouched(e);
-        }
+      onBlur: callbacks.getOrSet(
+        ON_CHANGE_HANDLER + key,
+        inputOptions.touchOnChange
+          ? undefined
+          : e => {
+              touch(e);
 
-        inputOptions.onBlur(e);
-        formOptions.onBlur(e);
+              inputOptions.onBlur(e);
+              formOptions.onBlur(e);
 
-        /**
-         * Limiting input validation on blur to:
-         * A) when it's either touched for the time
-         * B) when it's marked as dirty due to a value change
-         */
-        if (!formState.current.touched[name] || isDirty(name)) {
-          if (isRaw) {
-            validate(formState.current.values[name]);
-          } else {
-            validate(e);
-          }
-          setDirty(name, false);
-        }
-      }),
+              /**
+               * Limiting input validation on blur to:
+               * A) when it's either touched for the time
+               * B) when it's marked as dirty due to a value change
+               */
+              if (!formState.current.touched[name] || isDirty(name)) {
+                validate(e);
+                setDirty(name, false);
+              }
+            },
+      ),
       ...getIdProp('id', name, ownValue),
     };
 
     return isRaw
       ? {
           onChange: inputProps.onChange,
-          onBlur: inputOptions.supportOnBlur ? inputProps.onBlur : undefined,
+          onBlur: inputProps.onBlur,
           value: inputProps.value,
         }
       : inputProps;

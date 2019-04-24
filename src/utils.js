@@ -15,6 +15,11 @@ export function omit(key) {
 export function noop() {}
 
 /**
+ * Like `noop`, but passes through the first argument.
+ */
+export function identity(val) { return val; }
+
+/**
  * Cast non-string values to a string, with the exception of functions, symbols,
  * and undefined.
  */

@@ -57,15 +57,17 @@ describe('input type methods return correct props object', () => {
     expect(result.current[1].raw('option')).toEqual({
       value: undefined,
       onChange: expect.any(Function),
+      onBlur: expect.any(Function),
     });
   });
 
-  it('returns props for type "raw" with onBlur support', () => {
+  it('returns props for type "raw" with touchOnChange support', () => {
     const { result } = renderHook(() => useFormState());
-    expect(result.current[1].raw({ name: 'option', supportOnBlur: true })).toEqual({
+    expect(
+      result.current[1].raw({ name: 'option', touchOnChange: true }),
+    ).toEqual({
       value: undefined,
       onChange: expect.any(Function),
-      onBlur: expect.any(Function),
     });
   });
 
@@ -425,10 +427,10 @@ describe('Input blur behavior', () => {
     });
   });
 
-  it('marks "raw" value as touched on change by default', () => {
+  it('marks "raw" value as touched on change', () => {
     let onChange;
     const { formState } = renderWithFormState(([, { raw }]) => {
-      const inputProps = raw('value');
+      const inputProps = raw({ name: 'value', touchOnChange: true });
       ({ onChange } = inputProps);
       return <input {...inputProps} />;
     });
@@ -437,11 +439,11 @@ describe('Input blur behavior', () => {
     expect(formState.current.touched.value).toEqual(true);
   });
 
-  it('marks "raw" value as touched on blur only', () => {
+  it('marks "raw" value as touched on blur', () => {
     let onChange;
     let onBlur;
     const { formState } = renderWithFormState(([, { raw }]) => {
-      const inputProps = raw({name: 'value', supportOnBlur: true });
+      const inputProps = raw({ name: 'value' });
       ({ onChange, onBlur } = inputProps);
       return <input {...inputProps} />;
     });
