@@ -52,9 +52,9 @@
 
 ## Motivation
 
-Managing form state in React can be a bit unwieldy sometimes. There are [plenty of great solutions](https://www.npmjs.com/search?q=react%20forms&ranking=popularity) already available that make managing forms state a breeze. However, many of those solutions are opinionated, packed with tons of features that may end up not being used, and/or requires shipping a few extra bytes!
+Managing form state in React can be a bit unwieldy sometimes. There are [plenty of great solutions](https://www.npmjs.com/search?q=react%20forms&ranking=popularity) already available that make managing forms state a breeze. However, many of those solutions are opinionated, packed with tons of features that may end up not being used, and/or require shipping a few extra bytes!
 
-Luckily, the recent introduction of [React Hooks](https://reactjs.org/docs/hooks-intro.html), and the ability to write custom ones have enabled new possibilities when it comes sharing state logic. Forms state is no expectation!
+Luckily, the recent introduction of [React Hooks](https://reactjs.org/docs/hooks-intro.html) and the ability to write custom hooks have enabled new possibilities when it comes sharing state logic. Form state is no exception!
 
 `react-use-form-state` is a small React Hook that attempts to [simplify managing form state](#examples), using the native form input elements you are familiar with!
 
@@ -386,7 +386,7 @@ const [formState, inputs] = useFormState(null, {
 
 #### `formOptions.onTouched`
 
-A function that gets called after an input inside the form has lost focus, and marked as touched. It will be called once throughout the component life cycle. This functions provides access to the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).
+A function that gets called after an input inside the form has lost focus, and is marked as touched. It will be called once throughout the component life cycle. This functions provides access to the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).
 
 ```js
 const [formState, inputs] = useFormState(null, {
@@ -465,7 +465,7 @@ formState = {
 The second item returned by `useFormState`.
 
 ```js
-const [formState, inputs] = useFormState();
+const [formState, input] = useFormState();
 ```
 
 An object with keys as input types. Each type is a function that returns the appropriate props that can be spread on the corresponding input.
@@ -501,7 +501,7 @@ Alternatively, input type functions can be called with an object as the first ar
 
 ```jsx
 <input
-  {...text({
+  {...input.text({
     name: 'username',
     validate: value => validateUsername(value),
     validateOnBlur: true,
