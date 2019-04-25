@@ -305,7 +305,26 @@ function Widget() {
 }
 ```
 
-By default, no `onBlur()` prop is passed to the custom component, but if you have a component which supports `onBlur`, you can instruct `useFormState` to pass one.  `onBlur()` will not be passed any value.
+You can provide a custom `onChange` option in order to map the result of a custom control to a different type.
+
+```js
+function Widget() {
+  const [formState, { raw }] = userFormState({ date: new Date() });
+
+  return <>
+    <DatePicker {...raw({
+        name: 'date',
+        onChange(date) { return date.toString(); }
+      })}
+      value={new Date(formState.date)}
+    />
+  </>;
+}
+```
+
+Note that `onChange()` for a `raw` value *must* return a value.
+
+Many raw components do not support `onBlur()` correctly.  For these components, you can use `touchOnChange` to mark a field as touched when it changes instead of on blur:
 
 ```js
 function Widget() {

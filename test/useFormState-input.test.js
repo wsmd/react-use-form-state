@@ -68,6 +68,7 @@ describe('input type methods return correct props object', () => {
     ).toEqual({
       value: undefined,
       onChange: expect.any(Function),
+      onBlur: expect.any(Function),
     });
   });
 
@@ -279,6 +280,21 @@ describe('onChange updates inputs value', () => {
     });
     onChange({ foo: 1 });
     expect(formState.current.values.value).toEqual({ foo: 1 });
+  });
+
+  it('maps value for type "raw" with custom onChange', () => {
+    let onChange;
+    const { formState } = renderWithFormState(([, { raw }]) => {
+      const inputProps = raw({
+        name: 'value',
+        onChange: value => `foo${value}`,
+      });
+
+      ({ onChange } = inputProps);
+      return <input {...inputProps} />;
+    });
+    onChange('bar');
+    expect(formState.current.values.value).toEqual('foobar');
   });
 
   it.each([

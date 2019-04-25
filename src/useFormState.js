@@ -225,27 +225,22 @@ export default function useFormState(initialState, options) {
 
         formState.setValues(partialNewState);
       }),
-      onBlur: callbacks.getOrSet(
-        ON_CHANGE_HANDLER + key,
-        inputOptions.touchOnChange
-          ? undefined
-          : e => {
-              touch(e);
+      onBlur: callbacks.getOrSet(ON_CHANGE_HANDLER + key, e => {
+        touch(e);
 
-              inputOptions.onBlur(e);
-              formOptions.onBlur(e);
+        inputOptions.onBlur(e);
+        formOptions.onBlur(e);
 
-              /**
-               * Limiting input validation on blur to:
-               * A) when it's either touched for the time
-               * B) when it's marked as dirty due to a value change
-               */
-              if (!formState.current.touched[name] || isDirty(name)) {
-                validate(e);
-                setDirty(name, false);
-              }
-            },
-      ),
+        /**
+         * Limiting input validation on blur to:
+         * A) when it's either touched for the time
+         * B) when it's marked as dirty due to a value change
+         */
+        if (!formState.current.touched[name] || isDirty(name)) {
+          validate(e);
+          setDirty(name, false);
+        }
+      }),
       ...getIdProp('id', name, ownValue),
     };
 
