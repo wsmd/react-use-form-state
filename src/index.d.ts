@@ -87,6 +87,9 @@ interface Inputs<T, Name = keyof T> {
   checkbox(name: Name, ownValue?: OwnValue): CheckboxProps;
   checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps;
 
+  raw<Y>(name: Name, value?: Y): RawInputProps<Y>;
+  raw<Y>(options: RawInputOptions<T, Y, Name>): RawInputProps<Y>;
+
   label(name: string, value?: string): LabelProps;
   id(name: string, value?: string): string;
 }
@@ -107,6 +110,18 @@ type InputOptions<T, Name, Value = void> = {
   onChange?(event: React.ChangeEvent<InputElement>): void;
   onBlur?(event: React.FocusEvent<InputElement>): void;
 } & WithValue<Value>;
+
+type RawInputOptions<T, Y, Name> = {
+  name: Name;
+  validateOnBlur?: boolean;
+  validate?(
+    value: Y,
+    values: StateValues<T>,
+    event: (value: Y) => void,
+  ): any;
+  onChange?(value: Y): void;
+  onBlur?(): void;
+}
 
 type WithValue<V> = V extends OwnValue
   ? { value: OwnValue }
@@ -131,6 +146,12 @@ interface BaseInputProps {
 
 interface CheckboxProps extends BaseInputProps {
   checked: boolean;
+}
+
+interface RawInputProps<T> {
+  onChange(event: (value: T) => void): void;
+  onBlur(): void;
+  value: T;
 }
 
 interface RadioProps extends CheckboxProps {}

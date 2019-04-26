@@ -1,7 +1,7 @@
-import { noop } from './utils';
+import { identity, noop } from './utils';
 
 const defaultInputOptions = {
-  onChange: noop,
+  onChange: identity,
   onBlur: noop,
   validate: null,
   validateOnBlur: false,
@@ -16,6 +16,7 @@ export function parseInputArgs(args) {
   } else {
     [{ name, value: ownValue, ...options }] = args;
   }
+
   return {
     name,
     ownValue,

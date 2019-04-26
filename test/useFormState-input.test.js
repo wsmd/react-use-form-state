@@ -52,6 +52,26 @@ describe('input type methods return correct props object', () => {
     });
   });
 
+  it('returns props for type "raw"', () => {
+    const { result } = renderHook(() => useFormState());
+    expect(result.current[1].raw('option')).toEqual({
+      value: undefined,
+      onChange: expect.any(Function),
+      onBlur: expect.any(Function),
+    });
+  });
+
+  it('returns props for type "raw" with touchOnChange support', () => {
+    const { result } = renderHook(() => useFormState());
+    expect(
+      result.current[1].raw({ name: 'option', touchOnChange: true }),
+    ).toEqual({
+      value: undefined,
+      onChange: expect.any(Function),
+      onBlur: expect.any(Function),
+    });
+  });
+
   /**
    * Radio must have a type, value, and checked
    */
@@ -200,6 +220,21 @@ describe('inputs receive default values from initial state', () => {
     expect(input.checkbox('option2').value).toEqual('');
   });
 
+  it('sets initial "value" for type "raw"', () => {
+    const value = { foo: 1 };
+    const initialState = { raw: value };
+    const { result } = renderHook(() => useFormState(initialState));
+    const [, input] = result.current;
+    expect(input.raw('raw').value).toEqual(value);
+  });
+
+  it('sets initial "value" for type "raw" without a value', () => {
+    const initialState = {};
+    const { result } = renderHook(() => useFormState(initialState));
+    const [, input] = result.current;
+    expect(input.raw('raw').value).toEqual(undefined);
+  });
+
   it('sets initial "checked" for type "radio"', () => {
     const { result } = renderHook(() => useFormState({ option: 'no' }));
     const [, input] = result.current;
@@ -234,6 +269,32 @@ describe('onChange updates inputs value', () => {
     ));
     change({ value: '#ffffff' });
     expect(root).toHaveAttribute('value', '#ffffff');
+  });
+
+  it('updates value for type "raw"', () => {
+    let onChange;
+    const { formState } = renderWithFormState(([, { raw }]) => {
+      const inputProps = raw('value');
+      ({ onChange } = inputProps);
+      return <input {...inputProps} />;
+    });
+    onChange({ foo: 1 });
+    expect(formState.current.values.value).toEqual({ foo: 1 });
+  });
+
+  it('maps value for type "raw" with custom onChange', () => {
+    let onChange;
+    const { formState } = renderWithFormState(([, { raw }]) => {
+      const inputProps = raw({
+        name: 'value',
+        onChange: value => `foo${value}`,
+      });
+
+      ({ onChange } = inputProps);
+      return <input {...inputProps} />;
+    });
+    onChange('bar');
+    expect(formState.current.values.value).toEqual('foobar');
   });
 
   it.each([
@@ -380,6 +441,35 @@ describe('Input blur behavior', () => {
       errors: {},
       touched: { name: true },
     });
+  });
+
+  it('marks "raw" value as touched on change', () => {
+    let onChange;
+    const { formState } = renderWithFormState(([, { raw }]) => {
+      const inputProps = raw({ name: 'value', touchOnChange: true });
+      ({ onChange } = inputProps);
+      return <input {...inputProps} />;
+    });
+    onChange({ foo: 1 });
+    expect(formState.current.values.value).toEqual({ foo: 1 });
+    expect(formState.current.touched.value).toEqual(true);
+  });
+
+  it('marks "raw" value as touched on blur', () => {
+    let onChange;
+    let onBlur;
+    const { formState } = renderWithFormState(([, { raw }]) => {
+      const inputProps = raw({ name: 'value' });
+      ({ onChange, onBlur } = inputProps);
+      return <input {...inputProps} />;
+    });
+
+    onChange({ foo: 1 });
+    expect(formState.current.values.value).toEqual({ foo: 1 });
+    expect(formState.current.touched.value).toEqual(undefined);
+
+    onBlur();
+    expect(formState.current.touched.value).toEqual(true);
   });
 
   it('marks input as invalid on blur', () => {
