@@ -52,9 +52,7 @@ type StateValidity<T> = { readonly [A in keyof T]: Maybe<boolean> } & {
   readonly [key: string]: Maybe<boolean>;
 };
 
-type StateErrors<T, E = string> = {
-  readonly [A in keyof T]?: E | string
-};
+type StateErrors<T, E = string> = { readonly [A in keyof T]?: E | string };
 
 // Inputs
 
@@ -102,6 +100,7 @@ interface InputInitializer<T, Args extends any[], ReturnValue> {
 type InputOptions<T, Name, Value = void> = {
   name: Name;
   validateOnBlur?: boolean;
+  touchOnChange?: boolean;
   validate?(
     value: string,
     values: StateValues<T>,
@@ -114,14 +113,11 @@ type InputOptions<T, Name, Value = void> = {
 type RawInputOptions<T, Y, Name> = {
   name: Name;
   validateOnBlur?: boolean;
-  validate?(
-    value: Y,
-    values: StateValues<T>,
-    event: (value: Y) => void,
-  ): any;
+  touchOnChange?: boolean;
+  validate?(value: Y, values: StateValues<T>, event: (value: Y) => void): any;
   onChange?(value: Y): void;
   onBlur?(): void;
-}
+};
 
 type WithValue<V> = V extends OwnValue
   ? { value: OwnValue }

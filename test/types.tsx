@@ -153,10 +153,10 @@ function CustomErrorTypesWithStateErrors() {
     colors?: string | I18nError;
   }
 
-  const [formState, input] = useFormState<
-    FormFields,
-    FormFieldsErrors
-  >(initialState, {});
+  const [formState, input] = useFormState<FormFields, FormFieldsErrors>(
+    initialState,
+    {},
+  );
 
   if (formState.errors.colors && typeof formState.errors.colors !== 'string') {
     formState.errors.colors.en;

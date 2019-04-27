@@ -53,20 +53,20 @@ describe('input type methods return correct props object', () => {
   });
 
   it('returns props for type "raw"', () => {
-    const { result } = renderHook(() => useFormState());
+    const { result } = renderHook(() => useFormState({ option: '' }));
     expect(result.current[1].raw('option')).toEqual({
-      value: undefined,
+      value: '',
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
   });
 
   it('returns props for type "raw" with touchOnChange support', () => {
-    const { result } = renderHook(() => useFormState());
+    const { result } = renderHook(() => useFormState({ option: new Date() }));
     expect(
       result.current[1].raw({ name: 'option', touchOnChange: true }),
     ).toEqual({
-      value: undefined,
+      value: expect.any(Date),
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
     });
@@ -228,11 +228,25 @@ describe('inputs receive default values from initial state', () => {
     expect(input.raw('raw').value).toEqual(value);
   });
 
-  it('sets initial "value" for type "raw" without a value', () => {
-    const initialState = {};
-    const { result } = renderHook(() => useFormState(initialState));
+  it('returns default initial value for type "raw" without a value', () => {
+    const { result } = renderHook(() => useFormState({}));
     const [, input] = result.current;
-    expect(input.raw('raw').value).toEqual(undefined);
+    expect(input.raw('raw').value).toEqual('');
+  });
+
+  it('warns when initial value for type "raw" is not set', () => {
+    const { result } = renderHook(() => useFormState({}));
+    const [, input] = result.current;
+
+    // triggering the value getter
+    // eslint-disable-next-line no-unused-vars
+    const { value } = input.raw('test');
+
+    // eslint-disable-next-line no-console
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining('The initial value for input "test" is missing'),
+    );
   });
 
   it('sets initial "checked" for type "radio"', () => {
@@ -295,6 +309,35 @@ describe('onChange updates inputs value', () => {
     });
     onChange('bar');
     expect(formState.current.values.value).toEqual('foobar');
+  });
+
+  it('warns when a custom onChange of "raw" does not return a value', () => {
+    const { change } = renderWithFormState(([, { raw }]) => (
+      <input {...raw({ name: 'test', onChange: () => {} })} />
+    ));
+    change({ value: 'test' });
+    // eslint-disable-next-line no-console
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining(
+        'You used a raw input type for "test" with an onChange() option ' +
+          'without returning a value',
+      ),
+    );
+  });
+
+  it('warns when the validate option of "raw" is not provided', () => {
+    const { change } = renderWithFormState(([, { raw }]) => (
+      <input {...raw('test')} />
+    ));
+    change({ value: 'test' });
+    // eslint-disable-next-line no-console
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining(
+        'You used a raw input type for "test" without providing a custom validate method',
+      ),
+    );
   });
 
   it.each([
