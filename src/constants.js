@@ -49,4 +49,4 @@ export const TYPES = [
 export const ON_CHANGE_HANDLER = 0;
 export const ON_BLUR_HANDLER = 1;
 
-export const CONSOLE_TAG = '[react-use-form-state]';
+export const CONSOLE_TAG = '[useFormState]';

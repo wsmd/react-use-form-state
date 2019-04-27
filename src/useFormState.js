@@ -60,6 +60,20 @@ export default function useFormState(initialState, options) {
     const key = `${type}.${name}.${toString(ownValue)}`;
 
     function setInitialValue() {
+      /* istanbul ignore else */
+      if (process.env.NODE_ENV === 'development') {
+        if (isRaw && formState.current.values[name] === undefined) {
+          warn(
+            key,
+            'missingInitialValue',
+            `The initial value for input "${name}" is missing. Custom inputs ` +
+              'controlled with raw() are expected to have an initial value ' +
+              'provided to useFormState(). To prevent React from treating ' +
+              'this input as uncontrolled, an empty string will be used instead.',
+          );
+        }
+      }
+
       let value = '';
       if (isCheckbox) {
         /**
@@ -99,6 +113,7 @@ export default function useFormState(initialState, options) {
     function validate(e, values = formState.current.values) {
       let error;
       let isValid = true;
+      /* istanbul ignore else */
       if (isFunction(inputOptions.validate)) {
         const value = isRaw ? e : e.target.value;
         const result = inputOptions.validate(value, values, e);
@@ -113,10 +128,10 @@ export default function useFormState(initialState, options) {
         warn(
           key,
           'missingValidate',
-          `You provided a custom value for input "${name}" without a ` +
+          `You used a raw input type for "${name}" without providing a ` +
             'custom validate method. As a result, validation of this input ' +
-            'will be set to "true" automatically. If you need to ' +
-            'validate this input, provided a custom validation option.',
+            'will be set to "true" automatically. If you need to validate ' +
+            'this input, provide a custom validation option.',
         );
       }
       formState.setValidity({ [name]: isValid });
@@ -164,7 +179,7 @@ export default function useFormState(initialState, options) {
       },
       get value() {
         // auto populating initial state values on first render
-        if (!hasValueInState && !isRaw) {
+        if (!hasValueInState) {
           setInitialValue();
         }
         /**
@@ -176,11 +191,6 @@ export default function useFormState(initialState, options) {
           return toString(ownValue);
         }
 
-        if (isRaw) {
-          // Return `undefined` if we don't have the value.
-          return formState.current.values[name];
-        }
-
         return hasValueInState ? formState.current.values[name] : '';
       },
       onChange: callbacks.getOrSet(ON_BLUR_HANDLER + key, e => {
@@ -188,12 +198,21 @@ export default function useFormState(initialState, options) {
         let value;
         if (isRaw) {
           value = inputOptions.onChange(e);
-          if (process.env.NODE_ENV === 'development') {
-            if (value === undefined) {
+          if (value === undefined) {
+            // setting value to its current state if onChange does not return
+            // value to prevent React from complaining about the input switching
+            // from controlled to uncontrolled
+            value = formState.current.values[name];
+            /* istanbul ignore else */
+            if (process.env.NODE_ENV === 'development') {
               warn(
                 key,
                 'onChangeUndefined',
-                `You used onChange() for input ${name} with raw(), but didn't return a value!`,
+                `You used a raw input type for "${name}" with an onChange() ` +
+                  'option without returning a value. The onChange callback ' +
+                  'of raw inputs, when provided, is used to determine the ' +
+                  'custom value that will be stored in the form state. ' +
+                  'Therefore, a value must be returned from the onChange callback.',
               );
             }
           }
@@ -233,7 +252,7 @@ export default function useFormState(initialState, options) {
 
         /**
          * Limiting input validation on blur to:
-         * A) when it's either touched for the time
+         * A) when it's either touched for the first time
          * B) when it's marked as dirty due to a value change
          */
         if (!formState.current.touched[name] || isDirty(name)) {
