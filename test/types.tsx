@@ -53,11 +53,11 @@ let rememberMe: boolean = formState.values.remember_me;
  * the even is fired, the values will be of type undefined
  */
 formState.touched.colors;
-formState.validity.username;
-
+formState.validity.name;
+formState.values.power_level.split('');
 if (formState.errors.colors) {
   // string
-  formState.errors.colors;
+  formState.errors.colors.toLocaleLowerCase();
 }
 
 <input {...input.checkbox('remember_me')} />;

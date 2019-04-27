@@ -44,13 +44,9 @@ type StateValues<T> = {
    * inputs will will be of a string
    */
   readonly [A in keyof T]: T[A] extends number ? string : T[A]
-} & {
-  readonly [key: string]: Maybe<string | string[] | boolean>;
 };
 
-type StateValidity<T> = { readonly [A in keyof T]: Maybe<boolean> } & {
-  readonly [key: string]: Maybe<boolean>;
-};
+type StateValidity<T> = { readonly [A in keyof T]: Maybe<boolean> };
 
 type StateErrors<T, E = string> = {
   readonly [A in keyof T]?: E | string
