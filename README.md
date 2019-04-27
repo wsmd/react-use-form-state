@@ -36,7 +36,7 @@
   - [Custom Input Validation](#custom-input-validation)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
   - [Labels](#labels)
-- [Custom Controls](#custom-controls)
+  - [Custom Controls](#custom-controls)
 - [Working with TypeScript](#working-with-typescript)
 - [API](#api)
   - [`initialState`](#initialstate)
@@ -291,11 +291,12 @@ Note that this will override any existing `id` prop if specified before calling 
 <input {...text('username')} id="signup-username" />
 ```
 
-## Custom Controls
+### Custom Controls
 
-`useFormState` provides a `raw` type for working with controls that do not use React's [`SyntheticEvent`](https://reactjs.org/docs/events.html) system.  For example, controls like [react-select](https://react-select.com/home) or [react-datepicker](https://www.npmjs.com/package/react-datepicker) have `onChange` and `value` props that expect a raw value instead of an event.
+`useFormState` provides a `raw` type for working with controls that do not use React's [`SyntheticEvent`](https://reactjs.org/docs/events.html) system.  For example, controls like [react-select](https://react-select.com/home) or [react-datepicker](https://www.npmjs.com/package/react-datepicker) have `onChange` and `value` props that expect a custom value instead of an event.
 
-To use this, your custom component should support an `onChange()` event which takes the value as a parameter, and a `value` prop which is expected to contain the value.  Note that if no initial value is given, the component will receive a `value` prop of `undefined`.
+
+To use this, your custom component should support an `onChange()` event which takes the value as a parameter, and a `value` prop which is expected to contain the value.  Note that if no initial value is given, the component will receive a `value` prop of an empty string, which might not be what you want. Therefore, you must provide an [initial value](#initial-state) for `raw()` inputs when working with custom controls.
 
 ```js
 import DatePicker from 'react-datepicker';
