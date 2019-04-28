@@ -110,7 +110,7 @@ type InputOptions<T, Name, Value = void> = {
   onBlur?(event: React.FocusEvent<InputElement>): void;
 } & WithValue<Value>;
 
-type RawInputOptions<T, Name extends keyof T, RawValue> = {
+interface RawInputOptions<T, Name extends keyof T, RawValue> {
   name: Name;
   validateOnBlur?: boolean;
   touchOnChange?: boolean;
@@ -121,10 +121,10 @@ type RawInputOptions<T, Name extends keyof T, RawValue> = {
   ): any;
   onChange?(rawValue: RawValue): StateValues<T>[Name];
   onBlur?(...args: any[]): void;
-};
+}
 
 interface RawInputProps<T, Name extends keyof T, RawValue> {
-  name: string;
+  name: Name;
   value: StateValues<T>[Name];
   onChange(rawValue: RawValue): any;
   onBlur(...args: any[]): any;
