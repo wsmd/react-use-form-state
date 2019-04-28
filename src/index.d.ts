@@ -81,7 +81,7 @@ interface Inputs<T, Name extends keyof T = keyof T> {
   checkbox(name: Name, ownValue?: OwnValue): CheckboxProps<T>;
   checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps<T>;
 
-  raw<RawValue>(name: Name, ownValue?: any): RawInputProps<T, Name, RawValue>;
+  raw<RawValue>(name: Name): RawInputProps<T, Name, RawValue>;
   raw<RawValue>(
     options: RawInputOptions<T, Name, RawValue>,
   ): RawInputProps<T, Name, RawValue>;
@@ -125,7 +125,7 @@ interface RawInputProps<T, Name extends keyof T, RawValue> {
   name: string;
   value: StateValues<T>[Name];
   onChange(rawValue: RawValue): any;
-  onBlur(): any;
+  onBlur(...args: any[]): any;
 }
 
 type WithValue<V> = V extends OwnValue
