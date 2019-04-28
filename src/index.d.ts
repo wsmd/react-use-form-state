@@ -54,23 +54,23 @@ type StateErrors<T, E = string> = { readonly [A in keyof T]?: E | string };
 
 interface Inputs<T, Name = keyof T> {
   // prettier-ignore
-  selectMultiple: InputInitializer<T, Args<Name>, Omit<BaseInputProps, 'type'> & MultipleProp>;
-  select: InputInitializer<T, Args<Name>, Omit<BaseInputProps, 'type'>>;
-  email: InputInitializer<T, Args<Name>, BaseInputProps>;
-  color: InputInitializer<T, Args<Name>, BaseInputProps>;
-  password: InputInitializer<T, Args<Name>, BaseInputProps>;
-  text: InputInitializer<T, Args<Name>, BaseInputProps>;
-  textarea: InputInitializer<T, Args<Name>, Omit<BaseInputProps, 'type'>>;
-  url: InputInitializer<T, Args<Name>, BaseInputProps>;
-  search: InputInitializer<T, Args<Name>, BaseInputProps>;
-  number: InputInitializer<T, Args<Name>, BaseInputProps>;
-  range: InputInitializer<T, Args<Name>, BaseInputProps>;
-  tel: InputInitializer<T, Args<Name>, BaseInputProps>;
-  radio: InputInitializer<T, Args<Name, OwnValue>, RadioProps>;
-  date: InputInitializer<T, Args<Name>, BaseInputProps>;
-  month: InputInitializer<T, Args<Name>, BaseInputProps>;
-  week: InputInitializer<T, Args<Name>, BaseInputProps>;
-  time: InputInitializer<T, Args<Name>, BaseInputProps>;
+  selectMultiple: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'> & MultipleProp>;
+  select: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'>>;
+  email: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  color: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  password: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  text: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  textarea: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'>>;
+  url: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  search: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  number: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  range: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  tel: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  radio: InputInitializer<T, Args<Name, OwnValue>, RadioProps<T>>;
+  date: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  month: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  week: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  time: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
   /**
    * Checkbox inputs with a value will be treated as a collection of choices.
    * Their values in in the form state will be of type Array<string>.
@@ -78,8 +78,8 @@ interface Inputs<T, Name = keyof T> {
    * Checkbox inputs without a value will be treated as toggles. Their values in
    * in the form state will be of type boolean
    */
-  checkbox(name: Name, ownValue?: OwnValue): CheckboxProps;
-  checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps;
+  checkbox(name: Name, ownValue?: OwnValue): CheckboxProps<T>;
+  checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps<T>;
 
   raw<Y>(name: Name, value?: Y): RawInputProps<Y>;
   raw<Y>(options: RawInputOptions<T, Y, Name>): RawInputProps<Y>;
@@ -127,16 +127,16 @@ type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 type OwnValue = string | number | boolean | string[];
 
-interface BaseInputProps {
+interface BaseInputProps<T> {
   id: string;
   onChange(event: any): void;
   onBlur(event: any): void;
   value: string;
-  name: string;
+  name: keyof T;
   type: string;
 }
 
-interface CheckboxProps extends BaseInputProps {
+interface CheckboxProps<T> extends BaseInputProps<T> {
   checked: boolean;
 }
 
@@ -146,7 +146,7 @@ interface RawInputProps<T> {
   value: T;
 }
 
-interface RadioProps extends CheckboxProps {}
+interface RadioProps<T> extends CheckboxProps<T> {}
 
 interface MultipleProp {
   multiple: boolean;
