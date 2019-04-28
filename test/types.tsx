@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { useFormState } from '../src';
+import { useFormState, FormState } from '../src';
 
 useFormState();
 useFormState({});
@@ -186,16 +186,17 @@ const { port, host }: { port: string; host: string } = typedState.values;
 
 // untyped
 
-const [state, { text, radio, checkbox }] = useFormState({
+const [state, { raw, text, radio, checkbox }] = useFormState({
   foo: 1,
 });
-state.values.bar;
-text('test');
-text({ name: 'text', validateOnBlur: true });
-radio('option', 'a');
-radio({ name: 'option', value: 'a' });
-checkbox({ name: 'option' });
-checkbox({ name: 'option', value: 1 });
+
+<input {...text('test')} />;
+<input {...text({ name: 'text', validateOnBlur: true })} />;
+<input {...radio('option', 'a')} />;
+<input {...radio({ name: 'option', value: 'a' })} />;
+<input {...checkbox({ name: 'option' })} />;
+<input {...checkbox({ name: 'option', value: 1 })} />;
+<input {...raw('test')} />;
 
 // Raw Input
 
@@ -266,4 +267,20 @@ function RawValueInState() {
       />
     </>
   );
+}
+
+function PropsDelegation() {
+  interface FormFields {
+    email: string;
+  }
+  interface InputProps {
+    formState: FormState<FormFields>;
+    name: keyof FormFields;
+  }
+  const Input: React.FC<InputProps> = ({ formState, name }) => {
+    formState.errors[name]; // value of 'name' should be inferred (e.g. "email")
+    return null;
+  };
+  const [formState, input] = useFormState<FormFields>();
+  return <Input formState={formState} {...input.email('email')} />;
 }

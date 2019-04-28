@@ -124,7 +124,7 @@ interface RawInputOptions<T, Name extends keyof T, RawValue> {
 }
 
 interface RawInputProps<T, Name extends keyof T, RawValue> {
-  name: Name;
+  name: Extract<Name, string>;
   value: StateValues<T>[Name];
   onChange(rawValue: RawValue): any;
   onBlur(...args: any[]): any;
@@ -147,7 +147,7 @@ interface BaseInputProps<T> {
   onChange(event: any): void;
   onBlur(event: any): void;
   value: string;
-  name: keyof T;
+  name: Extract<keyof T, string>;
   type: string;
 }
 
