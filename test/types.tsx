@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { useFormState } from '../src';
 
 useFormState();
@@ -196,3 +196,74 @@ radio('option', 'a');
 radio({ name: 'option', value: 'a' });
 checkbox({ name: 'option' });
 checkbox({ name: 'option', value: 1 });
+
+// Raw Input
+
+function RawInputTyped() {
+  const DatePicker: FC<{ onChange(value: Date): void; value: string }> = () =>
+    null;
+  const [formState, { raw }] = useFormState<{ name: string; date: string }>();
+  formState.values.date.split('/');
+  return (
+    <>
+      <input {...raw('name')} />
+      <DatePicker
+        {...raw({
+          name: 'date',
+          onChange: e => e.toLocaleDateString(),
+          validate(value, values, rawValue) {
+            value.split('/');
+            rawValue.toLocaleDateString();
+            return true;
+          },
+        })}
+      />
+    </>
+  );
+}
+
+function RawInputUntyped() {
+  const DatePicker: FC<{ onChange(value: Date): void; value: string }> = () =>
+    null;
+  const [formState, { raw }] = useFormState();
+  return (
+    <>
+      <input {...raw('name')} />
+      <DatePicker
+        {...raw({
+          name: 'date',
+          onChange: e => e.toLocaleDateString(),
+          validate(value, values, rawValue) {
+            value.split('/');
+            rawValue.toISOString();
+            return true;
+          },
+        })}
+      />
+    </>
+  );
+}
+
+function RawValueInState() {
+  const DatePicker: FC<{ onChange(value: Date): any; value: Date }> = () =>
+    null;
+  const [formState, input] = useFormState<{ date: Date; name: string }>();
+  formState.values.date.toISOString();
+  return (
+    <>
+      <input {...input.text('name')} />
+      <input {...input.raw('name')} />
+      <DatePicker
+        {...input.raw({
+          name: 'date',
+          onChange: e => e,
+          validate(value, values, rawValue) {
+            value.toLocaleDateString();
+            rawValue.toISOString();
+            return true;
+          },
+        })}
+      />
+    </>
+  );
+}

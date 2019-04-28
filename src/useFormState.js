@@ -110,12 +110,15 @@ export default function useFormState(initialState, options) {
       );
     }
 
-    function validate(e, values = formState.current.values) {
+    function validate(
+      e,
+      value = isRaw ? undefined : e.target.value,
+      values = formState.current.values,
+    ) {
       let error;
       let isValid = true;
       /* istanbul ignore else */
       if (isFunction(inputOptions.validate)) {
-        const value = isRaw ? e : e.target.value;
         const result = inputOptions.validate(value, values, e);
         if (result !== true && result != null) {
           isValid = false;
@@ -239,7 +242,7 @@ export default function useFormState(initialState, options) {
         formOptions.onChange(e, formState.current.values, newValues);
 
         if (!inputOptions.validateOnBlur) {
-          validate(e, newValues);
+          validate(e, value, newValues);
         }
 
         formState.setValues(partialNewState);
