@@ -2,7 +2,7 @@
 // Project: https://github.com/wsmd/react-use-form-state
 // Definitions by: Waseem Dahman <https://github.com/wsmd>
 
-type StateShape<T> = { [key in keyof T]: string | string[] | number | boolean };
+type StateShape<T> = { [key in keyof T]: any };
 
 interface UseFormStateHook {
   (
@@ -81,8 +81,10 @@ interface Inputs<T, Name extends keyof T = keyof T> {
   checkbox(name: Name, ownValue?: OwnValue): CheckboxProps<T>;
   checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps<T>;
 
-  raw<RawValue>(name: Name): RawInputProps<T, Name, RawValue>;
-  raw<RawValue>(
+  raw<RawValue, Name extends keyof T = keyof T>(
+    name: Name,
+  ): RawInputProps<T, Name, RawValue>;
+  raw<RawValue, Name extends keyof T = keyof T>(
     options: RawInputOptions<T, Name, RawValue>,
   ): RawInputProps<T, Name, RawValue>;
 
