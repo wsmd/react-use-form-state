@@ -52,7 +52,7 @@ type StateErrors<T, E = string> = { readonly [A in keyof T]?: E | string };
 
 // Inputs
 
-interface Inputs<T, Name = keyof T> {
+interface Inputs<T, Name extends keyof T = keyof T> {
   // prettier-ignore
   selectMultiple: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'> & MultipleProp>;
   select: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'>>;
@@ -81,8 +81,10 @@ interface Inputs<T, Name = keyof T> {
   checkbox(name: Name, ownValue?: OwnValue): CheckboxProps<T>;
   checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps<T>;
 
-  raw<Y>(name: Name, value?: Y): RawInputProps<Y>;
-  raw<Y>(options: RawInputOptions<T, Y, Name>): RawInputProps<Y>;
+  raw<RawValue>(name: Name, ownValue?: any): RawInputProps<T, Name, RawValue>;
+  raw<RawValue>(
+    options: RawInputOptions<T, Name, RawValue>,
+  ): RawInputProps<T, Name, RawValue>;
 
   label(name: string, value?: string): LabelProps;
   id(name: string, value?: string): string;
@@ -106,14 +108,25 @@ type InputOptions<T, Name, Value = void> = {
   onBlur?(event: React.FocusEvent<InputElement>): void;
 } & WithValue<Value>;
 
-type RawInputOptions<T, Y, Name> = {
+type RawInputOptions<T, Name extends keyof T, RawValue> = {
   name: Name;
   validateOnBlur?: boolean;
   touchOnChange?: boolean;
-  validate?(value: Y, values: StateValues<T>, event: (value: Y) => void): any;
-  onChange?(value: Y): void;
-  onBlur?(): void;
+  validate?(
+    value: StateValues<T>[Name],
+    values: StateValues<T>,
+    rawValue: RawValue,
+  ): any;
+  onChange?(rawValue: RawValue): StateValues<T>[Name];
+  onBlur?(...args: any[]): void;
 };
+
+interface RawInputProps<T, Name extends keyof T, RawValue> {
+  name: string;
+  value: StateValues<T>[Name];
+  onChange(rawValue: RawValue): any;
+  onBlur(): any;
+}
 
 type WithValue<V> = V extends OwnValue
   ? { value: OwnValue }
@@ -138,12 +151,6 @@ interface BaseInputProps<T> {
 
 interface CheckboxProps<T> extends BaseInputProps<T> {
   checked: boolean;
-}
-
-interface RawInputProps<T> {
-  onChange(event: (value: T) => void): void;
-  onBlur(): void;
-  value: T;
 }
 
 interface RadioProps<T> extends CheckboxProps<T> {}

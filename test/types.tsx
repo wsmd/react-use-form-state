@@ -196,3 +196,55 @@ radio('option', 'a');
 radio({ name: 'option', value: 'a' });
 checkbox({ name: 'option' });
 checkbox({ name: 'option', value: 1 });
+
+// Raw Input
+
+const DatePicker: React.FC<{
+  onChange(value: Date): void;
+  value: string;
+}> = ({ onChange }) => (
+  <input
+    type="date"
+    onChange={e => onChange(new Date(JSON.stringify(e.target.value)))}
+  />
+);
+
+function RawInputTyped() {
+  const [formState, { raw }] = useFormState<{ name: string; date: string }>();
+  return (
+    <>
+      <input {...raw('name')} />
+      <DatePicker
+        {...raw({
+          name: 'date',
+          onChange: e => e.toLocaleDateString(),
+          validate(value, values, date) {
+            value.split('/');
+            date.toISOString();
+            return true;
+          },
+        })}
+      />
+    </>
+  );
+}
+
+function RawInputUntyped() {
+  const [formState, { raw }] = useFormState();
+  return (
+    <>
+      <input {...raw('name')} />
+      <DatePicker
+        {...raw({
+          name: 'date',
+          onChange: e => e.toLocaleDateString(),
+          validate(value, values, date) {
+            value.split('/');
+            date.toISOString();
+            return true;
+          },
+        })}
+      />
+    </>
+  );
+}
