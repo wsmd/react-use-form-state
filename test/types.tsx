@@ -186,16 +186,17 @@ const { port, host }: { port: string; host: string } = typedState.values;
 
 // untyped
 
-const [state, { text, radio, checkbox }] = useFormState({
+const [state, { raw, text, radio, checkbox }] = useFormState({
   foo: 1,
 });
-state.values.bar;
-text('test');
-text({ name: 'text', validateOnBlur: true });
-radio('option', 'a');
-radio({ name: 'option', value: 'a' });
-checkbox({ name: 'option' });
-checkbox({ name: 'option', value: 1 });
+
+<input {...text('test')} />;
+<input {...text({ name: 'text', validateOnBlur: true })} />;
+<input {...radio('option', 'a')} />;
+<input {...radio({ name: 'option', value: 'a' })} />;
+<input {...checkbox({ name: 'option' })} />;
+<input {...checkbox({ name: 'option', value: 1 })} />;
+<input {...raw('test')} />;
 
 // Raw Input
 
