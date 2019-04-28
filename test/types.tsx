@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { useFormState } from '../src';
+import { useFormState, FormState } from '../src';
 
 useFormState();
 useFormState({});
@@ -267,4 +267,20 @@ function RawValueInState() {
       />
     </>
   );
+}
+
+function PropsDelegation() {
+  interface FormFields {
+    email: string;
+  }
+  interface InputProps {
+    formState: FormState<FormFields>;
+    name: keyof FormFields;
+  }
+  const Input: React.FC<InputProps> = ({ formState, name }) => {
+    formState.errors[name]; // value of 'name' should be inferred (e.g. "email")
+    return null;
+  };
+  const [formState, input] = useFormState<FormFields>();
+  return <Input formState={formState} {...input.email('email')} />;
 }
