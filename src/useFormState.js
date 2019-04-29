@@ -290,15 +290,19 @@ export default function useFormState(initialState, options) {
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const resetAll = useCallback(() => {
-    formState.forEach(input =>
-      formState.updateInput(input, initialValues.get(input)),
-    );
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const reset = useCallback(
+    name => formState.updateInput(name, initialValues.get(name)),
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
-  const clearAll = useCallback(() => {
-    formState.forEach(input => formState.updateInput(input));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const resetAll = useCallback(() => formState.forEach(reset), []);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const clear = useCallback(name => formState.updateInput(name), []);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const clearAll = useCallback(() => formState.forEach(clear), []);
 
   const inputPropsCreators = TYPES.reduce(
     (methods, type) => ({ ...methods, [type]: createPropsGetter(type) }),
@@ -311,8 +315,10 @@ export default function useFormState(initialState, options) {
       ...inputPropsCreators,
       [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
       forceUpdate,
-      resetAll,
+      clear,
       clearAll,
+      reset,
+      resetAll,
     },
   ];
 }
