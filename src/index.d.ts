@@ -90,6 +90,8 @@ interface Inputs<T, Name extends keyof T = keyof T> {
 
   label(name: string, value?: string): LabelProps;
   id(name: string, value?: string): string;
+
+  forceUpdate(name: Name, value: StateValues<T>[Name]): void;
 }
 
 interface InputInitializer<T, Args extends any[], ReturnValue> {

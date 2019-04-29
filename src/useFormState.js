@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { toString, noop, omit, isFunction, isEmpty } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
@@ -275,6 +276,11 @@ export default function useFormState(initialState, options) {
       : inputProps;
   };
 
+  const forceUpdate = useCallback(
+    (name, value) => formState.updateInput(name, value),
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
   const inputPropsCreators = TYPES.reduce(
     (methods, type) => ({ ...methods, [type]: createPropsGetter(type) }),
     {},
@@ -285,6 +291,7 @@ export default function useFormState(initialState, options) {
     {
       ...inputPropsCreators,
       [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
+      forceUpdate,
     },
   ];
 }

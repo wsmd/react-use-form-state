@@ -25,5 +25,11 @@ export function useState({ initialState }) {
     setTouched,
     setValidity,
     setError,
+    updateInput(name, value, inputValidity, inputTouched, inputError) {
+      setValues({ [name]: value });
+      setTouched({ [name]: inputTouched });
+      setValidity({ [name]: inputValidity });
+      setError({ [name]: inputError });
+    },
   };
 }
