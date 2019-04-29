@@ -509,7 +509,7 @@ describe('Input blur behavior', () => {
 
     onChange({ foo: 1 });
     expect(formState.current.values.value).toEqual({ foo: 1 });
-    expect(formState.current.touched.value).toEqual(undefined);
+    expect(formState.current.touched.value).toEqual(false);
 
     onBlur();
     expect(formState.current.touched.value).toEqual(true);
