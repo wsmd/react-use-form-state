@@ -32,7 +32,7 @@ export default function useFormState(initialState, options) {
   const { getIdProp } = useInputId(formOptions.withIds);
   const { set: setDirty, has: isDirty } = useCache();
   const callbacks = useCache();
-
+  const initialValues = useCache();
   const devWarnings = useCache();
 
   function warn(key, type, message) {
@@ -60,7 +60,7 @@ export default function useFormState(initialState, options) {
     // probably fine.
     const key = `${type}.${name}.${toString(ownValue)}`;
 
-    function setInitialValue() {
+    function setDefaultValue() {
       /* istanbul ignore else */
       if (process.env.NODE_ENV === 'development') {
         if (isRaw && formState.current.values[name] === undefined) {
@@ -182,10 +182,19 @@ export default function useFormState(initialState, options) {
         }
       },
       get value() {
-        // auto populating initial state values on first render
         if (!hasValueInState) {
-          setInitialValue();
+          // auto populating default values if an initial value is not provided
+          setDefaultValue();
+        } else if (!initialValues.has(name)) {
+          // keep track of user-provided initial values on first render
+          initialValues.set(name, formState.current.values[name]);
         }
+
+        // auto populating default values of touched
+        if (formState.current.touched[name] == null) {
+          formState.setTouched({ [name]: false });
+        }
+
         /**
          * Since checkbox and radio inputs have their own user-defined values,
          * and since checkbox inputs can be either an array or a boolean,
@@ -281,6 +290,16 @@ export default function useFormState(initialState, options) {
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
+  const resetAll = useCallback(() => {
+    formState.forEach(input =>
+      formState.updateInput(input, initialValues.get(input)),
+    );
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const clearAll = useCallback(() => {
+    formState.forEach(input => formState.updateInput(input));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const inputPropsCreators = TYPES.reduce(
     (methods, type) => ({ ...methods, [type]: createPropsGetter(type) }),
     {},
@@ -292,6 +311,8 @@ export default function useFormState(initialState, options) {
       ...inputPropsCreators,
       [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
       forceUpdate,
+      resetAll,
+      clearAll,
     },
   ];
 }

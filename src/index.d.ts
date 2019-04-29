@@ -92,6 +92,8 @@ interface Inputs<T, Name extends keyof T = keyof T> {
   id(name: string, value?: string): string;
 
   forceUpdate(name: Name, value: StateValues<T>[Name]): void;
+  resetAll(): void;
+  clearAll(): void;
 }
 
 interface InputInitializer<T, Args extends any[], ReturnValue> {

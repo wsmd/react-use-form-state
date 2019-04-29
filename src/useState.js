@@ -31,5 +31,8 @@ export function useState({ initialState }) {
       setValidity({ [name]: inputValidity });
       setError({ [name]: inputError });
     },
+    forEach(callback) {
+      Object.keys(state.current.values).forEach(callback);
+    },
   };
 }
