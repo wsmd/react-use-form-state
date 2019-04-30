@@ -23,6 +23,11 @@ interface FormState<T, E = StateErrors<T, string>> {
   validity: StateValidity<T>;
   touched: StateValidity<T>;
   errors: E;
+  reset(): void;
+  clear(): void;
+  setField<K extends keyof T>(name: K, value: T[K]): void;
+  resetField(name: keyof T): void;
+  clearField(name: keyof T): void;
 }
 
 interface FormOptions<T> {
@@ -32,6 +37,8 @@ interface FormOptions<T> {
     nextStateValues: StateValues<T>,
   ): void;
   onBlur(event: React.FocusEvent<InputElement>): void;
+  onClear(): void;
+  onReset(): void;
   onTouched(event: React.FocusEvent<InputElement>): void;
   withIds: boolean | ((name: string, value?: string) => string);
 }
@@ -90,12 +97,6 @@ interface Inputs<T, Name extends keyof T = keyof T> {
 
   label(name: string, value?: string): LabelProps;
   id(name: string, value?: string): string;
-
-  forceUpdate(name: Name, value: StateValues<T>[Name]): void;
-  resetAll(): void;
-  clearAll(): void;
-  reset(name: Name): void;
-  clear(name: Name): void;
 }
 
 interface InputInitializer<T, Args extends any[], ReturnValue> {

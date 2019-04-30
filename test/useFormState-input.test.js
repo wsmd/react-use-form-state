@@ -478,12 +478,14 @@ describe('Input blur behavior', () => {
       <input {...text('name')} />
     ));
     blur();
-    expect(formState.current).toEqual({
-      values: { name: '' },
-      validity: { name: true },
-      errors: {},
-      touched: { name: true },
-    });
+    expect(formState.current).toEqual(
+      expect.objectContaining({
+        values: { name: '' },
+        validity: { name: true },
+        errors: {},
+        touched: { name: true },
+      }),
+    );
   });
 
   it('marks "raw" value as touched on change', () => {
@@ -520,14 +522,16 @@ describe('Input blur behavior', () => {
       <input {...text('name')} required />
     ));
     blur();
-    expect(formState.current).toEqual({
-      values: { name: '' },
-      validity: { name: false },
-      errors: {
-        name: expect.any(String),
-      },
-      touched: { name: true },
-    });
+    expect(formState.current).toEqual(
+      expect.objectContaining({
+        values: { name: '' },
+        validity: { name: false },
+        errors: {
+          name: expect.any(String),
+        },
+        touched: { name: true },
+      }),
+    );
   });
 });
 

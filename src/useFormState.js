@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { toString, noop, omit, isFunction, isEmpty } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
@@ -22,17 +21,18 @@ const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
+  onReset: noop,
+  onClear: noop,
   withIds: false,
 };
 
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFromOptions, ...options };
 
-  const formState = useState({ initialState });
+  const formState = useState({ initialState, ...formOptions });
   const { getIdProp } = useInputId(formOptions.withIds);
   const { set: setDirty, has: isDirty } = useCache();
   const callbacks = useCache();
-  const initialValues = useCache();
   const devWarnings = useCache();
 
   function warn(key, type, message) {
@@ -185,9 +185,9 @@ export default function useFormState(initialState, options) {
         if (!hasValueInState) {
           // auto populating default values if an initial value is not provided
           setDefaultValue();
-        } else if (!initialValues.has(name)) {
+        } else if (!formState.initialValues.has(name)) {
           // keep track of user-provided initial values on first render
-          initialValues.set(name, formState.current.values[name]);
+          formState.initialValues.set(name, formState.current.values[name]);
         }
 
         // auto populating default values of touched
@@ -268,6 +268,7 @@ export default function useFormState(initialState, options) {
          * A) when it's either touched for the first time
          * B) when it's marked as dirty due to a value change
          */
+        /* istanbul ignore else */
         if (!formState.current.touched[name] || isDirty(name)) {
           validate(e);
           setDirty(name, false);
@@ -285,40 +286,19 @@ export default function useFormState(initialState, options) {
       : inputProps;
   };
 
-  const forceUpdate = useCallback(
-    (name, value) => formState.updateInput(name, value),
-    [], // eslint-disable-line react-hooks/exhaustive-deps
-  );
-
-  const reset = useCallback(
-    name => formState.updateInput(name, initialValues.get(name)),
-    [], // eslint-disable-line react-hooks/exhaustive-deps
-  );
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const resetAll = useCallback(() => formState.forEach(reset), []);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const clear = useCallback(name => formState.updateInput(name), []);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const clearAll = useCallback(() => formState.forEach(clear), []);
-
   const inputPropsCreators = TYPES.reduce(
     (methods, type) => ({ ...methods, [type]: createPropsGetter(type) }),
     {},
   );
 
   return [
-    formState.current,
+    {
+      ...formState.current,
+      ...formState.controls,
+    },
     {
       ...inputPropsCreators,
       [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
-      forceUpdate,
-      clear,
-      clearAll,
-      reset,
-      resetAll,
     },
   ];
 }
