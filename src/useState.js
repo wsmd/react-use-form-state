@@ -54,7 +54,7 @@ export function useState({ initialState, onReset, onClear }) {
         onClear();
       },
       setField(name, value) {
-        setField(name, value);
+        setField(name, value, true, true);
       },
     },
   };
