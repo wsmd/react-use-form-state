@@ -38,7 +38,7 @@
   - [Labels](#labels)
   - [Custom Controls](#custom-controls)
   - [Updating Fields Manually](#updating-fields-manually)
-  - [Clearing and Resetting The From State](#clearing-and-resetting-the-from-state)
+  - [Resetting The From State](#resetting-the-from-state)
 - [Working with TypeScript](#working-with-typescript)
 - [API](#api)
   - [`initialState`](#initialstate)
@@ -388,7 +388,7 @@ Please note that when `formState.setField` is called, any existing errors that m
 
 It's also possible to clear or reset the input value back to its initial state if provided using `formState.clearField` and `formState.resetField` respectively.
 
-### Clearing and Resetting The From State
+### Resetting The From State
 
 The form state can be cleared or reset back to its initial state if provided at any time using `formState.clear` and `formState.reset` respectively.
 
