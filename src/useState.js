@@ -46,11 +46,11 @@ export function useState({ initialState, onReset, onClear }) {
       clearField,
       resetField,
       clear() {
-        forEach(resetField);
+        forEach(clearField);
         onReset();
       },
       reset() {
-        forEach(clearField);
+        forEach(resetField);
         onClear();
       },
       setField(name, value) {
