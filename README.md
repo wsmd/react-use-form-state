@@ -47,7 +47,6 @@
     - [`formOptions.onChange`](#formoptionsonchange)
     - [`formOptions.onTouched`](#formoptionsontouched)
     - [`formOptions.onClear`](#formoptionsonclear)
-    - [`formOptions.onReset`](#formoptionsonreset)
     - [`formOptions.withIds`](#formoptionswithids)
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
@@ -128,9 +127,7 @@ From the example above, as the user fills in the form, the `formState` object wi
     password: 'Please lengthen this text to 8 characters or more',
   },
   clear: Function,
-  reset: Function,
   clearField: Function,
-  resetField: Function,
   setField: Function,
 }
 ```
@@ -388,24 +385,21 @@ function Form() {
 
 Please note that when `formState.setField` is called, any existing errors that might have been set due to previous interactions from the user will be cleared, and both of the `validity` and the `touched` states of the input will be set to `true`.
 
-It's also possible to clear or reset the input value back to its initial state if provided using `formState.clearField` and `formState.resetField` respectively.
+It's also possible to clear a single input's value using `formState.clearField`.
 
 ### Resetting The From State
 
-The form state can be cleared or reset back to its initial state if provided at any time using `formState.clear` and `formState.reset` respectively.
+All fields in the form can be cleared all at once at any time using `formState.clear`.
 
 ```js
 function Form() {
-  const [formState, { text, email }] = useFormState({
-    email: "hello@example.com"
-  });
+  const [formState, { text, email }] = useFormState();
   return (
     <>
-      <input {...text("firstname")} />
-      <input {...text("lastname")} />
+      <input {...text("first_name")} />
+      <input {...text("last_name")} />
       <input {...email("email")} />
       <button onClick={formState.clear}>Clear All Fields</button>
-      <button onClick={formState.reset}>Reset to Initial State</button>
     </>
   );
 }
@@ -537,20 +531,6 @@ const [formState, inputs] = useFormState(null, {
 formState.clear(); // clearing the form state
 ```
 
-#### `formOptions.onReset`
-
-A function that gets called after calling `formState.reset` indicating that all fields in the form state are set to their initial values.
-
-```js
-const [formState, inputs] = useFormState(null, {
-  onReset() {
-    // form state was reset successfully
-  }
-});
-
-formState.reset(); // resetting the form state
-```
-
 #### `formOptions.withIds`
 
 Indicates whether `useFormState` should generate and pass an `id` attribute to its fields. This is helpful when [working with labels](#labels-and-ids).
@@ -615,14 +595,8 @@ formState = {
   // clears all fields in the form
   clear(): void,
 
-  // resets all fields the form back to their initial state if provided
-  reset(): void,
-
   // clears the state of an input
   clearField(name: string): void,
-
-  // resets the state of an input back to its initial state if provided
-  resetField(name: string): void,
 
   // updates the value of an input
   setField(name: string, value: string): void,,

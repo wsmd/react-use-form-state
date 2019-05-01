@@ -21,7 +21,6 @@ const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
-  onReset: noop,
   onClear: noop,
   withIds: false,
 };
@@ -60,7 +59,7 @@ export default function useFormState(initialState, options) {
     // probably fine.
     const key = `${type}.${name}.${toString(ownValue)}`;
 
-    function setDefaultValue() {
+    function setInitialValue() {
       /* istanbul ignore else */
       if (process.env.NODE_ENV === 'development') {
         if (isRaw && formState.current.values[name] === undefined) {
@@ -182,12 +181,9 @@ export default function useFormState(initialState, options) {
         }
       },
       get value() {
+        // auto populating initial state values on first render
         if (!hasValueInState) {
-          // auto populating default values if an initial value is not provided
-          setDefaultValue();
-        } else if (!formState.initialValues.has(name)) {
-          // keep track of user-provided initial values on first render
-          formState.initialValues.set(name, formState.current.values[name]);
+          setInitialValue();
         }
 
         // auto populating default values of touched
