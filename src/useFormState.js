@@ -21,17 +21,17 @@ const defaultFromOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
+  onClear: noop,
   withIds: false,
 };
 
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFromOptions, ...options };
 
-  const formState = useState({ initialState });
+  const formState = useState({ initialState, ...formOptions });
   const { getIdProp } = useInputId(formOptions.withIds);
   const { set: setDirty, has: isDirty } = useCache();
   const callbacks = useCache();
-
   const devWarnings = useCache();
 
   function warn(key, type, message) {
@@ -185,6 +185,12 @@ export default function useFormState(initialState, options) {
         if (!hasValueInState) {
           setInitialValue();
         }
+
+        // auto populating default values of touched
+        if (formState.current.touched[name] == null) {
+          formState.setTouched({ [name]: false });
+        }
+
         /**
          * Since checkbox and radio inputs have their own user-defined values,
          * and since checkbox inputs can be either an array or a boolean,
@@ -258,6 +264,7 @@ export default function useFormState(initialState, options) {
          * A) when it's either touched for the first time
          * B) when it's marked as dirty due to a value change
          */
+        /* istanbul ignore else */
         if (!formState.current.touched[name] || isDirty(name)) {
           validate(e);
           setDirty(name, false);
@@ -281,7 +288,10 @@ export default function useFormState(initialState, options) {
   );
 
   return [
-    formState.current,
+    {
+      ...formState.current,
+      ...formState.controls,
+    },
     {
       ...inputPropsCreators,
       [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),

@@ -10,6 +10,9 @@ describe('useFormState API', () => {
         validity: {},
         touched: {},
         errors: {},
+        clear: expect.any(Function),
+        setField: expect.any(Function),
+        clearField: expect.any(Function),
       },
       expect.any(Object),
     ]);

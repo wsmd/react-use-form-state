@@ -23,6 +23,9 @@ interface FormState<T, E = StateErrors<T, string>> {
   validity: StateValidity<T>;
   touched: StateValidity<T>;
   errors: E;
+  clear(): void;
+  setField<K extends keyof T>(name: K, value: T[K]): void;
+  clearField(name: keyof T): void;
 }
 
 interface FormOptions<T> {
@@ -32,6 +35,7 @@ interface FormOptions<T> {
     nextStateValues: StateValues<T>,
   ): void;
   onBlur(event: React.FocusEvent<InputElement>): void;
+  onClear(): void;
   onTouched(event: React.FocusEvent<InputElement>): void;
   withIds: boolean | ((name: string, value?: string) => string);
 }

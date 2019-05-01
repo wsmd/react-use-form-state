@@ -5,6 +5,12 @@
 </h1>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/react-use-form-state">
+    <img src="https://img.shields.io/npm/v/react-use-form-state.svg" alt="Current Release" />
+  </a>
+  <a href="https://www.npmjs.com/package/react-use-form-state">
+    <img src="https://badgen.net/npm/dt/react-use-form-state" alt="Downloads" />
+  </a>
   <a href="https://travis-ci.org/wsmd/react-use-form-state">
     <img src="https://travis-ci.org/wsmd/react-use-form-state.svg?branch=master" alt="CI Build">
   </a>
@@ -13,12 +19,6 @@
   </a>
   <a href="https://github.com/wsmd/react-use-form-state/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/wsmd/react-use-form-state.svg" alt="Licence">
-  </a>
-  <a href="https://www.npmjs.com/package/react-use-form-state">
-    <img src="https://img.shields.io/npm/v/react-use-form-state.svg" alt="Current Release" />
-  </a>
-  <a href="https://www.npmjs.com/package/react-use-form-state">
-    <img src="https://badgen.net/npm/dt/react-use-form-state" alt="Downloads" />
   </a>
 </p>
 
@@ -37,6 +37,8 @@
   - [Without Using a `<form />` Element](#without-using-a-form--element)
   - [Labels](#labels)
   - [Custom Controls](#custom-controls)
+  - [Updating Fields Manually](#updating-fields-manually)
+  - [Resetting The From State](#resetting-the-from-state)
 - [Working with TypeScript](#working-with-typescript)
 - [API](#api)
   - [`initialState`](#initialstate)
@@ -44,6 +46,7 @@
     - [`formOptions.onBlur`](#formoptionsonblur)
     - [`formOptions.onChange`](#formoptionsonchange)
     - [`formOptions.onTouched`](#formoptionsontouched)
+    - [`formOptions.onClear`](#formoptionsonclear)
     - [`formOptions.withIds`](#formoptionswithids)
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
@@ -79,10 +82,15 @@ Please note that `react-use-form-state` requires `react@^16.8.0` as a peer depen
 ```jsx
 import { useFormState } from 'react-use-form-state';
 
-export default function SignUpForm() {
+export default function SignUpForm({ onSubmit }) {
   const [formState, { text, email, password, radio }] = useFormState();
+
+  function handleSubmit(e) {
+    // ...
+  }
+
   return (
-    <form onSubmit={() => console.log(formState)}>
+    <form onSubmit={handleSubmit}>
       <input {...text('name')} />
       <input {...email('email')} required />
       <input {...password('password')} required minLength="8" />
@@ -93,31 +101,34 @@ export default function SignUpForm() {
 }
 ```
 
-From the example above, as the user fills in the form, `formState` will look something like this:
+From the example above, as the user fills in the form, the `formState` object will look something like this:
 
 ```js
 {
-  "values": {
-    "name": "Mary Poppins",
-    "email": "mary@example.com",
-    "password": "1234",
-    "plan": "free",
+  values: {
+    name: 'Mary Poppins',
+    email: 'mary@example.com',
+    password: '1234',
+    plan: 'free',
   },
-  "touched": {
-    "name": true,
-    "email": true,
-    "password": true,
-    "plan": true,
+  touched: {
+    name: true,
+    email: true,
+    password: true,
+    plan: true,
   },
-  "validity": {
-    "name": true,
-    "email": true,
-    "password": false,
-    "plan": true,
+  validity: {
+    name: true,
+    email: true,
+    password: false,
+    plan: true,
   },
-  "errors": {
-    "password": "Please lengthen this text to 8 characters or more",
-  }
+  errors: {
+    password: 'Please lengthen this text to 8 characters or more',
+  },
+  clear: Function,
+  clearField: Function,
+  setField: Function,
 }
 ```
 
@@ -350,6 +361,50 @@ function Widget() {
 }
 ```
 
+### Updating Fields Manually
+
+There are cases where you may want to update the value of an input manually without user interaction. To do so, the `formState.setField` method can be used.
+
+```js
+function Form() {
+  const [formState, { text }] = useFormState();
+
+  function setNameField() {
+    // manually setting the value of the "name" input
+    formState.setField('name', 'Mary Poppins');
+  }
+
+  return (
+    <>
+      <input {...text('name')} readOnly />
+      <button onClick={setNameField}>Set Name</button>
+    </>
+  )
+}
+```
+
+Please note that when `formState.setField` is called, any existing errors that might have been set due to previous interactions from the user will be cleared, and both of the `validity` and the `touched` states of the input will be set to `true`.
+
+It's also possible to clear a single input's value using `formState.clearField`.
+
+### Resetting The From State
+
+All fields in the form can be cleared all at once at any time using `formState.clear`.
+
+```js
+function Form() {
+  const [formState, { text, email }] = useFormState();
+  return (
+    <>
+      <input {...text("first_name")} />
+      <input {...text("last_name")} />
+      <input {...email("email")} />
+      <button onClick={formState.clear}>Clear All Fields</button>
+    </>
+  );
+}
+```
+
 ## Working with TypeScript
 
 When working with TypeScript, the compiler needs to know what values and inputs `useFormState` is expected to be working with.
@@ -401,7 +456,9 @@ import { useFormState } from 'react-use-form-state';
 
 function FormComponent()
   const [formState, inputs] = useFormState(initialState, formOptions);
-  // ...
+  return (
+    // ...
+  )
 }
 ```
 
@@ -460,6 +517,20 @@ const [formState, inputs] = useFormState(null, {
 });
 ```
 
+#### `formOptions.onClear`
+
+A function that gets called after calling `formState.clear` indicating that all fields in the form state are cleared successfully.
+
+```js
+const [formState, inputs] = useFormState(null, {
+  onClear() {
+    // form state was cleared successfully
+  }
+});
+
+formState.clear(); // clearing the form state
+```
+
 #### `formOptions.withIds`
 
 Indicates whether `useFormState` should generate and pass an `id` attribute to its fields. This is helpful when [working with labels](#labels-and-ids).
@@ -497,29 +568,38 @@ The first item returned by `useFormState`.
 const [formState, inputs] = useFormState();
 ```
 
-An object describing the form state that updates during subsequent re-renders.
-
-Form state consists of three nested objects:
-
-- `values`: an object holding the state of each input being rendered.
-- `validity`: an object indicating whether the value of each input is valid.
-- `errors`: an object holding all errors resulting from input validations.
-- `touched`: an object indicating whether the input was touched (focused) by the user.
+An object containing the form state that updates during subsequent re-renders. It also include methods to update the form state manually.
 
 ```ts
 formState = {
+  // an object holding the values of all input being rendered
   values: {
-    [inputName: string]: string | string[] | boolean,
+    [name: string]: string | string[] | boolean,
   },
+
+  // an object indicating whether the value of each input is valid
   validity: {
-    [inputName: string]?: boolean,
+    [name: string]?: boolean,
   },
+
+  // an object holding all errors resulting from input validations
   errors: {
-    [input: name]?: any,
+    [name: string]?: any,
   },
+
+  // an object indicating whether the input was touched (focused) by the user
   touched: {
-    [inputName: string]?: boolean,
+    [name: string]?: boolean,
   },
+
+  // clears all fields in the form
+  clear(): void,
+
+  // clears the state of an input
+  clearField(name: string): void,
+
+  // updates the value of an input
+  setField(name: string, value: string): void,,
 }
 ```
 
