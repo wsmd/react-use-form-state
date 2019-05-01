@@ -46,6 +46,8 @@
     - [`formOptions.onBlur`](#formoptionsonblur)
     - [`formOptions.onChange`](#formoptionsonchange)
     - [`formOptions.onTouched`](#formoptionsontouched)
+    - [`formOptions.onClear`](#formoptionsonclear)
+    - [`formOptions.onReset`](#formoptionsonreset)
     - [`formOptions.withIds`](#formoptionswithids)
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
@@ -519,6 +521,34 @@ const [formState, inputs] = useFormState(null, {
     const { name, value, ...target } = e.target;
   }
 });
+```
+
+#### `formOptions.onClear`
+
+A function that gets called after calling `formState.clear` indicating that all fields in the form state are cleared successfully.
+
+```js
+const [formState, inputs] = useFormState(null, {
+  onClear() {
+    // form state was cleared successfully
+  }
+});
+
+formState.clear(); // clearing the form state
+```
+
+#### `formOptions.onReset`
+
+A function that gets called after calling `formState.reset` indicating that all fields in the form state are set to their initial values.
+
+```js
+const [formState, inputs] = useFormState(null, {
+  onReset() {
+    // form state was reset successfully
+  }
+});
+
+formState.reset(); // resetting the form state
 ```
 
 #### `formOptions.withIds`

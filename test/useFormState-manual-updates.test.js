@@ -28,6 +28,7 @@ describe('useFormState manual updates', () => {
   });
 
   it('clears the entire all form fields using form.clear', () => {
+    const onClear = jest.fn();
     const { root, formState, change, click } = renderWithFormState(
       ([, input]) => (
         <div>
@@ -37,6 +38,8 @@ describe('useFormState manual updates', () => {
           <input {...input.checkbox('role', 'user')} />
         </div>
       ),
+      null,
+      { onClear },
     );
 
     change({ value: 'bruce' }, root.childNodes[0]);
@@ -54,9 +57,11 @@ describe('useFormState manual updates', () => {
       last: '',
       role: [],
     });
+    expect(onClear).toHaveBeenCalled();
   });
 
   it('resets the entire all form fields to their initial values using form.reset', () => {
+    const onReset = jest.fn();
     const initialState = {
       first: 'waseem',
       last: 'dahman',
@@ -73,6 +78,7 @@ describe('useFormState manual updates', () => {
         </div>
       ),
       initialState,
+      { onReset },
     );
 
     change({ value: 'bruce' }, root.childNodes[0]);
@@ -86,6 +92,7 @@ describe('useFormState manual updates', () => {
 
     formState.current.reset();
     expect(formState.current.values).toEqual(initialState);
+    expect(onReset).toHaveBeenCalled();
   });
 
   it('sets the value of an input programmatically using from.setField', () => {
