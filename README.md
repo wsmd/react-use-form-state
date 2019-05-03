@@ -180,7 +180,7 @@ export default function RentCarForm() {
 
 ### Advanced Input Options
 
-`useFormState` provides a quick and simple API to get started with building a from and managing its state. It also supports [HTML5 from validation](https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Form_validation) out of the box.
+`useFormState` provides a quick and simple API to get started with building a from and managing its state. It also supports [HTML5 form validation](https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Form_validation) out of the box.
 
 ```jsx
 <input {...password('password')} required minLength="8" />
