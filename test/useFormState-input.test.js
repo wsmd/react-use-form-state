@@ -481,7 +481,7 @@ describe('Input blur behavior', () => {
     expect(formState.current).toEqual(
       expect.objectContaining({
         values: { name: '' },
-        validity: { name: true },
+        validity: {},
         errors: {},
         touched: { name: true },
       }),
@@ -517,9 +517,9 @@ describe('Input blur behavior', () => {
     expect(formState.current.touched.value).toEqual(true);
   });
 
-  it('marks input as invalid on blur', () => {
+  it('validates on blur when validateOnBlur=true', () => {
     const { blur, formState } = renderWithFormState(([, { text }]) => (
-      <input {...text('name')} required />
+      <input {...text({ name: 'name', validateOnBlur: true })} required />
     ));
     blur();
     expect(formState.current).toEqual(
@@ -529,6 +529,54 @@ describe('Input blur behavior', () => {
         errors: {
           name: expect.any(String),
         },
+        touched: { name: true },
+      }),
+    );
+  });
+
+  it('does not validate on blur when validateOnBlur!=true', () => {
+    const { blur, formState } = renderWithFormState(([, { text }]) => (
+      <input {...text({ name: 'name' })} required />
+    ));
+    blur();
+    expect(formState.current).toEqual(
+      expect.objectContaining({
+        values: { name: '' },
+        validity: {},
+        errors: {},
+        touched: { name: true },
+      }),
+    );
+  });
+
+  it('raw validates on blur when validateOnBlur=true', () => {
+    const { blur, formState } = renderWithFormState(([, { raw }]) => (
+      <input
+        {...raw({ name: 'name', validateOnBlur: true, validate: () => 'fail' })}
+        required
+      />
+    ));
+    blur();
+    expect(formState.current).toEqual(
+      expect.objectContaining({
+        values: { name: '' },
+        validity: { name: false },
+        errors: { name: 'fail' },
+        touched: { name: true },
+      }),
+    );
+  });
+
+  it('raw does not validate on blur when validateOnBlur!=true', () => {
+    const { blur, formState } = renderWithFormState(([, { raw }]) => (
+      <input {...raw({ name: 'name' })} required />
+    ));
+    blur();
+    expect(formState.current).toEqual(
+      expect.objectContaining({
+        values: { name: '' },
+        validity: {},
+        errors: {},
         touched: { name: true },
       }),
     );

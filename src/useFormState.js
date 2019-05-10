@@ -28,10 +28,11 @@ export default function useFormState(initialState, options) {
 
   const formState = useState({ initialState, ...formOptions });
   const { getIdProp } = useInputId(formOptions.withIds);
-  const { set: setDirty, has: isDirty } = useCache();
+  const { set: setDirty } = useCache();
   const devWarnings = useCache();
 
   function warn(key, type, message) {
+    /* istanbul ignore else */
     if (!devWarnings.has(`${type}:${key}`)) {
       devWarnings.set(`${type}:${key}`, true);
       // eslint-disable-next-line no-console
@@ -109,7 +110,7 @@ export default function useFormState(initialState, options) {
 
     function validate(
       e,
-      value = isRaw ? undefined : e.target.value,
+      value = isRaw ? e : e.target.value,
       values = formState.current.values,
     ) {
       let error;
@@ -256,16 +257,7 @@ export default function useFormState(initialState, options) {
         inputOptions.onBlur(e);
         formOptions.onBlur(e);
 
-        /**
-         * Limiting input validation on blur to:
-         * A) when it's either touched for the first time
-         * B) when it's marked as dirty due to a value change
-         */
-        /* istanbul ignore else */
-        if (!formState.current.touched[name] || isDirty(name)) {
-          validate(e);
-          setDirty(name, false);
-        }
+        if (inputOptions.validateOnBlur) validate(e);
       },
       ...getIdProp('id', name, ownValue),
     };
