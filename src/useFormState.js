@@ -112,7 +112,7 @@ export default function useFormState(initialState, options) {
 
     function validate(
       e,
-      value = isRaw ? undefined : e.target.value,
+      value = isRaw ? formState.current.values[name] : e.target.value,
       values = formState.current.values,
     ) {
       let error;
