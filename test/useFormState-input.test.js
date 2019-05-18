@@ -534,3 +534,23 @@ describe('Input blur behavior', () => {
     );
   });
 });
+
+describe('Input props are memoized', () => {
+  it('does not cause re-render of memoized components', () => {
+    const renderCheck = jest.fn(() => true);
+    const MemoInput = React.memo(
+      props => renderCheck() && <input {...props} />,
+    );
+    const { change, root } = renderWithFormState(([, { text }]) => (
+      <div>
+        <input {...text('foo')} />
+        <MemoInput {...text('bar')} />
+      </div>
+    ));
+    change({ value: 'a' }, root.childNodes[0]);
+    change({ value: 'b' }, root.childNodes[0]);
+    expect(renderCheck).toHaveBeenCalledTimes(1);
+    change({ value: 'c' }, root.childNodes[1]);
+    expect(renderCheck).toHaveBeenCalledTimes(2);
+  });
+});
