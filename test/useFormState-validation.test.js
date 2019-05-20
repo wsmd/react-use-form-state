@@ -109,6 +109,27 @@ describe('passing a custom input validate function', () => {
     expect(formState.current.errors).not.toHaveProperty('name');
   });
 
+  it('handles validation of raw values on blur', () => {
+    const validate = jest.fn(val => ((val && val.foo === 'pass') ? true : 'wrong!'));
+    let onChange;
+    let onBlur;
+    const { formState } = renderWithFormState(([, { raw }]) => {
+      const inputProps = raw({ name: 'name', validate });
+      ({ onChange, onBlur } = inputProps);
+      return <input {...inputProps} />;
+    });
+
+    onChange({ foo: 'fail' });
+    onBlur();
+    expect(formState.current.validity).toHaveProperty('name', false);
+    expect(formState.current.errors).toHaveProperty('name', 'wrong!');
+
+    onChange({ foo: 'pass' });
+    onBlur();
+    expect(formState.current.validity).toHaveProperty('name', true);
+    expect(formState.current.errors).not.toHaveProperty('name');
+  });
+
   it.each([
     ['empty array', []],
     ['empty object', {}],
