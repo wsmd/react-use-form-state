@@ -43,6 +43,10 @@ export function useState({ initialState, onClear }) {
       setField(name, value) {
         setField(name, value, true, true);
       },
+      setFieldError(name, error) {
+        setValidity({ [name]: false });
+        setError({ [name]: error });
+      },
     },
   };
 }
