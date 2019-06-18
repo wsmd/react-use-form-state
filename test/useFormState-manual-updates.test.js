@@ -55,4 +55,14 @@ describe('useFormState manual updates', () => {
     formState.current.setField('name', 'waseem');
     expect(formState.current.values.name).toBe('waseem');
   });
+
+  it('sets the error of an input and invalidates the input programmatically using from.setFieldError', () => {
+    const { formState } = renderWithFormState(([, input]) => (
+      <input {...input.text('name')} />
+    ));
+
+    formState.current.setFieldError('name', 'incorrect name');
+    expect(formState.current.validity.name).toBe(false);
+    expect(formState.current.errors.name).toBe('incorrect name');
+  });
 });

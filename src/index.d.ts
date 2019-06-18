@@ -25,6 +25,7 @@ interface FormState<T, E = StateErrors<T, string>> {
   errors: E;
   clear(): void;
   setField<K extends keyof T>(name: K, value: T[K]): void;
+  setFieldError(name: keyof T, error: string): void;
   clearField(name: keyof T): void;
 }
 
