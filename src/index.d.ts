@@ -18,6 +18,12 @@ interface UseFormStateHook {
 
 export const useFormState: UseFormStateHook;
 
+type SetFieldsOptions = {
+  touched?: StateValidity<boolean>;
+  validity?: StateValidity<boolean>;
+  errors?: StateErrors<string, string>;
+};
+
 interface FormState<T, E = StateErrors<T, string>> {
   values: StateValues<T>;
   validity: StateValidity<T>;
@@ -25,6 +31,7 @@ interface FormState<T, E = StateErrors<T, string>> {
   errors: E;
   clear(): void;
   setField<K extends keyof T>(name: K, value: T[K]): void;
+  setFields(fieldValues: StateValues<T>, options?: SetFieldsOptions): void;
   setFieldError(name: keyof T, error: string): void;
   clearField(name: keyof T): void;
 }

@@ -23,6 +23,10 @@ export function useState({ initialState, onClear }) {
 
   const clearField = name => setField(name);
 
+  function setAll(fields, value) {
+    return fields.reduce((obj, name) => Object.assign(obj, {[name]: value}), {});
+  }
+
   return {
     /**
      * @type {{ values, touched, validity, errors }}
@@ -42,6 +46,60 @@ export function useState({ initialState, onClear }) {
       },
       setField(name, value) {
         setField(name, value, true, true);
+      },
+      setFields(fieldValues, options = {touched: false, validity: true}) {
+        setValues(fieldValues);
+
+        if (options) {
+          const fields = Object.keys(fieldValues);
+
+          if (options.touched !== undefined) {
+            // We're setting the touched state of all fields at once:
+            if (typeof options.touched === "boolean") {
+              setTouched(setAll(fields, options.touched));
+            } else {
+              setTouched(options.touched);
+            }
+          }
+
+          if (options.validity !== undefined) {
+            if (typeof options.validity === "boolean") {
+              // We're setting the validity of all fields at once:
+              setValidity(setAll(fields, options.validity));
+              if (options.validity) {
+                // All fields are valid, clear the errors:
+                setError(setAll(fields, undefined));
+              }
+            } else {
+              setValidity(options.validity);
+
+              if (options.errors === undefined) {
+                // Clear the errors for valid fields:
+                const errorFields = Object.entries(options.validity).reduce((errorsObj, [name, isValid]) => {
+                  if (isValid) {
+                    return Object.assign({}, errorsObj || {}, {[name]: undefined});
+                  }
+                  return errorsObj;
+                }, null);
+
+                if (errorFields) {
+                  setError(errorFields);
+                }
+              }
+            }
+          }
+
+          if (options.errors) {
+            // Not logical to set the same error for all fields so has to be an object.
+            setError(options.errors);
+
+            if (options.validity === undefined) {
+              // Fields with errors are not valid:
+              setValidity(setAll(Object.keys(options.errors), false));
+            }
+          }
+        }
+
       },
       setFieldError(name, error) {
         setValidity({ [name]: false });
