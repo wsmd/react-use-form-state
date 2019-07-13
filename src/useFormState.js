@@ -17,7 +17,7 @@ import {
   CONSOLE_TAG,
 } from './constants';
 
-const defaultFromOptions = {
+const defaultFormOptions = {
   onChange: noop,
   onBlur: noop,
   onTouched: noop,
@@ -26,7 +26,7 @@ const defaultFromOptions = {
 };
 
 export default function useFormState(initialState, options) {
-  const formOptions = { ...defaultFromOptions, ...options };
+  const formOptions = { ...defaultFormOptions, ...options };
 
   const formState = useState({ initialState, ...formOptions });
   const { getIdProp } = useInputId(formOptions.withIds);
