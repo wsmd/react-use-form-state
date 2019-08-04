@@ -388,7 +388,9 @@ function Form() {
 
 Please note that when `formState.setField` is called, any existing errors that might have been set due to previous interactions from the user will be cleared, and both of the `validity` and the `touched` states of the input will be set to `true`.
 
-It's also possible to set the error value for a single input using `formState.setFieldError` and to clear a single input's value _or_ resetting to its initial state if provided using `formState.clearField` and `formState.resetField` respectively.
+It's also possible to clear a single input's value or to reset it to its initial value, if provided, using `formState.clearField` and `formState.resetField` respectively.
+
+As a convenience you can also set the error value for a single input using `formState.setFieldError`.
 
 ### Resetting The From State
 
