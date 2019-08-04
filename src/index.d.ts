@@ -23,10 +23,12 @@ interface FormState<T, E = StateErrors<T, string>> {
   validity: StateValidity<T>;
   touched: StateValidity<T>;
   errors: E;
+  reset(): void;
   clear(): void;
   setField<K extends keyof T>(name: K, value: T[K]): void;
   setFieldError(name: keyof T, error: string): void;
   clearField(name: keyof T): void;
+  resetField(name: keyof T): void;
 }
 
 interface FormOptions<T> {
@@ -37,6 +39,7 @@ interface FormOptions<T> {
   ): void;
   onBlur(event: React.FocusEvent<InputElement>): void;
   onClear(): void;
+  onReset(): void;
   onTouched(event: React.FocusEvent<InputElement>): void;
   withIds: boolean | ((name: string, value?: string) => string);
 }
