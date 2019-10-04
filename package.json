@@ -80,5 +80,8 @@
     "rollup": "^0.66.6",
     "rollup-plugin-babel": "^4.0.3",
     "typescript": "^3.3.3333"
+  },
+  "dependencies": {
+    "lodash": "^4.17.15"
   }
 }
