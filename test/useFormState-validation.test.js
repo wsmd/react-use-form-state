@@ -11,7 +11,7 @@ describe('passing a custom input validate function', () => {
       <input {...text({ name: 'name', validate })} />
     ));
 
-    expect(validate).not.toHaveBeenCalledWith();
+    expect(validate).not.toHaveBeenCalled();
     change({ value: 'test' });
     expect(validate).toHaveBeenCalledWith(
       'test',
@@ -31,7 +31,25 @@ describe('passing a custom input validate function', () => {
     ));
 
     change({ value: 'test' });
-    expect(validate).not.toHaveBeenCalledWith();
+    expect(validate).not.toHaveBeenCalled();
+    blur();
+    expect(validate).toHaveBeenCalledWith(
+      'test',
+      { name: 'test' },
+      INPUT_CHANGE_EVENT,
+    );
+  });
+
+  it('calls input validate function on blur with validateOnBlur on formState', () => {
+    const validate = jest.fn(() => false);
+    const { change, blur } = renderWithFormState(
+      ([, { text }]) => <input {...text({ name: 'name', validate })} />,
+      {},
+      { validateOnBlur: true },
+    );
+
+    change({ value: 'test' });
+    expect(validate).not.toHaveBeenCalled();
     blur();
     expect(validate).toHaveBeenCalledWith(
       'test',
