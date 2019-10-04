@@ -1,5 +1,5 @@
 import { useReducer, useRef } from 'react';
-import { isFunction } from './utils';
+import { isFunction, omit, isEqualByValue } from './utils';
 import { useCache } from './useCache';
 
 function stateReducer(state, newState) {
@@ -13,14 +13,18 @@ export function useState({ initialState, onClear, onReset }) {
   const [touched, setTouched] = useReducer(stateReducer, {});
   const [validity, setValidity] = useReducer(stateReducer, {});
   const [errors, setError] = useReducer(stateReducer, {});
+  const [pristine, setPristine] = useReducer(stateReducer, {});
 
-  state.current = { values, touched, validity, errors };
+  state.current = { values, touched, validity, errors, pristine };
 
   function setField(name, value, inputValidity, inputTouched, inputError) {
     setValues({ [name]: value });
     setTouched({ [name]: inputTouched });
     setValidity({ [name]: inputValidity });
     setError({ [name]: inputError });
+
+    const isPristine = isEqualByValue(initialValues.get(name), value);
+    setPristine(isPristine ? omit(name) : { [name]: false });
   }
 
   const clearField = name => setField(name);
@@ -28,7 +32,7 @@ export function useState({ initialState, onClear, onReset }) {
 
   return {
     /**
-     * @type {{ values, touched, validity, errors }}
+     * @type {{ values, touched, validity, errors, pristine }}
      */
     get current() {
       return state.current;
@@ -37,6 +41,7 @@ export function useState({ initialState, onClear, onReset }) {
     setTouched,
     setValidity,
     setError,
+    setPristine,
     initialValues,
     controls: {
       clearField,

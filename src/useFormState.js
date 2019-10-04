@@ -1,4 +1,11 @@
-import { toString, noop, omit, isFunction, isEmpty } from './utils';
+import {
+  toString,
+  noop,
+  omit,
+  isFunction,
+  isEmpty,
+  isEqualByValue,
+} from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useCache } from './useCache';
@@ -245,6 +252,13 @@ export default function useFormState(initialState, options) {
         if (inputOptions.touchOnChange) {
           touch(e);
         }
+
+        const isPristine = isEqualByValue(
+          formState.initialValues.get(name),
+          value,
+        );
+
+        formState.setPristine(isPristine ? omit(name) : { [name]: false });
 
         const partialNewState = { [name]: value };
         const newValues = { ...formState.current.values, ...partialNewState };
