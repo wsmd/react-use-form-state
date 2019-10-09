@@ -251,7 +251,7 @@ export default function useFormState(initialState, options) {
 
         formOptions.onChange(e, formState.current.values, newValues);
 
-        if (!inputOptions.validateOnBlur) {
+        if (!formOptions.validateOnBlur && !inputOptions.validateOnBlur) {
           validate(e, value, newValues);
         }
 
