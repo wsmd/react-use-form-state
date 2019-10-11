@@ -71,12 +71,24 @@ describe('useFormState pristine', () => {
     expect(formState.current.pristine).not.toHaveProperty('name');
   });
 
+  it('calls options.pristinify when an input changes', () => {
+    const pristinifyHandler = jest.fn();
+    const { change } = renderWithFormState(([, { text }]) => (
+      <input {...text({ name: 'name', pristinify: pristinifyHandler })} />
+    ));
+    change({ value: 'someval' });
+    expect(pristinifyHandler).toHaveBeenCalledTimes(1);
+  });
+
   it('handles pristine on raw  default value', () => {
     const initialData = { name: { foo: 'someval' } };
-
+    const isEqual = (a, b) => a.foo === b.foo;
     let onChange;
     const { formState } = renderWithFormState(([, { raw }]) => {
-      const inputProps = raw({ name: 'name' });
+      const inputProps = raw({
+        name: 'name',
+        pristinify: (initialValue, value) => isEqual(initialValue, value),
+      });
       ({ onChange } = inputProps);
       return <input {...inputProps} />;
     }, initialData);

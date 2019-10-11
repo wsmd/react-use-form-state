@@ -1,5 +1,3 @@
-import { isEqualWith } from 'lodash';
-
 /**
  * Returns a function that can be called with an object. The return value of the
  * new function is a copy of the object excluding the key passed initially.
@@ -68,9 +66,23 @@ export function isEmpty(value) {
 }
 
 // We can have initial values undefined, but input makes them empty strings after edit/clear. We will consider those equal.
+
 const withException = (original, current) =>
   (original === undefined || original === null) && current === ''
     ? true
     : undefined;
+
+function baseIsEqual(value, other) {
+  if (value === other) {
+    return true;
+  }
+
+  return false;
+}
+
+function isEqualWith(value, other, customizer) {
+  const result = customizer ? customizer(value, other) : undefined;
+  return result === undefined ? baseIsEqual(value, other) : !!result;
+}
 
 export const isEqualByValue = (a, b) => isEqualWith(a, b, withException);

@@ -257,6 +257,43 @@ If the input's value is invalid based on the rules specified above, the form sta
 
 If the `validate()` method is not specified, `useFormState` will fallback to the HTML5 constrains validation to determine the validity of the input along with the appropriate error message.
 
+### Pristine - if values have been changed
+
+`useFormState` also returns object `pristine` with fields that are not pristine. Eg: if user edits input field and changes it back manually: 'car'=>'car2'=>'car'
+
+And this can be used for Save button, to disable it, if there are no actual changes:
+
+```
+const isPristine = isEmpty(formState.pristine);
+<Button disabled={isPristine} onClick={handleClick}>Save</Button>
+```
+
+Checking if field is pristine is done with simple equality `===`, with some exceptions: Field is considered pristine if initial value is null or undefined and later value is empty string.
+
+This can be overriden per field by providing pristinify function:
+
+Value will always pristine:
+
+```jsx
+<input
+  {...text({
+    name: 'name',
+    pristinify: () => true,
+  })}
+/>
+```
+
+Use other equals function:
+
+```jsx
+<input
+  {...raw({
+    name: 'userObj',
+    pristinify: (initialValue, value) => isEqualDeep(initialValue, value),
+  })}
+/>
+```
+
 ### Without Using a `<form />` Element
 
 `useFormState` is not limited to actual forms. It can be used anywhere inputs are used.
