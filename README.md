@@ -270,7 +270,7 @@ const isPristine = isEmpty(formState.pristine);
 
 Checking if field is pristine is done with simple equality `===`, with some exceptions: Field is considered pristine if initial value is null or undefined and later value is empty string.
 
-This can be overriden per field by providing pristinify function:
+This can be overriden per field by providing compare function:
 
 Value will always pristine:
 
@@ -278,7 +278,7 @@ Value will always pristine:
 <input
   {...text({
     name: 'name',
-    pristinify: () => true,
+    compare: () => true,
   })}
 />
 ```
@@ -289,7 +289,7 @@ Use other equals function:
 <input
   {...raw({
     name: 'userObj',
-    pristinify: (initialValue, value) => isEqualDeep(initialValue, value),
+    compare: (initialValue, value) => isEqualDeep(initialValue, value),
   })}
 />
 ```

@@ -72,17 +72,9 @@ const withException = (original, current) =>
     ? true
     : undefined;
 
-function baseIsEqual(value, other) {
-  if (value === other) {
-    return true;
-  }
-
-  return false;
-}
-
 function isEqualWith(value, other, customizer) {
   const result = customizer ? customizer(value, other) : undefined;
-  return result === undefined ? baseIsEqual(value, other) : !!result;
+  return result === undefined ? value === other : !!result;
 }
 
 export const isEqualByValue = (a, b) => isEqualWith(a, b, withException);

@@ -254,8 +254,8 @@ export default function useFormState(initialState, options) {
         }
 
         let isPristine;
-        if (isFunction(inputOptions.pristinify)) {
-          isPristine = inputOptions.pristinify(
+        if (isFunction(inputOptions.compare)) {
+          isPristine = inputOptions.compare(
           formState.initialValues.get(name),
           value,
         );
