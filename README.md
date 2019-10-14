@@ -392,6 +392,65 @@ It's also possible to clear a single input's value or to reset it to its initial
 
 As a convenience you can also set the error value for a single input using `formState.setFieldError`.
 
+### Updating multiple fields at once
+
+Updating the value of multiple fields in the form at once is possible via the `formState.setFields` method.
+
+This could come in handy if you're, for example, loading data from the server.
+
+```js
+function Form() {
+  const [formState, { text, email }] = useFormState();
+
+  React.useEffect(function loadDataFromServer() {
+    // we'll simulate some delay with a setTimeout. This could be your fetch() request:
+    const timer = setTimeout(() => {
+      formState.setFields({
+        name: "John",
+        age: 24,
+        email: "john@example.com" 
+      });
+    },  1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <>
+      <input {...text('name')} readOnly />
+      <input {...text('age')} readOnly />
+      <input {...email('email')} readOnly />
+    </>
+  )
+}
+
+```
+
+`formState.setFields` has a second `options` argument which can be used to update the `touched`, `validity` and `errors` in the state.
+
+`touched` and `validity` can be a boolean value which applies that value to all fields for which a value is provided.
+
+```js
+// mark all fields as valid (clears all errors):
+formState.setFields(newValues, {
+  validity: true
+});
+
+// marks only "name" as invalid:
+formState.setFields(newValues, {
+  validity: {
+    name: false
+  },
+  errors: {
+    name: "Your name is required!"
+  }
+});
+
+// marks all fields as not touched:
+formState.setFields(newValues, {
+  touched: false
+});
+```
+
 ### Resetting The From State
 
 The form state can be cleared or reset back to its initial state if provided at any time using `formState.clear` and `formState.reset` respectively.
@@ -627,6 +686,9 @@ formState = {
 
   // updates the value of an input
   setField(name: string, value: string): void,
+
+  // updates multiple field values and (optionally) sets touched, validity and errors:
+  setFields(values: object, [options]: object): void,
 
   // sets the error of an input
   setFieldError(name: string, error: string): void,
