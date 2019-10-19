@@ -23,8 +23,16 @@ export function useState({ initialState, onClear, onReset }) {
     setError({ [name]: inputError });
   }
 
-  const clearField = name => setField(name);
-  const resetField = name => setField(name, initialValues.get(name));
+  const clearField = name => {
+    setField(name);
+  };
+
+  const resetField = name => {
+    setField(
+      name,
+      initialValues.has(name) ? initialValues.get(name) : initialState[name],
+    );
+  };
 
   return {
     /**
