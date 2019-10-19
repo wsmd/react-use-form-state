@@ -4,7 +4,7 @@ const defaultInputOptions = {
   onChange: identity,
   onBlur: noop,
   validate: null,
-  validateOnBlur: false,
+  validateOnBlur: undefined,
   touchOnChange: false,
 };
 

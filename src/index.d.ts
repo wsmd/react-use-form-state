@@ -41,6 +41,7 @@ interface FormOptions<T> {
   onClear(): void;
   onReset(): void;
   onTouched(event: React.FocusEvent<InputElement>): void;
+  validateOnBlur: boolean;
   withIds: boolean | ((name: string, value?: string) => string);
 }
 
