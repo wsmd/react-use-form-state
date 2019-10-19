@@ -1,10 +1,11 @@
+import { useRef } from 'react';
 import { toString, noop, omit, isFunction, isEmpty } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useCache } from './useCache';
 import { useState } from './useState';
 import {
-  TYPES,
+  INPUT_TYPES,
   SELECT,
   CHECKBOX,
   RADIO,
@@ -29,7 +30,7 @@ const defaultFormOptions = {
 export default function useFormState(initialState, options) {
   const formOptions = { ...defaultFormOptions, ...options };
 
-  const formState = useState({ initialState, ...formOptions });
+  const formState = useState({ initialState });
   const { getIdProp } = useInputId(formOptions.withIds);
   const { set: setDirty, has: isDirty } = useCache();
   const callbacks = useCache();
@@ -290,19 +291,39 @@ export default function useFormState(initialState, options) {
       : inputProps;
   };
 
-  const inputPropsCreators = TYPES.reduce(
-    (methods, type) => ({ ...methods, [type]: createPropsGetter(type) }),
-    {},
-  );
+  const formStateAPI = useRef({
+    clearField: formState.clearField,
+    resetField: formState.resetField,
+    setField(name, value) {
+      formState.setField(name, value, true, true);
+    },
+    setFieldError(name, error) {
+      formState.setValidity({ [name]: false });
+      formState.setError({ [name]: error });
+    },
+    clear() {
+      formState.forEach(formState.clearField);
+      formOptions.onClear();
+    },
+    reset() {
+      formState.forEach(formState.resetField);
+      formOptions.onReset();
+    },
+  });
 
-  return [
-    {
-      ...formState.current,
-      ...formState.controls,
-    },
-    {
-      ...inputPropsCreators,
-      [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
-    },
-  ];
+  // exposing current form state (e.g. values, touched, validity, etc)
+  // eslint-disable-next-line guard-for-in, no-restricted-syntax
+  for (const key in formState.current) {
+    formStateAPI.current[key] = formState.current[key];
+  }
+
+  const inputPropsCreators = {
+    [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
+  };
+
+  INPUT_TYPES.forEach(type => {
+    inputPropsCreators[type] = createPropsGetter(type);
+  });
+
+  return [formStateAPI.current, inputPropsCreators];
 }
