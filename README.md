@@ -48,6 +48,7 @@
     - [`formOptions.onTouched`](#formoptionsontouched)
     - [`formOptions.onClear`](#formoptionsonclear)
     - [`formOptions.onReset`](#formoptionsonreset)
+    - [`formOptions.validateOnBlur`](#formoptionsvalidateonblur)
     - [`formOptions.withIds`](#formoptionswithids)
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
@@ -551,6 +552,10 @@ const [formState, inputs] = useFormState(null, {
 });
  formState.reset(); // resetting the form state
 ```
+
+#### `formOptions.validateOnBlur`
+
+When set to `true`, all form fields will validated when the input loses focus. If not specified, the `validate` function of each input will be called on value change.
 
 #### `formOptions.withIds`
 

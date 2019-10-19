@@ -35,6 +35,7 @@ const [formState, input] = useFormState<FormFields>(initialState, {
     const { name, value } = e.target;
   },
   withIds: (name, value) => (value ? `${name}.${value.toLowerCase()}` : name),
+  validateOnBlur: true,
 });
 
 let name: string = formState.values.name;

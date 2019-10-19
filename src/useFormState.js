@@ -251,7 +251,11 @@ export default function useFormState(initialState, options) {
 
         formOptions.onChange(e, formState.current.values, newValues);
 
-        if (!formOptions.validateOnBlur && !inputOptions.validateOnBlur) {
+        const validateOnBlur = formOptions.validateOnBlur
+          ? inputOptions.validateOnBlur !== false
+          : inputOptions.validateOnBlur;
+
+        if (!validateOnBlur) {
           validate(e, value, newValues);
         }
 
