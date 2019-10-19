@@ -5,7 +5,7 @@ import { useInputId } from './useInputId';
 import { useCache } from './useCache';
 import { useState } from './useState';
 import {
-  TYPES,
+  INPUT_TYPES,
   SELECT,
   CHECKBOX,
   RADIO,
@@ -291,12 +291,7 @@ export default function useFormState(initialState, options) {
       : inputProps;
   };
 
-  const inputPropsCreators = TYPES.reduce(
-    (methods, type) => ({ ...methods, [type]: createPropsGetter(type) }),
-    {},
-  );
-
-  const API = useRef({
+  const formStateAPI = useRef({
     clearField: formState.clearField,
     resetField: formState.resetField,
     setField(name, value) {
@@ -319,14 +314,16 @@ export default function useFormState(initialState, options) {
   // exposing current form state (e.g. values, touched, validity, etc)
   // eslint-disable-next-line guard-for-in, no-restricted-syntax
   for (const key in formState.current) {
-    API.current[key] = formState.current[key];
+    formStateAPI.current[key] = formState.current[key];
   }
 
-  return [
-    API.current,
-    {
-      ...inputPropsCreators,
-      [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
-    },
-  ];
+  const inputPropsCreators = {
+    [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
+  };
+
+  INPUT_TYPES.forEach(type => {
+    inputPropsCreators[type] = createPropsGetter(type);
+  });
+
+  return [formStateAPI.current, inputPropsCreators];
 }

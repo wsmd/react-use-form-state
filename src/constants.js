@@ -24,7 +24,7 @@ export const LABEL = 'label';
  */
 export const DATETIME_LOCAL = 'datetime-local';
 
-export const TYPES = [
+export const INPUT_TYPES = [
   CHECKBOX,
   COLOR,
   DATE,
