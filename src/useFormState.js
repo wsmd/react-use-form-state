@@ -254,15 +254,10 @@ export default function useFormState(initialState, options) {
           touch(e);
         }
 
-        let isPristine;
-        if (isFunction(inputOptions.compare)) {
-          isPristine = inputOptions.compare(
-            formState.initialValues.get(name),
-            value,
-          );
-        } else {
-          isPristine = isEqualByValue(formState.initialValues.get(name), value);
-        }
+        const isPristine = inputOptions.compare(
+          formState.initialValues.get(name),
+          value,
+        );
 
         formState.setPristine(isPristine ? omit(name) : { [name]: false });
 
