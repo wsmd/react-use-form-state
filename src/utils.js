@@ -65,16 +65,11 @@ export function isEmpty(value) {
   return false;
 }
 
-// We can have initial values undefined, but input makes them empty strings after edit/clear. We will consider those equal.
+export function isEqualByValue(original, current) {
+  // We can have initial values undefined, but input makes them empty strings
+  // after edit/clear. We will consider those equal.
+  const isNullish =
+    (original === undefined || original === null) && current === '';
 
-const withException = (original, current) =>
-  (original === undefined || original === null) && current === ''
-    ? true
-    : undefined;
-
-function isEqualWith(value, other, customizer) {
-  const result = customizer ? customizer(value, other) : undefined;
-  return result === undefined ? value === other : !!result;
+  return isNullish || original === current;
 }
-
-export const isEqualByValue = (a, b) => isEqualWith(a, b, withException);
