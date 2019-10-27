@@ -49,4 +49,13 @@ describe('useFormState API', () => {
     const [formState] = result.current;
     expect(formState.values).toEqual(expect.objectContaining(initialState));
   });
+
+  it('persists reference to the formState object', () => {
+    const firstRenderResult = { current: null };
+    const { result, rerender } = renderHook(() => useFormState());
+    [firstRenderResult.current] = result.current;
+    rerender();
+    expect(result.current[0]).toBe(firstRenderResult.current);
+    expect(result.current[0].setField).toBe(firstRenderResult.current.setField);
+  });
 });

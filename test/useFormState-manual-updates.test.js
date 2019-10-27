@@ -95,6 +95,27 @@ describe('useFormState manual updates', () => {
     expect(onReset).toHaveBeenCalled();
   });
 
+  it('resets an un-mounted for field', () => {
+    const initialState = {
+      first: 'bruce',
+      last: 'wayne',
+    };
+
+    const { root, formState, change } = renderWithFormState(
+      ([, input]) => <input {...input.text('first')} />,
+      initialState,
+    );
+
+    change({ value: '' }, root);
+    expect(formState.current.values).toEqual({
+      first: '',
+      last: 'wayne',
+    });
+
+    formState.current.reset();
+    expect(formState.current.values).toEqual(initialState);
+  });
+
   it('sets the value of an input programmatically using from.setField', () => {
     const { formState } = renderWithFormState(([, input]) => (
       <input {...input.text('name')} />

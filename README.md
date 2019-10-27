@@ -48,6 +48,7 @@
     - [`formOptions.onTouched`](#formoptionsontouched)
     - [`formOptions.onClear`](#formoptionsonclear)
     - [`formOptions.onReset`](#formoptionsonreset)
+    - [`formOptions.validateOnBlur`](#formoptionsvalidateonblur)
     - [`formOptions.withIds`](#formoptionswithids)
   - [`[formState, inputs]`](#formstate-inputs)
     - [Form State](#form-state)
@@ -183,7 +184,7 @@ export default function RentCarForm() {
 
 ### Advanced Input Options
 
-`useFormState` provides a quick and simple API to get started with building a from and managing its state. It also supports [HTML5 form validation](https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Form_validation) out of the box.
+`useFormState` provides a quick and simple API to get started with building a form and managing its state. It also supports [HTML5 form validation](https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Form_validation) out of the box.
 
 ```jsx
 <input {...password('password')} required minLength="8" />
@@ -255,7 +256,7 @@ If the input's value is invalid based on the rules specified above, the form sta
 }
 ```
 
-If the `validate()` method is not specified, `useFormState` will fallback to the HTML5 constrains validation to determine the validity of the input along with the appropriate error message.
+If the `validate()` method is not specified, `useFormState` will fallback to the HTML5 constraints validation to determine the validity of the input along with the appropriate error message.
 
 ### Pristine - if values have been changed
 
@@ -588,6 +589,10 @@ const [formState, inputs] = useFormState(null, {
 });
  formState.reset(); // resetting the form state
 ```
+
+#### `formOptions.validateOnBlur`
+
+When set to `true`, all form fields will validated when the input loses focus. If not specified, the `validate` function of each input will be called on value change.
 
 #### `formOptions.withIds`
 

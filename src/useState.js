@@ -6,7 +6,7 @@ function stateReducer(state, newState) {
   return isFunction(newState) ? newState(state) : { ...state, ...newState };
 }
 
-export function useState({ initialState, onClear, onReset }) {
+export function useState({ initialState }) {
   const state = useRef();
   const initialValues = useCache();
   const [values, setValues] = useReducer(stateReducer, initialState || {});
@@ -27,13 +27,22 @@ export function useState({ initialState, onClear, onReset }) {
     setPristine(isPristine ? omit(name) : { [name]: false });
   }
 
-  const clearField = name => setField(name);
-  const resetField = name => setField(name, initialValues.get(name));
+  function clearField(name) {
+    setField(name);
+  }
+
+  function resetField(name) {
+    setField(
+      name,
+      initialValues.has(name) ? initialValues.get(name) : initialState[name],
+    );
+  }
+
+  function forEach(cb) {
+    Object.keys(state.current.values).forEach(cb);
+  }
 
   return {
-    /**
-     * @type {{ values, touched, validity, errors, pristine }}
-     */
     get current() {
       return state.current;
     },
@@ -41,26 +50,11 @@ export function useState({ initialState, onClear, onReset }) {
     setTouched,
     setValidity,
     setError,
+    setField,
     setPristine,
     initialValues,
-    controls: {
-      clearField,
-      resetField,
-      clear() {
-        Object.keys(state.current.values).forEach(clearField);
-        onClear();
-      },
-      reset() {
-        Object.keys(state.current.values).forEach(resetField);
-        onReset();
-      },
-      setField(name, value) {
-        setField(name, value, true, true);
-      },
-      setFieldError(name, error) {
-        setValidity({ [name]: false });
-        setError({ [name]: error });
-      },
-    },
+    resetField,
+    clearField,
+    forEach,
   };
 }

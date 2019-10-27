@@ -1,4 +1,4 @@
-// Type definitions for react-use-form-state 0.11.0
+// Type definitions for react-use-form-state 0.12.0
 // Project: https://github.com/wsmd/react-use-form-state
 // Definitions by: Waseem Dahman <https://github.com/wsmd>
 
@@ -41,6 +41,7 @@ interface FormOptions<T> {
   onClear(): void;
   onReset(): void;
   onTouched(event: React.FocusEvent<InputElement>): void;
+  validateOnBlur: boolean;
   withIds: boolean | ((name: string, value?: string) => string);
 }
 
