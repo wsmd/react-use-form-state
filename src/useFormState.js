@@ -1,12 +1,5 @@
 import { useRef } from 'react';
-import {
-  toString,
-  noop,
-  omit,
-  isFunction,
-  isEmpty,
-  isEqualByValue,
-} from './utils';
+import { toString, noop, omit, isFunction, isEmpty } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useCache } from './useCache';
