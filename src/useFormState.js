@@ -24,6 +24,7 @@ const defaultFormOptions = {
   onClear: noop,
   onReset: noop,
   onTouched: noop,
+  customProps: () => ({}),
   withIds: false,
 };
 
@@ -282,13 +283,19 @@ export default function useFormState(initialState, options) {
       ...getIdProp('id', name, ownValue),
     };
 
+    const customProps = formOptions.customProps(formState.current, name);
+
     return isRaw
       ? {
           onChange: inputProps.onChange,
           onBlur: inputProps.onBlur,
           value: inputProps.value,
+          ...customProps
         }
-      : inputProps;
+      : {
+          ...inputProps,
+          ...customProps
+        };
   };
 
   const formStateAPI = useRef({

@@ -554,3 +554,30 @@ describe('Input props are memoized', () => {
     expect(renderCheck).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('input type methods return custom props object', () => {
+  /**
+   * Supports customProps
+   */
+  it.each([
+    ...InputTypes.textLike,
+    ...InputTypes.numeric,
+    ...InputTypes.time,
+    'color',
+  ])('returns custom props for type "%s"', type => {
+    const { result } = renderHook(() => useFormState(null, {
+      customProps: (formState, name) => ({
+        isValid: formState.validity[name],
+        errorMessage: formState.errors[name],
+        plainString: "plainString",
+        one: 1
+      })
+    }));
+    expect(result.current[1][type]('input-name')).toEqual(expect.objectContaining({
+      isValid: undefined,
+      errorMessage: undefined,
+      plainString: "plainString",
+      one: 1
+    }));
+  });
+});

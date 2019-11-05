@@ -7,13 +7,13 @@ type StateShape<T> = { [key in keyof T]: any };
 interface UseFormStateHook {
   (
     initialState?: Partial<StateShape<any>> | null,
-    options?: Partial<FormOptions<any>>,
-  ): [FormState<any>, Inputs<any>];
+    options?: Partial<FormOptions<any, {}>>,
+  ): [FormState<any>, Inputs<any, {}>];
 
-  <T extends StateShape<T>, E = StateErrors<T, string>>(
+  <T extends StateShape<T>, E = StateErrors<T, string>, C = {}>(
     initialState?: Partial<T> | null,
-    options?: Partial<FormOptions<T>>,
-  ): [FormState<T, E>, Inputs<T>];
+    options?: Partial<FormOptions<T, C>>,
+  ): [FormState<T, E>, Inputs<T, C>];
 }
 
 export const useFormState: UseFormStateHook;
@@ -31,7 +31,7 @@ interface FormState<T, E = StateErrors<T, string>> {
   resetField(name: keyof T): void;
 }
 
-interface FormOptions<T> {
+interface FormOptions<T, C> {
   onChange(
     event: React.ChangeEvent<InputElement>,
     stateValues: StateValues<T>,
@@ -41,6 +41,7 @@ interface FormOptions<T> {
   onClear(): void;
   onReset(): void;
   onTouched(event: React.FocusEvent<InputElement>): void;
+  customProps(formState: FormState<T>, name: string): C;
   validateOnBlur: boolean;
   withIds: boolean | ((name: string, value?: string) => string);
 }
@@ -61,25 +62,25 @@ type StateErrors<T, E = string> = { readonly [A in keyof T]?: E | string };
 
 // Inputs
 
-interface Inputs<T, Name extends keyof T = keyof T> {
+interface Inputs<T, C extends {}, Name extends keyof T = keyof T> {
   // prettier-ignore
-  selectMultiple: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'> & MultipleProp>;
-  select: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'>>;
-  email: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  color: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  password: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  text: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  textarea: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'>>;
-  url: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  search: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  number: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  range: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  tel: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  radio: InputInitializer<T, Args<Name, OwnValue>, RadioProps<T>>;
-  date: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  month: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  week: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  time: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
+  selectMultiple: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'> & MultipleProp & C>;
+  select: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'> & C>;
+  email: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  color: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  password: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  text: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  textarea: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'> & C>;
+  url: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  search: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  number: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  range: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  tel: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  radio: InputInitializer<T, Args<Name, OwnValue>, RadioProps<T> & C>;
+  date: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  month: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  week: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
+  time: InputInitializer<T, Args<Name>, BaseInputProps<T> & C>;
   /**
    * Checkbox inputs with a value will be treated as a collection of choices.
    * Their values in in the form state will be of type Array<string>.
@@ -87,15 +88,15 @@ interface Inputs<T, Name extends keyof T = keyof T> {
    * Checkbox inputs without a value will be treated as toggles. Their values in
    * in the form state will be of type boolean
    */
-  checkbox(name: Name, ownValue?: OwnValue): CheckboxProps<T>;
-  checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps<T>;
+  checkbox(name: Name, ownValue?: OwnValue): CheckboxProps<T> & C;
+  checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps<T> & C;
 
   raw<RawValue, Name extends keyof T = keyof T>(
     name: Name,
-  ): RawInputProps<T, Name, RawValue>;
+  ): RawInputProps<T, Name, RawValue> & C;
   raw<RawValue, Name extends keyof T = keyof T>(
     options: RawInputOptions<T, Name, RawValue>,
-  ): RawInputProps<T, Name, RawValue>;
+  ): RawInputProps<T, Name, RawValue> & C;
 
   label(name: string, value?: string): LabelProps;
   id(name: string, value?: string): string;
