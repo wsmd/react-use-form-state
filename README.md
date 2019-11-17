@@ -317,7 +317,7 @@ To use this, your custom component should support an `onChange()` event which ta
 import DatePicker from 'react-datepicker';
 
 function Widget() {
-  const [formState, { raw }] = userFormState({ date: new Date() });
+  const [formState, { raw }] = useFormState({ date: new Date() });
   return (
     <>
       <DatePicker {...raw('date')} />
@@ -330,7 +330,7 @@ You can also provide an `onChange` option with a return value in order to map th
 
 ```js
 function Widget() {
-  const [formState, { raw }] = userFormState({ date: new Date() });
+  const [formState, { raw }] = useFormState({ date: new Date() });
   return (
     <>
       <DatePicker
@@ -351,7 +351,7 @@ Many raw components do not support `onBlur()` correctly.  For these components, 
 
 ```js
 function Widget() {
-  const [formState, { raw }] = userFormState({ date: new Date() });
+  const [formState, { raw }] = useFormState({ date: new Date() });
   return (
     <>
       <CustomComponent
