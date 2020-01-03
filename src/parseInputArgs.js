@@ -1,4 +1,4 @@
-import { identity, noop } from './utils';
+import { identity, noop, isEqualByValue } from './utils';
 
 const defaultInputOptions = {
   onChange: identity,
@@ -6,6 +6,7 @@ const defaultInputOptions = {
   validate: null,
   validateOnBlur: undefined,
   touchOnChange: false,
+  compare: isEqualByValue,
 };
 
 export function parseInputArgs(args) {

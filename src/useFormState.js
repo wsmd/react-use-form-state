@@ -247,6 +247,13 @@ export default function useFormState(initialState, options) {
           touch(e);
         }
 
+        const isPristine = inputOptions.compare(
+          formState.initialValues.get(name),
+          value,
+        );
+
+        formState.setPristine(isPristine ? omit(name) : { [name]: false });
+
         const partialNewState = { [name]: value };
         const newValues = { ...formState.current.values, ...partialNewState };
 

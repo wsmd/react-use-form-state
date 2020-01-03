@@ -64,3 +64,12 @@ export function isEmpty(value) {
   }
   return false;
 }
+
+export function isEqualByValue(original, current) {
+  // We can have initial values undefined, but input makes them empty strings
+  // after edit/clear. We will consider those equal.
+  const isNullish =
+    (original === undefined || original === null) && current === '';
+
+  return isNullish || original === current;
+}
