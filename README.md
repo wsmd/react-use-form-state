@@ -34,6 +34,7 @@
   - [Global Handlers](#global-handlers)
   - [Advanced Input Options](#advanced-input-options)
   - [Custom Input Validation](#custom-input-validation)
+  - [Pristine - if values have been changed](#pristine---if-values-have-been-changed)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
   - [Labels](#labels)
   - [Custom Controls](#custom-controls)
@@ -211,7 +212,7 @@ export default function SignUpForm() {
       />
     </>
   );
-};
+}
 ```
 
 ### Custom Input Validation
@@ -238,7 +239,6 @@ For convenience, empty collection values such as empty objects, empty arrays, em
         return 'Password is not strong enough';
       }
     },
-
   })}
 />
 ```
@@ -264,9 +264,11 @@ If the `validate()` method is not specified, `useFormState` will fallback to the
 
 And this can be used for Save button, to disable it, if there are no actual changes:
 
-```
+```js
 const isPristine = isEmpty(formState.pristine);
-<Button disabled={isPristine} onClick={handleClick}>Save</Button>
+<Button disabled={isPristine} onClick={handleClick}>
+  Save
+</Button>;
 ```
 
 Checking if field is pristine is done with simple equality `===`, with some exceptions: Field is considered pristine if initial value is null or undefined and later value is empty string.
@@ -345,10 +347,9 @@ Note that this will override any existing `id` prop if specified before calling 
 
 ### Custom Controls
 
-`useFormState` provides a `raw` type for working with controls that do not use React's [`SyntheticEvent`](https://reactjs.org/docs/events.html) system.  For example, controls like [react-select](https://react-select.com/home) or [react-datepicker](https://www.npmjs.com/package/react-datepicker) have `onChange` and `value` props that expect a custom value instead of an event.
+`useFormState` provides a `raw` type for working with controls that do not use React's [`SyntheticEvent`](https://reactjs.org/docs/events.html) system. For example, controls like [react-select](https://react-select.com/home) or [react-datepicker](https://www.npmjs.com/package/react-datepicker) have `onChange` and `value` props that expect a custom value instead of an event.
 
-
-To use this, your custom component should support an `onChange()` event which takes the value as a parameter, and a `value` prop which is expected to contain the value.  Note that if no initial value is given, the component will receive a `value` prop of an empty string, which might not be what you want. Therefore, you must provide an [initial value](#initial-state) for `raw()` inputs when working with custom controls.
+To use this, your custom component should support an `onChange()` event which takes the value as a parameter, and a `value` prop which is expected to contain the value. Note that if no initial value is given, the component will receive a `value` prop of an empty string, which might not be what you want. Therefore, you must provide an [initial value](#initial-state) for `raw()` inputs when working with custom controls.
 
 ```js
 import DatePicker from 'react-datepicker';
@@ -382,9 +383,9 @@ function Widget() {
 }
 ```
 
-Note that `onChange()` for a `raw` value *must* return a value.
+Note that `onChange()` for a `raw` value _must_ return a value.
 
-Many raw components do not support `onBlur()` correctly.  For these components, you can use `touchOnChange` to mark a field as touched when it changes instead of on blur:
+Many raw components do not support `onBlur()` correctly. For these components, you can use `touchOnChange` to mark a field as touched when it changes instead of on blur:
 
 ```js
 function Widget() {
@@ -394,7 +395,7 @@ function Widget() {
       <CustomComponent
         {...raw({
           name: 'date',
-          touchOnChange: true
+          touchOnChange: true,
         })}
       />
     </>
@@ -420,7 +421,7 @@ function Form() {
       <input {...text('name')} readOnly />
       <button onClick={setNameField}>Set Name</button>
     </>
-  )
+  );
 }
 ```
 
@@ -477,7 +478,7 @@ formState.values.doesNotExist
 
 By default, `useFormState` will use the type `any` for the form state and its inputs if no type argument is provided. Therefore, it is recommended that you provide one.
 
-By default, the `errors` property will contain strings.  If you return complex error objects from custom validation, you can provide an error type:
+By default, the `errors` property will contain strings. If you return complex error objects from custom validation, you can provide an error type:
 
 ```ts
 interface I18nError {
@@ -525,7 +526,7 @@ const [formState, inputs] = useFormState(null, {
   onBlur(e) {
     // accessing the inputs target that triggered the blur event
     const { name, value, ...target } = e.target;
-  }
+  },
 });
 ```
 
@@ -546,7 +547,7 @@ const [formState, inputs] = useFormState(null, {
     nextStateValues;
     // the state value of the input. See Input Types below for more information.
     nextStateValues[name];
-  }
+  },
 });
 ```
 
@@ -559,7 +560,7 @@ const [formState, inputs] = useFormState(null, {
   onTouched(e) {
     // accessing the inputs target that triggered the blur event
     const { name, value, ...target } = e.target;
-  }
+  },
 });
 ```
 
@@ -571,7 +572,7 @@ A function that gets called after calling `formState.clear` indicating that all 
 const [formState, inputs] = useFormState(null, {
   onClear() {
     // form state was cleared successfully
-  }
+  },
 });
 
 formState.clear(); // clearing the form state
@@ -585,9 +586,9 @@ A function that gets called after calling `formState.reset` indicating that all 
 const [formState, inputs] = useFormState(null, {
   onReset() {
     // form state was reset successfully
-  }
+  },
 });
- formState.reset(); // resetting the form state
+formState.reset(); // resetting the form state
 ```
 
 #### `formOptions.validateOnBlur`
@@ -735,7 +736,7 @@ The following options can be passed:
 | `onBlur(e): void`                                                 | Optional. A blur event handler that gets passed the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `validate(value: string, values: StateValues, event: Event): any` | Optional. An input validation function that determines whether the input value is valid. It gets passed the input value, all input values in the form, and the change/blur event (or the raw value of the control in the case of `.raw()`). The input is considered **valid** if this method returns `true` or `undefined`. Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. Such values are used a **custom validation errors** that can be retrieved from [`state.errors`](#form-state). HTML5 validation rules are ignored when this function is specified. |
 | `validateOnBlur: boolean`                                         | Optional. `false` by default. When set to `true` and the `validate` function is provided, the function will be called when the input loses focus. If not specified, the `validate` function will be called on value change.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `touchOnChange: boolean`                                          | Optional. `false` by default.  When `false`, the input will be marked as touched when the `onBlur()` event handler is called.  For custom controls that do not support `onBlur`, setting this to `true` will make it so inputs will be marked as touched when `onChange()` is called instead.                                                                                                                                                                                                                                                                                                                                                                           |
+| `touchOnChange: boolean`                                          | Optional. `false` by default. When `false`, the input will be marked as touched when the `onBlur()` event handler is called. For custom controls that do not support `onBlur`, setting this to `true` will make it so inputs will be marked as touched when `onChange()` is called instead.                                                                                                                                                                                                                                                                                                                                                                             |
 
 ## License
 

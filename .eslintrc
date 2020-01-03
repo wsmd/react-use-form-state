@@ -1,19 +1,21 @@
 {
-  "extends": ["airbnb", "prettier"],
-  "plugins": ["react-hooks"],
-  "env": {
-    "jest": true
-  },
+  "extends": [
+    "@wsmd/eslint-config/react",
+    "@wsmd/eslint-config/prettier",
+    "@wsmd/eslint-config/jest"
+  ],
   "rules": {
-    "consistent-return": "off",
     "getter-return": "off",
-    "arrow-parens": ["error", "as-needed"],
-    "react/jsx-filename-extension": [
-      "error",
-      { "extensions": [".js", ".jsx"] }
-    ],
-    "import/prefer-default-export": false,
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
-  }
+    "consistent-return": "off"
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.js"],
+      "rules": {
+        "react/jsx-props-no-spreading": "off",
+        "react/jsx-filename-extension": "off",
+        "jsx-a11y/control-has-associated-label": "off"
+      }
+    }
+  ]
 }

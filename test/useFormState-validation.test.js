@@ -128,7 +128,9 @@ describe('passing a custom input validate function', () => {
   });
 
   it('handles validation of raw values on blur', () => {
-    const validate = jest.fn(val => ((val && val.foo === 'pass') ? true : 'wrong!'));
+    const validate = jest.fn(val =>
+      val && val.foo === 'pass' ? true : 'wrong!',
+    );
     let onChange;
     let onBlur;
     const { formState } = renderWithFormState(([, { raw }]) => {

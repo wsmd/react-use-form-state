@@ -99,18 +99,19 @@ describe('useFormState pristine', () => {
     expect(formState.current.pristine).not.toHaveProperty('name');
   });
 
-  it.each([['undefined', undefined], ['empty string', ''], ['null', null]])(
-    'initial value %s is treated as pristine',
-    (name, testValue) => {
-      const initialData = { name: testValue };
-      const { formState, change } = renderWithFormState(
-        ([, { text }]) => <input {...text({ name: 'name' })} />,
-        initialData,
-      );
-      change({ value: 'someval' });
-      expect(formState.current.pristine).toHaveProperty('name');
-      change({ value: '' });
-      expect(formState.current.pristine).not.toHaveProperty('name');
-    },
-  );
+  it.each([
+    ['undefined', undefined],
+    ['empty string', ''],
+    ['null', null],
+  ])('initial value %s is treated as pristine', (name, testValue) => {
+    const initialData = { name: testValue };
+    const { formState, change } = renderWithFormState(
+      ([, { text }]) => <input {...text({ name: 'name' })} />,
+      initialData,
+    );
+    change({ value: 'someval' });
+    expect(formState.current.pristine).toHaveProperty('name');
+    change({ value: '' });
+    expect(formState.current.pristine).not.toHaveProperty('name');
+  });
 });
