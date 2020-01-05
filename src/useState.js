@@ -1,5 +1,5 @@
 import { useReducer, useRef } from 'react';
-import { isFunction, omit, isEqualByValue } from './utils';
+import { isFunction, getOr } from './utils';
 import { useCache } from './useCache';
 
 function stateReducer(state, newState) {
@@ -17,14 +17,27 @@ export function useState({ initialState }) {
 
   state.current = { values, touched, validity, errors, pristine };
 
-  function setField(name, value, inputValidity, inputTouched, inputError) {
-    setValues({ [name]: value });
-    setTouched({ [name]: inputTouched });
-    setValidity({ [name]: inputValidity });
-    setError({ [name]: inputError });
+  function getInitialValue(name) {
+    return initialValues.has(name)
+      ? initialValues.get(name)
+      : initialState[name];
+  }
 
-    const isPristine = isEqualByValue(initialValues.get(name), value);
-    setPristine(isPristine ? omit(name) : { [name]: false });
+  function updatePristine(name, value, comparator) {
+    const initialValue = getInitialValue(name);
+    setPristine({ [name]: !!comparator(initialValue, value) });
+  }
+
+  function setFieldState(field) {
+    setError({ [field.name]: field.error });
+    setValues({ [field.name]: field.value });
+    setTouched({ [field.name]: getOr(field.touched, true) });
+    setValidity({ [field.name]: getOr(field.validity, true) });
+    setPristine({ [field.name]: getOr(field.pristine, true) });
+  }
+
+  function setField(name, value) {
+    setFieldState(typeof name === 'object' ? name : { name, value });
   }
 
   function clearField(name) {
@@ -32,9 +45,12 @@ export function useState({ initialState }) {
   }
 
   function resetField(name) {
-    setField(
-      name,
-      initialValues.has(name) ? initialValues.get(name) : initialState[name],
+    setField(name, getInitialValue(name));
+  }
+
+  function isPristine() {
+    return Object.keys(state.current.pristine).every(
+      key => !!state.current.pristine[key],
     );
   }
 
@@ -52,9 +68,11 @@ export function useState({ initialState }) {
     setError,
     setField,
     setPristine,
+    updatePristine,
     initialValues,
     resetField,
     clearField,
     forEach,
+    isPristine,
   };
 }

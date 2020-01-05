@@ -65,11 +65,17 @@ export function isEmpty(value) {
   return false;
 }
 
-export function isEqualByValue(original, current) {
-  // We can have initial values undefined, but input makes them empty strings
-  // after edit/clear. We will consider those equal.
-  const isNullish =
-    (original === undefined || original === null) && current === '';
+export function isEqual(value, other) {
+  if (Array.isArray(value) && Array.isArray(other)) {
+    return (
+      value.length === other.length &&
+      value.every(a => other.indexOf(a) > -1) &&
+      other.every(b => value.indexOf(b) > -1)
+    );
+  }
+  return value === other;
+}
 
-  return isNullish || original === current;
+export function getOr(value, fallback) {
+  return value != null ? value : fallback;
 }

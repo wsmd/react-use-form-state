@@ -26,9 +26,18 @@ interface FormState<T, E = StateErrors<T, string>> {
   reset(): void;
   clear(): void;
   setField<K extends keyof T>(name: K, value: T[K]): void;
-  setFieldError(name: keyof T, error: string): void;
+  setField<K extends keyof T>(field: {
+    name: K;
+    value?: T[K];
+    error?: any;
+    validity?: boolean;
+    touched?: boolean;
+    pristine?: boolean;
+  }): void;
+  setFieldError(name: keyof T, error: any): void;
   clearField(name: keyof T): void;
   resetField(name: keyof T): void;
+  isPristine(): boolean;
 }
 
 interface FormOptions<T> {
@@ -75,7 +84,7 @@ interface Inputs<T, Name extends keyof T = keyof T> {
   number: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
   range: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
   tel: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  radio: InputInitializer<T, Args<Name, OwnValue>, RadioProps<T>>;
+  radio: InputInitializer<T, Args<Name, OwnValue>, CheckboxProps<T>>;
   date: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
   month: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
   week: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
@@ -88,7 +97,9 @@ interface Inputs<T, Name extends keyof T = keyof T> {
    * in the form state will be of type boolean
    */
   checkbox(name: Name, ownValue?: OwnValue): CheckboxProps<T>;
-  checkbox(options: InputOptions<T, Name, Maybe<OwnValue>>): CheckboxProps<T>;
+  checkbox<Name extends keyof T>(
+    options: InputOptions<T, Name, Maybe<OwnValue>>,
+  ): CheckboxProps<T>;
 
   raw<RawValue, Name extends keyof T = keyof T>(
     name: Name,
@@ -101,12 +112,12 @@ interface Inputs<T, Name extends keyof T = keyof T> {
   id(name: string, value?: string): string;
 }
 
-interface InputInitializer<T, Args extends any[], ReturnValue> {
-  (...args: Args): ReturnValue;
-  (options: InputOptions<T, Args[0], Args[1]>): ReturnValue;
+interface InputInitializer<T, Args extends any[], InputProps> {
+  (...args: Args): InputProps;
+  (options: InputOptions<T, Args[0], Args[1]>): InputProps;
 }
 
-type InputOptions<T, Name, Value = void> = {
+type InputOptions<T, Name extends keyof T, Value> = {
   name: Name;
   validateOnBlur?: boolean;
   touchOnChange?: boolean;
@@ -115,6 +126,10 @@ type InputOptions<T, Name, Value = void> = {
     values: StateValues<T>,
     event: React.ChangeEvent<InputElement> | React.FocusEvent<InputElement>,
   ): any;
+  compare?(
+    initialValue: StateValues<T>[Name],
+    value: StateValues<T>[Name],
+  ): boolean;
   onChange?(event: React.ChangeEvent<InputElement>): void;
   onBlur?(event: React.FocusEvent<InputElement>): void;
 } & WithValue<Value>;
@@ -122,6 +137,10 @@ type InputOptions<T, Name, Value = void> = {
 interface RawInputOptions<T, Name extends keyof T, RawValue> {
   name: Name;
   validateOnBlur?: boolean;
+  compare?(
+    initialValue: StateValues<T>[Name],
+    value: StateValues<T>[Name],
+  ): boolean;
   touchOnChange?: boolean;
   validate?(
     value: StateValues<T>[Name],
@@ -139,10 +158,10 @@ interface RawInputProps<T, Name extends keyof T, RawValue> {
   onBlur(...args: any[]): any;
 }
 
-type WithValue<V> = V extends OwnValue
-  ? { value: OwnValue }
-  : V extends undefined
+type WithValue<V extends any> = V extends Maybe<OwnValue>
   ? { value?: OwnValue }
+  : V extends OwnValue
+  ? { value: OwnValue }
   : {};
 
 type Args<Name, Value = void> = [Name, Value];
@@ -163,8 +182,6 @@ interface BaseInputProps<T> {
 interface CheckboxProps<T> extends BaseInputProps<T> {
   checked: boolean;
 }
-
-interface RadioProps<T> extends CheckboxProps<T> {}
 
 interface MultipleProp {
   multiple: boolean;

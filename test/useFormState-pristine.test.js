@@ -30,7 +30,7 @@ describe('useFormState pristine', () => {
     expect(formState.current.pristine).toHaveProperty('name', false);
     change({ value: 'someval' });
 
-    expect(formState.current.pristine).not.toHaveProperty('name');
+    expect(formState.current.pristine).toHaveProperty('name', true);
   });
 
   it('reset marks input as pristine when have default value', () => {
@@ -44,7 +44,17 @@ describe('useFormState pristine', () => {
     expect(formState.current.pristine).toHaveProperty('name', false);
 
     formState.current.resetField('name');
-    expect(formState.current.pristine).not.toHaveProperty('name');
+    expect(formState.current.pristine).toHaveProperty('name', true);
+  });
+
+  it('manually sets the pristine value of an input using setField', () => {
+    const { formState } = renderWithFormState(
+      ([, { text }]) => <input {...text({ name: 'name' })} />,
+      { name: 'someval' },
+    );
+    expect(formState.current.pristine).toHaveProperty('name', true);
+    formState.current.setField({ name: 'name', pristine: false });
+    expect(formState.current.pristine).toHaveProperty('name', false);
   });
 
   it('marks input back as pristine', () => {
@@ -54,21 +64,21 @@ describe('useFormState pristine', () => {
     change({ value: 'someval' });
     expect(formState.current.pristine).toHaveProperty('name', false);
     change({ value: '' });
-    expect(formState.current.pristine).not.toHaveProperty('name');
+    expect(formState.current.pristine).toHaveProperty('name', true);
   });
 
-  it('handles pristine on raw values', () => {
+  it('handles pristine on raw values (always false)', () => {
     let onChange;
     const { formState } = renderWithFormState(([, { raw }]) => {
       const inputProps = raw({ name: 'name' });
       ({ onChange } = inputProps);
       return <input {...inputProps} />;
     });
-
+    expect(formState.current.pristine).toHaveProperty('name', true);
     onChange({ foo: 'someval' });
     expect(formState.current.pristine).toHaveProperty('name', false);
     onChange('');
-    expect(formState.current.pristine).not.toHaveProperty('name');
+    expect(formState.current.pristine).toHaveProperty('name', false);
   });
 
   it('calls options.compare when an input changes', () => {
@@ -96,13 +106,24 @@ describe('useFormState pristine', () => {
     onChange({ foo: 'otherval' });
     expect(formState.current.pristine).toHaveProperty('name', false);
     onChange({ foo: 'someval' });
-    expect(formState.current.pristine).not.toHaveProperty('name');
+    expect(formState.current.pristine).toHaveProperty('name', true);
+  });
+
+  it('handles pristine of checkbox inputs', () => {
+    const { formState, click } = renderWithFormState(
+      ([, { checkbox }]) => <input {...checkbox('permission', 1)} />,
+      { permission: [1, 2, 4] },
+    );
+    expect(formState.current.pristine).toHaveProperty('permission', true);
+    click();
+    expect(formState.current.pristine).toHaveProperty('permission', false);
+    click();
+    expect(formState.current.pristine).toHaveProperty('permission', true);
   });
 
   it.each([
     ['undefined', undefined],
     ['empty string', ''],
-    ['null', null],
   ])('initial value %s is treated as pristine', (name, testValue) => {
     const initialData = { name: testValue };
     const { formState, change } = renderWithFormState(
@@ -110,8 +131,33 @@ describe('useFormState pristine', () => {
       initialData,
     );
     change({ value: 'someval' });
-    expect(formState.current.pristine).toHaveProperty('name');
+    expect(formState.current.pristine).toHaveProperty('name', false);
     change({ value: '' });
-    expect(formState.current.pristine).not.toHaveProperty('name');
+    expect(formState.current.pristine).toHaveProperty('name', true);
+  });
+
+  it('reports whether the form is pristine or not', () => {
+    const { change, formState } = renderWithFormState(([, { text }]) => (
+      <input {...text({ name: 'name' })} />
+    ));
+    expect(formState.current.isPristine()).toBe(true);
+    change({ value: 'someval' });
+    expect(formState.current.isPristine()).toBe(false);
+  });
+
+  it('warns when a custom compare of "raw" is not specified', () => {
+    const { change } = renderWithFormState(
+      ([, { raw }]) => (
+        <input {...raw({ name: 'test', validate: () => true })} />
+      ),
+      { test: 'foo' },
+    );
+    change({ value: 'test' });
+    expect(console.warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "[useFormState]",
+        "You used a raw input type for \\"test\\" without providing a custom compare method. As a result, the pristine value of this input will remain set to \\"false\\" after a change. If the form depends on the pristine values, please provide a custom compare method.",
+      ]
+    `);
   });
 });
