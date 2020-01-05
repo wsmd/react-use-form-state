@@ -110,9 +110,10 @@ describe('useFormState pristine', () => {
   });
 
   it('handles pristine of checkbox inputs', () => {
+    const initialState = { permission: ['1', '2', '4'] };
     const { formState, click } = renderWithFormState(
-      ([, { checkbox }]) => <input {...checkbox('permission', 1)} />,
-      { permission: [1, 2, 4] },
+      ([, { checkbox }]) => <input {...checkbox('permission', '1')} />,
+      initialState,
     );
     expect(formState.current.pristine).toHaveProperty('permission', true);
     click();

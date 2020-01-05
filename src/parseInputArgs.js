@@ -9,12 +9,10 @@ const defaultInputOptions = {
   compare: null,
 };
 
-export function parseInputArgs(type, args) {
+export function parseInputArgs(args) {
   let name;
   let ownValue;
   let options;
-  let compareFn;
-  let ownCompare;
   if (typeof args[0] === 'string' || typeof args[0] === 'number') {
     [name, ownValue] = args;
   } else {
@@ -26,8 +24,6 @@ export function parseInputArgs(type, args) {
   return {
     name,
     ownValue,
-    compare: compareFn,
-    hasOwnCompare: compareFn === ownCompare,
     hasOwnValue: !!ownValue,
     ...defaultInputOptions,
     ...options,

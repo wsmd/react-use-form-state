@@ -20,7 +20,7 @@ export function useState({ initialState }) {
   function getInitialValue(name) {
     return initialValues.has(name)
       ? initialValues.get(name)
-      : initialState[name];
+      : getOr(initialState, state.current.values)[name];
   }
 
   function updatePristine(name, value, comparator) {

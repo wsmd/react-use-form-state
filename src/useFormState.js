@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { noop, omit, isFunction, isEmpty, isEqual } from './utils';
-import { parseInputArgs as getInputOptions } from './parseInputArgs';
+import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useCache } from './useCache';
 import { useState } from './useState';
@@ -44,8 +44,7 @@ export default function useFormState(initialState, options) {
   }
 
   const createPropsGetter = type => (...args) => {
-    const { name, ownValue, hasOwnValue, ...inputOptions } = getInputOptions(
-      type,
+    const { name, ownValue, hasOwnValue, ...inputOptions } = parseInputArgs(
       args,
     );
 
@@ -65,7 +64,7 @@ export default function useFormState(initialState, options) {
     function setDefaultValue() {
       /* istanbul ignore else */
       if (process.env.NODE_ENV === 'development') {
-        if (isRaw && !hasValueInState) {
+        if (isRaw) {
           warn(
             key,
             'missingInitialValue',
@@ -191,7 +190,7 @@ export default function useFormState(initialState, options) {
           return values[name] === ownValue;
         }
         if (isCheckbox) {
-          if (!ownValue) {
+          if (!hasOwnValue) {
             return values[name] || false;
           }
           /**
