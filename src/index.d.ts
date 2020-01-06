@@ -4,15 +4,25 @@
 
 type StateShape<T> = { [key in keyof T]: any };
 
-interface UseFormStateHook {
-  (
-    initialState?: Partial<StateShape<any>> | null,
-    options?: Partial<FormOptions<any>>,
-  ): [FormState<any>, Inputs<any>];
+// Even though we're accepting a number as a default value for numeric inputs
+// (e.g. type=number and type=range), the value stored in state for those
+// inputs will be a string
+type StateValues<T> = {
+  readonly [A in keyof T]: T[A] extends number ? string : T[A];
+};
 
+type StateErrors<T, E = string> = {
+  readonly [A in keyof T]?: E | string;
+};
+
+interface UseFormStateHook {
+  (initialState?: Partial<StateShape<any>> | null, options?: FormOptions<any>): [
+    FormState<any>,
+    Inputs<any>,
+  ];
   <T extends StateShape<T>, E = StateErrors<T, string>>(
     initialState?: Partial<T> | null,
-    options?: Partial<FormOptions<T>>,
+    options?: FormOptions<T>,
   ): [FormState<T, E>, Inputs<T>];
 }
 
@@ -20,12 +30,12 @@ export const useFormState: UseFormStateHook;
 
 interface FormState<T, E = StateErrors<T, string>> {
   values: StateValues<T>;
-  validity: StateValidity<T>;
-  touched: StateValidity<T>;
   errors: E;
+  validity: { readonly [A in keyof T]?: boolean };
+  touched: { readonly [A in keyof T]?: boolean };
+  pristine: { readonly [A in keyof T]: boolean };
   reset(): void;
   clear(): void;
-  setField<K extends keyof T>(name: K, value: T[K]): void;
   setField<K extends keyof T>(field: {
     name: K;
     value?: T[K];
@@ -34,6 +44,7 @@ interface FormState<T, E = StateErrors<T, string>> {
     touched?: boolean;
     pristine?: boolean;
   }): void;
+  setField<K extends keyof T>(name: K, value: T[K]): void;
   setFieldError(name: keyof T, error: any): void;
   clearField(name: keyof T): void;
   resetField(name: keyof T): void;
@@ -41,134 +52,101 @@ interface FormState<T, E = StateErrors<T, string>> {
 }
 
 interface FormOptions<T> {
-  onChange(
+  onChange?(
     event: React.ChangeEvent<InputElement>,
     stateValues: StateValues<T>,
     nextStateValues: StateValues<T>,
   ): void;
-  onBlur(event: React.FocusEvent<InputElement>): void;
-  onClear(): void;
-  onReset(): void;
-  onTouched(event: React.FocusEvent<InputElement>): void;
-  validateOnBlur: boolean;
-  withIds: boolean | ((name: string, value?: string) => string);
+  onBlur?(event: React.FocusEvent<InputElement>): void;
+  onClear?(): void;
+  onReset?(): void;
+  onTouched?(event: React.FocusEvent<InputElement>): void;
+  validateOnBlur?: boolean;
+  withIds?: boolean | ((name: string, value?: string) => string);
 }
-
-// prettier-ignore
-type StateValues<T> = {
-  /**
-   * Even though we're accepting a number as a default value for numeric inputs
-   * (e.g. type=number and type=range), the value we store in  state for those
-   * inputs will will be of a string
-   */
-  readonly [A in keyof T]: T[A] extends number ? string : T[A]
-};
-
-type StateValidity<T> = { readonly [A in keyof T]: Maybe<boolean> };
-
-type StateErrors<T, E = string> = { readonly [A in keyof T]?: E | string };
 
 // Inputs
 
-interface Inputs<T, Name extends keyof T = keyof T> {
-  // prettier-ignore
-  selectMultiple: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'> & MultipleProp>;
-  select: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'>>;
-  email: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  color: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  password: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  text: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  textarea: InputInitializer<T, Args<Name>, Omit<BaseInputProps<T>, 'type'>>;
-  url: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  search: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  number: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  range: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  tel: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  radio: InputInitializer<T, Args<Name, OwnValue>, CheckboxProps<T>>;
-  date: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  month: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  week: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  time: InputInitializer<T, Args<Name>, BaseInputProps<T>>;
-  /**
-   * Checkbox inputs with a value will be treated as a collection of choices.
-   * Their values in in the form state will be of type Array<string>.
-   *
-   * Checkbox inputs without a value will be treated as toggles. Their values in
-   * in the form state will be of type boolean
-   */
-  checkbox(name: Name, ownValue?: OwnValue): CheckboxProps<T>;
-  checkbox<Name extends keyof T>(
-    options: InputOptions<T, Name, Maybe<OwnValue>>,
-  ): CheckboxProps<T>;
-
-  raw<RawValue, Name extends keyof T = keyof T>(
-    name: Name,
-  ): RawInputProps<T, Name, RawValue>;
-  raw<RawValue, Name extends keyof T = keyof T>(
-    options: RawInputOptions<T, Name, RawValue>,
-  ): RawInputProps<T, Name, RawValue>;
-
+interface Inputs<T> {
+  selectMultiple: InputInitializer<T, SelectMultipleProps<T>>;
+  select: InputInitializer<T, TypeLessInputProps<T>>;
+  email: InputInitializer<T, BaseInputProps<T>>;
+  color: InputInitializer<T, BaseInputProps<T>>;
+  password: InputInitializer<T, BaseInputProps<T>>;
+  text: InputInitializer<T, BaseInputProps<T>>;
+  textarea: InputInitializer<T, TypeLessInputProps<T>>;
+  url: InputInitializer<T, BaseInputProps<T>>;
+  search: InputInitializer<T, BaseInputProps<T>>;
+  number: InputInitializer<T, BaseInputProps<T>>;
+  range: InputInitializer<T, BaseInputProps<T>>;
+  tel: InputInitializer<T, BaseInputProps<T>>;
+  date: InputInitializer<T, BaseInputProps<T>>;
+  month: InputInitializer<T, BaseInputProps<T>>;
+  week: InputInitializer<T, BaseInputProps<T>>;
+  time: InputInitializer<T, BaseInputProps<T>>;
+  radio: InputInitializerWithOwnValue<T, CheckableInputProps<T>>;
+  checkbox: InputInitializerWithOptionalOwnValue<T, CheckableInputProps<T>>;
+  raw: RawInputInitializer<T>;
   label(name: string, value?: string): LabelProps;
   id(name: string, value?: string): string;
 }
 
-interface InputInitializer<T, Args extends any[], InputProps> {
-  (...args: Args): InputProps;
-  (options: InputOptions<T, Args[0], Args[1]>): InputProps;
+interface InputInitializer<T, InputProps> {
+  <K extends keyof T>(options: InputOptions<T, K>): InputProps;
+  <K extends keyof T>(name: K): InputProps;
 }
 
-type InputOptions<T, Name extends keyof T, Value> = {
-  name: Name;
+interface InputInitializerWithOwnValue<T, R> {
+  <K extends keyof T>(options: InputOptions<T, K, { value: OwnValueType }>): R;
+  <K extends keyof T>(name: K, value: OwnValueType): R;
+}
+
+interface InputInitializerWithOptionalOwnValue<T, R> {
+  <K extends keyof T>(options: InputOptions<T, K, { value?: OwnValueType }>): R;
+  <K extends keyof T>(name: K, value?: OwnValueType): R;
+}
+
+interface RawInputInitializer<T> {
+  <RawValue extends any, K extends keyof T = keyof T>(
+    options: RawInputOptions<T, K, RawValue>,
+  ): RawInputProps<T, K, RawValue>;
+  <RawValue extends any, K extends keyof T = keyof T>(name: K): RawInputProps<T, K, RawValue>;
+}
+
+type InputOptions<T, K extends keyof T, OwnOptions = {}> = {
+  name: K;
   validateOnBlur?: boolean;
   touchOnChange?: boolean;
+  onChange?(event: React.ChangeEvent<InputElement>): void;
+  onBlur?(event: React.FocusEvent<InputElement>): void;
+  compare?(initialValue: StateValues<T>[K], value: StateValues<T>[K]): boolean;
   validate?(
     value: string,
     values: StateValues<T>,
     event: React.ChangeEvent<InputElement> | React.FocusEvent<InputElement>,
   ): any;
-  compare?(
-    initialValue: StateValues<T>[Name],
-    value: StateValues<T>[Name],
-  ): boolean;
-  onChange?(event: React.ChangeEvent<InputElement>): void;
-  onBlur?(event: React.FocusEvent<InputElement>): void;
-} & WithValue<Value>;
+} & OwnOptions;
 
-interface RawInputOptions<T, Name extends keyof T, RawValue> {
-  name: Name;
-  validateOnBlur?: boolean;
-  compare?(
-    initialValue: StateValues<T>[Name],
-    value: StateValues<T>[Name],
-  ): boolean;
+interface RawInputOptions<T, K extends keyof T, RawValue> {
+  name: K;
   touchOnChange?: boolean;
-  validate?(
-    value: StateValues<T>[Name],
-    values: StateValues<T>,
-    rawValue: RawValue,
-  ): any;
-  onChange?(rawValue: RawValue): StateValues<T>[Name];
+  validateOnBlur?: boolean;
   onBlur?(...args: any[]): void;
+  onChange?(rawValue: RawValue): StateValues<T>[K];
+  compare?(initialValue: StateValues<T>[K], value: StateValues<T>[K]): boolean;
+  validate?(value: StateValues<T>[K], values: StateValues<T>, rawValue: RawValue): any;
 }
 
-interface RawInputProps<T, Name extends keyof T, RawValue> {
-  name: Extract<Name, string>;
-  value: StateValues<T>[Name];
+interface RawInputProps<T, K extends keyof T, RawValue> {
+  name: Extract<K, string>;
+  value: StateValues<T>[K];
   onChange(rawValue: RawValue): any;
   onBlur(...args: any[]): any;
 }
 
-type WithValue<V extends any> = V extends Maybe<OwnValue>
-  ? { value?: OwnValue }
-  : V extends OwnValue
-  ? { value: OwnValue }
-  : {};
-
-type Args<Name, Value = void> = [Name, Value];
-
 type InputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
-type OwnValue = string | number | boolean | string[];
+type OwnValueType = string | number | boolean | string[];
 
 interface BaseInputProps<T> {
   id: string;
@@ -179,20 +157,18 @@ interface BaseInputProps<T> {
   type: string;
 }
 
-interface CheckboxProps<T> extends BaseInputProps<T> {
+type TypeLessInputProps<T> = Omit<BaseInputProps<T>, 'type'>;
+
+interface CheckableInputProps<T> extends BaseInputProps<T> {
   checked: boolean;
 }
 
-interface MultipleProp {
+interface SelectMultipleProps<T> extends TypeLessInputProps<T> {
   multiple: boolean;
 }
 
 interface LabelProps {
   htmlFor: string;
 }
-
-// Utils
-
-type Maybe<T> = T | undefined;
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;

@@ -1,4 +1,12 @@
 {
   "trailingComma": "all",
-  "singleQuote": true
+  "singleQuote": true,
+  "overrides": [
+    {
+      "files": ["src/index.d.ts"],
+      "options": {
+        "printWidth": 100
+      }
+    }
+  ]
 }

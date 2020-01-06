@@ -20,5 +20,6 @@
         "jsx-a11y/control-has-associated-label": "off"
       }
     }
-  ]
+  ],
+  "ignorePatterns": ["test/types.tsx"]
 }
