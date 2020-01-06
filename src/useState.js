@@ -1,5 +1,5 @@
 import { useReducer, useRef } from 'react';
-import { isFunction, getOr } from './utils';
+import { isFunction, isEqual } from './utils';
 import { useCache } from './useCache';
 
 function stateReducer(state, newState) {
@@ -9,6 +9,7 @@ function stateReducer(state, newState) {
 export function useState({ initialState }) {
   const state = useRef();
   const initialValues = useCache();
+  const comparators = useCache();
   const [values, setValues] = useReducer(stateReducer, initialState || {});
   const [touched, setTouched] = useReducer(stateReducer, {});
   const [validity, setValidity] = useReducer(stateReducer, {});
@@ -20,24 +21,32 @@ export function useState({ initialState }) {
   function getInitialValue(name) {
     return initialValues.has(name)
       ? initialValues.get(name)
-      : getOr(initialState, state.current.values)[name];
+      : initialState[name];
   }
 
-  function updatePristine(name, value, comparator) {
-    const initialValue = getInitialValue(name);
-    setPristine({ [name]: !!comparator(initialValue, value) });
+  function updatePristine(name, value) {
+    let comparator = comparators.get(name);
+    // If comparator isn't available for an input, that means the input wasn't
+    // mounted, or manually added via setField.
+    comparator = isFunction(comparator) ? comparator : isEqual;
+    setPristine({ [name]: !!comparator(getInitialValue(name), value) });
   }
 
-  function setFieldState(field) {
-    setError({ [field.name]: field.error });
-    setValues({ [field.name]: field.value });
-    setTouched({ [field.name]: getOr(field.touched, true) });
-    setValidity({ [field.name]: getOr(field.validity, true) });
-    setPristine({ [field.name]: getOr(field.pristine, true) });
+  function setFieldState(name, value, inputValidity, inputTouched, inputError) {
+    setValues({ [name]: value });
+    setTouched({ [name]: inputTouched });
+    setValidity({ [name]: inputValidity });
+    setError({ [name]: inputError });
+    updatePristine(name, value);
   }
 
   function setField(name, value) {
-    setFieldState(typeof name === 'object' ? name : { name, value });
+    // need to store the initial value via setField in case it's before the
+    // input of the given name is rendered.
+    if (!initialValues.has(name)) {
+      initialValues.set(name, value);
+    }
+    setFieldState(name, value, true, true);
   }
 
   function clearField(name) {
@@ -74,5 +83,6 @@ export function useState({ initialState }) {
     clearField,
     forEach,
     isPristine,
+    comparators,
   };
 }

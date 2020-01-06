@@ -53,7 +53,7 @@ describe('useFormState pristine', () => {
       { name: 'someval' },
     );
     expect(formState.current.pristine).toHaveProperty('name', true);
-    formState.current.setField({ name: 'name', pristine: false });
+    formState.current.setField('name', 'otherval');
     expect(formState.current.pristine).toHaveProperty('name', false);
   });
 
@@ -67,7 +67,7 @@ describe('useFormState pristine', () => {
     expect(formState.current.pristine).toHaveProperty('name', true);
   });
 
-  it('handles pristine on raw values (always false)', () => {
+  it('handles pristine on raw values', () => {
     let onChange;
     const { formState } = renderWithFormState(([, { raw }]) => {
       const inputProps = raw({ name: 'name' });
@@ -78,25 +78,33 @@ describe('useFormState pristine', () => {
     onChange({ foo: 'someval' });
     expect(formState.current.pristine).toHaveProperty('name', false);
     onChange('');
-    expect(formState.current.pristine).toHaveProperty('name', false);
+    expect(formState.current.pristine).toHaveProperty('name', true);
   });
 
-  it('calls options.compare when an input changes', () => {
-    const compareHandler = jest.fn();
-    const { change } = renderWithFormState(([, { text }]) => (
-      <input {...text({ name: 'name', compare: compareHandler })} />
-    ));
-    change({ value: 'someval' });
-    expect(compareHandler).toHaveBeenCalledTimes(1);
+  it('warns when a custom compare of "raw" is not specified', () => {
+    const { change } = renderWithFormState(
+      ([, { raw }]) => (
+        <input {...raw({ name: 'test', validate: () => true })} />
+      ),
+      { test: 'foo' },
+    );
+    change({ value: 'test' });
+    expect(console.warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "[useFormState]",
+        "You used a raw input type for \\"test\\" without providing a custom compare method. As a result, the pristine value of this input will be calculated using strict equality check (====), which is insufficient. Please provide a custom compare method for this input in order to get an accurate pristine value.",
+      ]
+    `);
   });
 
-  it('handles pristine on raw  default value', () => {
+  it('handles pristine on raw default value', () => {
     const initialData = { name: { foo: 'someval' } };
     const isEqual = (a, b) => a.foo === b.foo;
     let onChange;
     const { formState } = renderWithFormState(([, { raw }]) => {
       const inputProps = raw({
         name: 'name',
+        validate: () => true,
         compare: (initialValue, value) => isEqual(initialValue, value),
       });
       ({ onChange } = inputProps);
@@ -107,6 +115,16 @@ describe('useFormState pristine', () => {
     expect(formState.current.pristine).toHaveProperty('name', false);
     onChange({ foo: 'someval' });
     expect(formState.current.pristine).toHaveProperty('name', true);
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
+  it('calls options.compare when an input changes', () => {
+    const compareHandler = jest.fn();
+    const { change } = renderWithFormState(([, { text }]) => (
+      <input {...text({ name: 'name', compare: compareHandler })} />
+    ));
+    change({ value: 'someval' });
+    expect(compareHandler).toHaveBeenCalledTimes(1);
   });
 
   it('handles pristine of checkbox inputs', () => {
@@ -144,21 +162,5 @@ describe('useFormState pristine', () => {
     expect(formState.current.isPristine()).toBe(true);
     change({ value: 'someval' });
     expect(formState.current.isPristine()).toBe(false);
-  });
-
-  it('warns when a custom compare of "raw" is not specified', () => {
-    const { change } = renderWithFormState(
-      ([, { raw }]) => (
-        <input {...raw({ name: 'test', validate: () => true })} />
-      ),
-      { test: 'foo' },
-    );
-    change({ value: 'test' });
-    expect(console.warn.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "[useFormState]",
-        "You used a raw input type for \\"test\\" without providing a custom compare method. As a result, the pristine value of this input will remain set to \\"false\\" after a change. If the form depends on the pristine values, please provide a custom compare method.",
-      ]
-    `);
   });
 });

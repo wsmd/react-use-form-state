@@ -1,9 +1,16 @@
 import { useRef } from 'react';
-import { noop, omit, isFunction, isEmpty, isEqual } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useCache } from './useCache';
 import { useState } from './useState';
+import {
+  noop,
+  omit,
+  isFunction,
+  isEmpty,
+  isEqual,
+  testIsEqualCompatibility,
+} from './utils';
 import {
   INPUT_TYPES,
   SELECT,
@@ -116,23 +123,27 @@ export default function useFormState(initialState, options) {
       if (isFunction(inputOptions.compare)) {
         return inputOptions.compare;
       }
-      if (isRaw) {
+      return (value, other) => {
         /* istanbul ignore else */
         if (process.env.NODE_ENV === 'development') {
-          warn(
-            key,
-            'missingCompare',
-            `You used a raw input type for "${name}" without providing a ` +
-              'custom compare method. As a result, the pristine value of ' +
-              'this input will remain set to "false" after a change. If the ' +
-              'form depends on the pristine values, please provide a custom ' +
-              'compare method.',
-          );
+          if (isRaw && ![value, other].every(testIsEqualCompatibility)) {
+            warn(
+              key,
+              'missingCompare',
+              `You used a raw input type for "${name}" without providing a ` +
+                'custom compare method. As a result, the pristine value of ' +
+                'this input will be calculated using strict equality check ' +
+                '(====), which is insufficient. Please provide a custom ' +
+                'compare method for this input in order to get an accurate ' +
+                'pristine value.',
+            );
+          }
         }
-        return () => false;
-      }
-      return isEqual;
+        return isEqual(value, other);
+      };
     }
+
+    formState.comparators.set(name, getCompareFn());
 
     function validate(
       e,
@@ -285,7 +296,7 @@ export default function useFormState(initialState, options) {
           validate(e, value, newValues);
         }
 
-        formState.updatePristine(name, value, getCompareFn());
+        formState.updatePristine(name, value);
 
         formState.setValues(partialNewState);
       }),

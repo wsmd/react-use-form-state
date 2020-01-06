@@ -36,14 +36,6 @@ interface FormState<T, E = StateErrors<T, string>> {
   pristine: { readonly [A in keyof T]: boolean };
   reset(): void;
   clear(): void;
-  setField<K extends keyof T>(field: {
-    name: K;
-    value?: T[K];
-    error?: any;
-    validity?: boolean;
-    touched?: boolean;
-    pristine?: boolean;
-  }): void;
   setField<K extends keyof T>(name: K, value: T[K]): void;
   setFieldError(name: keyof T, error: any): void;
   clearField(name: keyof T): void;

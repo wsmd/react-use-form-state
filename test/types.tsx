@@ -285,13 +285,3 @@ function PropsDelegation() {
   const [formState, input] = useFormState<FormFields>();
   return <Input formState={formState} {...input.email('email')} />;
 }
-
-formState.setField('colors', ['red']);
-formState.setField({
-  name: 'colors',
-  value: ['red'],
-  error: 'invalid',
-  pristine: true,
-  validity: false,
-  touched: false,
-});

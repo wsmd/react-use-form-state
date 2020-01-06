@@ -76,6 +76,13 @@ export function isEqual(value, other) {
   return value === other;
 }
 
-export function getOr(value, fallback) {
-  return value != null ? value : fallback;
+export function testIsEqualCompatibility(value) {
+  let result;
+  /* istanbul ignore if */
+  if (Array.isArray(value)) {
+    result = value.every(testIsEqualCompatibility);
+  } else {
+    result = value == null || /^[sbn]/.test(typeof value); // is primitive
+  }
+  return result;
 }
