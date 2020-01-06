@@ -1,4 +1,4 @@
-import { identity, noop, isEqualByValue } from './utils';
+import { identity, noop, toString } from './utils';
 
 const defaultInputOptions = {
   onChange: identity,
@@ -6,7 +6,7 @@ const defaultInputOptions = {
   validate: null,
   validateOnBlur: undefined,
   touchOnChange: false,
-  compare: isEqualByValue,
+  compare: null,
 };
 
 export function parseInputArgs(args) {
@@ -19,9 +19,12 @@ export function parseInputArgs(args) {
     [{ name, value: ownValue, ...options }] = args;
   }
 
+  ownValue = toString(ownValue);
+
   return {
     name,
     ownValue,
+    hasOwnValue: !!ownValue,
     ...defaultInputOptions,
     ...options,
   };

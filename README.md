@@ -34,7 +34,7 @@
   - [Global Handlers](#global-handlers)
   - [Advanced Input Options](#advanced-input-options)
   - [Custom Input Validation](#custom-input-validation)
-  - [Pristine - if values have been changed](#pristine---if-values-have-been-changed)
+  - [Check If the Form State Is Pristine](#check-if-the-form-state-is-pristine)
   - [Without Using a `<form />` Element](#without-using-a-form--element)
   - [Labels](#labels)
   - [Custom Controls](#custom-controls)
@@ -258,41 +258,39 @@ If the input's value is invalid based on the rules specified above, the form sta
 
 If the `validate()` method is not specified, `useFormState` will fallback to the HTML5 constraints validation to determine the validity of the input along with the appropriate error message.
 
-### Pristine - if values have been changed
+### Check If the Form State Is Pristine
 
-`useFormState` also returns object `pristine` with fields that are not pristine. Eg: if user edits input field and changes it back manually: 'car'=>'car2'=>'car'
+`useFormState` exposes a `pristine` object, and an `isPristine()` helper via `formState` that you can use to check if the user has made any changes.
 
-And this can be used for Save button, to disable it, if there are no actual changes:
+This can be used for a Submit button, to disable it, if there are no actual changes to the form state:
 
 ```js
-const isPristine = isEmpty(formState.pristine);
-<Button disabled={isPristine} onClick={handleClick}>
-  Save
-</Button>;
+function PristineForm() {
+  const [formState, { text, password }] = useFormState();
+  return (
+    <div>
+      <input {...text('username')} />
+      <input {...password('password')} />
+      <button disabled={formState.isPristine()} onClick={handleSubmit}>
+        Login
+      </button>
+    </div>
+  );
+}
 ```
 
-Checking if field is pristine is done with simple equality `===`, with some exceptions: Field is considered pristine if initial value is null or undefined and later value is empty string.
+Checking if a field is pristine is done with simple equality `===`, with some exceptions. This can be overridden per field by providing a custom `compare` function.
 
-This can be overriden per field by providing compare function:
-
-Value will always pristine:
-
-```jsx
-<input
-  {...text({
-    name: 'name',
-    compare: () => true,
-  })}
-/>
-```
-
-Use other equals function:
+Note that a `compare` function is **required** for [`raw`](#custom-controls) inputs, otherwise, if not specified, the `pristine` value of a `raw` input will always be set to `false` after a change.
 
 ```jsx
 <input
   {...raw({
     name: 'userObj',
-    compare: (initialValue, value) => isEqualDeep(initialValue, value),
+    compare(initialValue, value) {
+      // returns a boolean indicating if the changed value is equal to the initial value
+      return isEqualDeep(initialValue, value);
+    },
   })}
 />
 ```
@@ -656,6 +654,14 @@ formState = {
     [name: string]?: boolean,
   },
 
+  // an object indicating whether the value of each input is pristine
+  pristine: {
+    [name: string]: boolean,
+  },
+
+  // whether the form is pristine or not
+  isPristine(): boolean,
+
   // clears all fields in the form
   clear(): void,
 
@@ -728,15 +734,16 @@ Alternatively, input type functions can be called with an object as the first ar
 
 The following options can be passed:
 
-| key                                                               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name: string`                                                    | Required. The name of the input.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `value: string`                                                   | The input's own value. Only required by the `radio` input, and optional for the `checkbox` input.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `onChange(e): void`                                               | Optional. A change event handler that gets passed the input's `change` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `onBlur(e): void`                                                 | Optional. A blur event handler that gets passed the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `validate(value: string, values: StateValues, event: Event): any` | Optional. An input validation function that determines whether the input value is valid. It gets passed the input value, all input values in the form, and the change/blur event (or the raw value of the control in the case of `.raw()`). The input is considered **valid** if this method returns `true` or `undefined`. Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. Such values are used a **custom validation errors** that can be retrieved from [`state.errors`](#form-state). HTML5 validation rules are ignored when this function is specified. |
-| `validateOnBlur: boolean`                                         | Optional. `false` by default. When set to `true` and the `validate` function is provided, the function will be called when the input loses focus. If not specified, the `validate` function will be called on value change.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `touchOnChange: boolean`                                          | Optional. `false` by default. When `false`, the input will be marked as touched when the `onBlur()` event handler is called. For custom controls that do not support `onBlur`, setting this to `true` will make it so inputs will be marked as touched when `onChange()` is called instead.                                                                                                                                                                                                                                                                                                                                                                             |
+| key                                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name: string`                      | Required. The name of the input.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `value: string`                     | The input's own value. Only required by the `radio` input, and optional for the `checkbox` input.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `onChange(e): void`                 | Optional. A change event handler that's called with the input's `change` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `onBlur(e): void`                   | Optional. A blur event handler that's called with the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `validate(value, values, e): any`   | Optional (required for `raw` inputs). An input validation function that determines whether the input value is valid. It's called with the input value, all input values in the form, and the change/blur event (or the raw value of the control in the case of `.raw()`). The input is considered **valid** if this method returns `true` or `undefined`. Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. Such values are used a **custom validation errors** that can be retrieved from [`state.errors`](#form-state). HTML5 validation rules are ignored when this function is specified. |
+| `compare(initialValue, value): any` | Optional (required for `raw` inputs). A comparison function that determines whether the input value is pristine. It's called with the input's initial value, and the input's current value. It must return a boolean indicating whether the form is pristine.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `validateOnBlur: boolean`           | Optional. `false` by default. When set to `true` and the `validate` function is provided, the function will be called when the input loses focus. If not specified, the `validate` function will be called on value change.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `touchOnChange: boolean`            | Optional. `false` by default. When `false`, the input will be marked as touched when the `onBlur()` event handler is called. For custom controls that do not support `onBlur`, setting this to `true` will make it so inputs will be marked as touched when `onChange()` is called instead.                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ## License
 

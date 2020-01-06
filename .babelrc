@@ -5,5 +5,13 @@
       "plugins": ["@babel/plugin-transform-runtime"]
     }
   },
-  "presets": [["@babel/preset-env", { "modules": false }]]
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "modules": false,
+        "exclude": ["transform-typeof-symbol"]
+      }
+    ]
+  ]
 }

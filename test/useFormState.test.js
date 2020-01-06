@@ -17,6 +17,7 @@ describe('useFormState API', () => {
         setFieldError: expect.any(Function),
         clearField: expect.any(Function),
         resetField: expect.any(Function),
+        isPristine: expect.any(Function),
       },
       expect.any(Object),
     ]);

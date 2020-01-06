@@ -1,9 +1,16 @@
 import { useRef } from 'react';
-import { toString, noop, omit, isFunction, isEmpty } from './utils';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
 import { useCache } from './useCache';
 import { useState } from './useState';
+import {
+  noop,
+  omit,
+  isFunction,
+  isEmpty,
+  isEqual,
+  testIsEqualCompatibility,
+} from './utils';
 import {
   INPUT_TYPES,
   SELECT,
@@ -39,15 +46,15 @@ export default function useFormState(initialState, options) {
   function warn(key, type, message) {
     if (!devWarnings.has(`${type}:${key}`)) {
       devWarnings.set(`${type}:${key}`, true);
-      // eslint-disable-next-line no-console
       console.warn(CONSOLE_TAG, message);
     }
   }
 
   const createPropsGetter = type => (...args) => {
-    const { name, ownValue, ...inputOptions } = parseInputArgs(args);
+    const { name, ownValue, hasOwnValue, ...inputOptions } = parseInputArgs(
+      args,
+    );
 
-    const hasOwnValue = !!toString(ownValue);
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
     const isSelectMultiple = type === SELECT_MULTIPLE;
@@ -55,16 +62,16 @@ export default function useFormState(initialState, options) {
     const hasValueInState = formState.current.values[name] !== undefined;
 
     // This is used to cache input props that shouldn't change across
-    // re-renders.  Note that for `raw` values, `toString(ownValue)`
+    // re-renders.  Note that for `raw` values, `ownValue`
     // will return '[object Object]'.  This means we can't have multiple
     // raw inputs with the same name and different values, but this is
     // probably fine.
-    const key = `${type}.${name}.${toString(ownValue)}`;
+    const key = `${type}.${name}.${ownValue}`;
 
     function setDefaultValue() {
       /* istanbul ignore else */
       if (process.env.NODE_ENV === 'development') {
-        if (isRaw && formState.current.values[name] === undefined) {
+        if (isRaw) {
           warn(
             key,
             'missingInitialValue',
@@ -111,6 +118,32 @@ export default function useFormState(initialState, options) {
         [],
       );
     }
+
+    function getCompareFn() {
+      if (isFunction(inputOptions.compare)) {
+        return inputOptions.compare;
+      }
+      return (value, other) => {
+        /* istanbul ignore else */
+        if (process.env.NODE_ENV === 'development') {
+          if (isRaw && ![value, other].every(testIsEqualCompatibility)) {
+            warn(
+              key,
+              'missingCompare',
+              `You used a raw input type for "${name}" without providing a ` +
+                'custom compare method. As a result, the pristine value of ' +
+                'this input will be calculated using strict equality check ' +
+                '(====), which is insufficient. Please provide a custom ' +
+                'compare method for this input in order to get an accurate ' +
+                'pristine value.',
+            );
+          }
+        }
+        return isEqual(value, other);
+      };
+    }
+
+    formState.comparators.set(name, getCompareFn());
 
     function validate(
       e,
@@ -165,7 +198,7 @@ export default function useFormState(initialState, options) {
       get checked() {
         const { values } = formState.current;
         if (isRadio) {
-          return values[name] === toString(ownValue);
+          return values[name] === ownValue;
         }
         if (isCheckbox) {
           if (!hasOwnValue) {
@@ -177,9 +210,7 @@ export default function useFormState(initialState, options) {
            * <input {...input.checkbox('option1')} />
            * <input {...input.checkbox('option1', 'value_of_option1')} />
            */
-          return hasValueInState
-            ? values[name].includes(toString(ownValue))
-            : false;
+          return hasValueInState ? values[name].includes(ownValue) : false;
         }
       },
       get value() {
@@ -196,13 +227,18 @@ export default function useFormState(initialState, options) {
           formState.setTouched({ [name]: false });
         }
 
+        // auto populating default values of pristine
+        if (formState.current.pristine[name] == null) {
+          formState.setPristine({ [name]: true });
+        }
+
         /**
          * Since checkbox and radio inputs have their own user-defined values,
          * and since checkbox inputs can be either an array or a boolean,
          * returning the value of input from the current form state is illogical
          */
         if (isCheckbox || isRadio) {
-          return toString(ownValue);
+          return ownValue;
         }
 
         return hasValueInState ? formState.current.values[name] : '';
@@ -247,13 +283,6 @@ export default function useFormState(initialState, options) {
           touch(e);
         }
 
-        const isPristine = inputOptions.compare(
-          formState.initialValues.get(name),
-          value,
-        );
-
-        formState.setPristine(isPristine ? omit(name) : { [name]: false });
-
         const partialNewState = { [name]: value };
         const newValues = { ...formState.current.values, ...partialNewState };
 
@@ -266,6 +295,8 @@ export default function useFormState(initialState, options) {
         if (!validateOnBlur) {
           validate(e, value, newValues);
         }
+
+        formState.updatePristine(name, value);
 
         formState.setValues(partialNewState);
       }),
@@ -299,11 +330,10 @@ export default function useFormState(initialState, options) {
   };
 
   const formStateAPI = useRef({
+    isPristine: formState.isPristine,
     clearField: formState.clearField,
     resetField: formState.resetField,
-    setField(name, value) {
-      formState.setField(name, value, true, true);
-    },
+    setField: formState.setField,
     setFieldError(name, error) {
       formState.setValidity({ [name]: false });
       formState.setError({ [name]: error });

@@ -1,12 +1,15 @@
 {
   "extends": [
+    "@wsmd/eslint-config/typescript",
     "@wsmd/eslint-config/react",
     "@wsmd/eslint-config/prettier",
     "@wsmd/eslint-config/jest"
   ],
   "rules": {
     "getter-return": "off",
-    "consistent-return": "off"
+    "consistent-return": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-console": ["error", { "allow": ["warn", "error"] }]
   },
   "overrides": [
     {
@@ -17,5 +20,6 @@
         "jsx-a11y/control-has-associated-label": "off"
       }
     }
-  ]
+  ],
+  "ignorePatterns": ["test/types.tsx"]
 }
