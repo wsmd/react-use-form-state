@@ -39,7 +39,7 @@
   - [Labels](#labels)
   - [Custom Controls](#custom-controls)
   - [Updating Fields Manually](#updating-fields-manually)
-  - [Resetting The From State](#resetting-the-from-state)
+  - [Resetting The Formm State](#resetting-the-form-state)
 - [Working with TypeScript](#working-with-typescript)
 - [API](#api)
   - [`initialState`](#initialstate)
@@ -429,7 +429,7 @@ It's also possible to clear a single input's value or to reset it to its initial
 
 As a convenience you can also set the error value for a single input using `formState.setFieldError`.
 
-### Resetting The From State
+### Resetting The Form State
 
 The form state can be cleared or reset back to its initial state if provided at any time using `formState.clear` and `formState.reset` respectively.
 
