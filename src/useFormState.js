@@ -70,7 +70,7 @@ export default function useFormState(initialState, options) {
 
     function setDefaultValue() {
       /* istanbul ignore else */
-      if (process.env.NODE_ENV === 'development') {
+      if (__DEV__) {
         if (isRaw) {
           warn(
             key,
@@ -125,7 +125,7 @@ export default function useFormState(initialState, options) {
       }
       return (value, other) => {
         /* istanbul ignore else */
-        if (process.env.NODE_ENV === 'development') {
+        if (__DEV__) {
           if (isRaw && ![value, other].every(testIsEqualCompatibility)) {
             warn(
               key,
@@ -162,7 +162,7 @@ export default function useFormState(initialState, options) {
       } else if (!isRaw) {
         isValid = e.target.validity.valid;
         error = e.target.validationMessage;
-      } else if (process.env.NODE_ENV === 'development') {
+      } else if (__DEV__) {
         warn(
           key,
           'missingValidate',
@@ -254,7 +254,7 @@ export default function useFormState(initialState, options) {
             // from controlled to uncontrolled
             value = formState.current.values[name];
             /* istanbul ignore else */
-            if (process.env.NODE_ENV === 'development') {
+            if (__DEV__) {
               warn(
                 key,
                 'onChangeUndefined',

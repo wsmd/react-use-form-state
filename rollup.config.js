@@ -1,4 +1,5 @@
-import babel from 'rollup-plugin-babel';
+import babel from '@rollup/plugin-babel';
+import replace from '@rollup/plugin-replace';
 import pkg from './package.json';
 
 export default {
@@ -14,5 +15,12 @@ export default {
     },
   ],
   external: Object.keys(pkg.devDependencies),
-  plugins: [babel()],
+  plugins: [
+    babel({
+      babelHelpers: 'bundled',
+    }),
+    replace({
+      __DEV__: "process.env.NODE_ENV === 'development'",
+    }),
+  ],
 };

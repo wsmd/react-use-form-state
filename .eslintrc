@@ -5,11 +5,15 @@
     "@wsmd/eslint-config/prettier",
     "@wsmd/eslint-config/jest"
   ],
+  "globals": {
+    "__DEV__": false
+  },
   "rules": {
     "getter-return": "off",
     "consistent-return": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "no-console": ["error", { "allow": ["warn", "error"] }]
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "no-underscore-dangle": ["error", { "allow": ["__DEV__"] }]
   },
   "overrides": [
     {
