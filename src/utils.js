@@ -77,12 +77,9 @@ export function isEqual(value, other) {
 }
 
 export function testIsEqualCompatibility(value) {
-  let result;
   /* istanbul ignore if */
   if (Array.isArray(value)) {
-    result = value.every(testIsEqualCompatibility);
-  } else {
-    result = value == null || /^[sbn]/.test(typeof value); // is primitive
+    return value.every(testIsEqualCompatibility);
   }
-  return result;
+  return value == null || /^[sbn]/.test(typeof value); // basic primitives
 }

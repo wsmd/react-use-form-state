@@ -8,12 +8,11 @@ import 'react-testing-library/cleanup-after-each';
  * in the development environment.
  */
 let consoleSpy;
-const originalEnv = process.env.NODE_ENV;
 beforeEach(() => {
   consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-  process.env.NODE_ENV = 'development';
+  global.__DEV__ = 'development';
 });
 afterEach(() => {
   consoleSpy.mockRestore();
-  process.env.NODE_ENV = originalEnv;
+  global.__DEV__ = process.env.NODE_ENV;
 });

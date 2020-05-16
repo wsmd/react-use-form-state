@@ -20,9 +20,6 @@ import {
   TEXTAREA,
   SELECT_MULTIPLE,
   LABEL,
-  ON_CHANGE_HANDLER,
-  ON_BLUR_HANDLER,
-  CONSOLE_TAG,
 } from './constants';
 
 const defaultFormOptions = {
@@ -46,14 +43,13 @@ export default function useFormState(initialState, options) {
   function warn(key, type, message) {
     if (!devWarnings.has(`${type}:${key}`)) {
       devWarnings.set(`${type}:${key}`, true);
-      console.warn(CONSOLE_TAG, message);
+      console.warn('[useFormState]', message);
     }
   }
 
   const createPropsGetter = type => (...args) => {
-    const { name, ownValue, hasOwnValue, ...inputOptions } = parseInputArgs(
-      args,
-    );
+    const inputOptions = parseInputArgs(args);
+    const { name, ownValue, hasOwnValue } = inputOptions;
 
     const isCheckbox = type === CHECKBOX;
     const isRadio = type === RADIO;
@@ -70,7 +66,7 @@ export default function useFormState(initialState, options) {
 
     function setDefaultValue() {
       /* istanbul ignore else */
-      if (process.env.NODE_ENV === 'development') {
+      if (__DEV__) {
         if (isRaw) {
           warn(
             key,
@@ -125,7 +121,7 @@ export default function useFormState(initialState, options) {
       }
       return (value, other) => {
         /* istanbul ignore else */
-        if (process.env.NODE_ENV === 'development') {
+        if (__DEV__) {
           if (isRaw && ![value, other].every(testIsEqualCompatibility)) {
             warn(
               key,
@@ -162,7 +158,7 @@ export default function useFormState(initialState, options) {
       } else if (!isRaw) {
         isValid = e.target.validity.valid;
         error = e.target.validationMessage;
-      } else if (process.env.NODE_ENV === 'development') {
+      } else if (__DEV__) {
         warn(
           key,
           'missingValidate',
@@ -243,7 +239,7 @@ export default function useFormState(initialState, options) {
 
         return hasValueInState ? formState.current.values[name] : '';
       },
-      onChange: callbacks.getOrSet(ON_BLUR_HANDLER + key, e => {
+      onChange: callbacks.getOrSet(`onChange.${key}`, e => {
         setDirty(name, true);
         let value;
         if (isRaw) {
@@ -254,7 +250,7 @@ export default function useFormState(initialState, options) {
             // from controlled to uncontrolled
             value = formState.current.values[name];
             /* istanbul ignore else */
-            if (process.env.NODE_ENV === 'development') {
+            if (__DEV__) {
               warn(
                 key,
                 'onChangeUndefined',
@@ -272,7 +268,7 @@ export default function useFormState(initialState, options) {
           } else if (isSelectMultiple) {
             value = getNextSelectMultipleValue(e);
           } else {
-            ({ value } = e.target);
+            value = e.target.value;
           }
           inputOptions.onChange(e);
         }
@@ -300,7 +296,7 @@ export default function useFormState(initialState, options) {
 
         formState.setValues(partialNewState);
       }),
-      onBlur: callbacks.getOrSet(ON_CHANGE_HANDLER + key, e => {
+      onBlur: callbacks.getOrSet(`onBlur.${key}`, e => {
         touch(e);
 
         inputOptions.onBlur(e);
@@ -320,13 +316,15 @@ export default function useFormState(initialState, options) {
       ...getIdProp('id', name, ownValue),
     };
 
-    return isRaw
-      ? {
-          onChange: inputProps.onChange,
-          onBlur: inputProps.onBlur,
-          value: inputProps.value,
-        }
-      : inputProps;
+    if (isRaw) {
+      return {
+        onChange: inputProps.onChange,
+        onBlur: inputProps.onBlur,
+        value: inputProps.value,
+      };
+    }
+
+    return inputProps;
   };
 
   const formStateAPI = useRef({
@@ -349,10 +347,9 @@ export default function useFormState(initialState, options) {
   });
 
   // exposing current form state (e.g. values, touched, validity, etc)
-  // eslint-disable-next-line guard-for-in, no-restricted-syntax
-  for (const key in formState.current) {
+  Object.keys(formState.current).forEach(key => {
     formStateAPI.current[key] = formState.current[key];
-  }
+  });
 
   const inputPropsCreators = {
     [LABEL]: (name, ownValue) => getIdProp('htmlFor', name, ownValue),
