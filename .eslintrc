@@ -17,6 +17,10 @@
   },
   "overrides": [
     {
+      "files": ["**/*.js"],
+      "parser": "babel-eslint"
+    },
+    {
       "files": ["test/**/*.js"],
       "rules": {
         "react/jsx-props-no-spreading": "off",
