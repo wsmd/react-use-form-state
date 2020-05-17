@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
-import { useCache } from './useCache';
+import { useMap, useReferencedCallback } from './utils-hooks';
 import { useState } from './useState';
 import {
   noop,
@@ -36,9 +36,9 @@ export default function useFormState(initialState, options) {
 
   const formState = useState({ initialState });
   const { getIdProp } = useInputId(formOptions.withIds);
-  const { set: setDirty, get: isDirty } = useCache();
-  const callbacks = useCache();
-  const devWarnings = useCache();
+  const { set: setDirty, get: isDirty } = useMap();
+  const referencedCallback = useReferencedCallback();
+  const devWarnings = useMap();
 
   function warn(key, type, message) {
     if (!devWarnings.has(`${type}:${key}`)) {
@@ -243,7 +243,7 @@ export default function useFormState(initialState, options) {
 
         return hasValueInState ? formState.current.values[name] : '';
       },
-      onChange: callbacks.getOrSet(`onChange.${key}`, e => {
+      onChange: referencedCallback(`onChange.${key}`, e => {
         setDirty(name, true);
         let value;
         if (isRaw) {
@@ -296,7 +296,7 @@ export default function useFormState(initialState, options) {
 
         formState.setValues(partialNewState);
       }),
-      onBlur: callbacks.getOrSet(`onBlur.${key}`, e => {
+      onBlur: referencedCallback(`onBlur.${key}`, e => {
         touch(e);
 
         inputOptions.onBlur(e);

@@ -1,6 +1,6 @@
 import { useReducer, useRef } from 'react';
 import { isFunction, isEqual } from './utils';
-import { useCache } from './useCache';
+import { useMap } from './utils-hooks';
 
 function stateReducer(state, newState) {
   return isFunction(newState) ? newState(state) : { ...state, ...newState };
@@ -8,8 +8,8 @@ function stateReducer(state, newState) {
 
 export function useState({ initialState }) {
   const state = useRef();
-  const initialValues = useCache();
-  const comparators = useCache();
+  const initialValues = useMap();
+  const comparators = useMap();
   const [values, setValues] = useReducer(stateReducer, initialState || {});
   const [touched, setTouched] = useReducer(stateReducer, {});
   const [validity, setValidity] = useReducer(stateReducer, {});
