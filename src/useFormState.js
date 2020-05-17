@@ -36,7 +36,7 @@ export default function useFormState(initialState, options) {
 
   const formState = useState({ initialState });
   const { getIdProp } = useInputId(formOptions.withIds);
-  const { set: setDirty, has: isDirty } = useCache();
+  const { set: setDirty, get: isDirty } = useCache();
   const callbacks = useCache();
   const devWarnings = useCache();
 
@@ -307,7 +307,6 @@ export default function useFormState(initialState, options) {
          * A) when it's either touched for the first time
          * B) when it's marked as dirty due to a value change
          */
-        /* istanbul ignore else */
         if (!formState.current.touched[name] || isDirty(name)) {
           setDirty(name, false);
           // http://github.com/wsmd/react-use-form-state/issues/127#issuecomment-597989364
