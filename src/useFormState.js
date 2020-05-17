@@ -141,6 +141,10 @@ export default function useFormState(initialState, options) {
 
     formState.comparators.set(name, getCompareFn());
 
+    function getValidateOnBlur() {
+      return formOptions.validateOnBlur ?? inputOptions.validateOnBlur;
+    }
+
     function validate(
       e,
       value = isRaw ? formState.current.values[name] : e.target.value,
@@ -284,11 +288,7 @@ export default function useFormState(initialState, options) {
 
         formOptions.onChange(e, formState.current.values, newValues);
 
-        const validateOnBlur = formOptions.validateOnBlur
-          ? inputOptions.validateOnBlur !== false
-          : inputOptions.validateOnBlur;
-
-        if (!validateOnBlur) {
+        if (!getValidateOnBlur()) {
           validate(e, value, newValues);
         }
 
@@ -309,8 +309,11 @@ export default function useFormState(initialState, options) {
          */
         /* istanbul ignore else */
         if (!formState.current.touched[name] || isDirty(name)) {
-          validate(e);
           setDirty(name, false);
+          // http://github.com/wsmd/react-use-form-state/issues/127#issuecomment-597989364
+          if (getValidateOnBlur() ?? true) {
+            validate(e);
+          }
         }
       }),
       ...getIdProp('id', name, ownValue),

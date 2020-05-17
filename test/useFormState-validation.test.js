@@ -58,6 +58,17 @@ describe('passing a custom input validate function', () => {
     );
   });
 
+  it('does not validate input on blur when validateOnBlur is false', () => {
+    const validate = jest.fn(() => false);
+    const { change, blur } = renderWithFormState(([, { text }]) => (
+      <input {...text({ name: 'name', validate, validateOnBlur: false })} />
+    ));
+    change({ value: 'test' });
+    expect(validate).toHaveBeenCalled();
+    blur();
+    expect(validate).toHaveBeenCalledTimes(1);
+  });
+
   it('marks input as valid', () => {
     const { change, formState } = renderWithFormState(([, { text }]) => (
       <input
