@@ -39,7 +39,7 @@
   - [Labels](#labels)
   - [Custom Controls](#custom-controls)
   - [Updating Fields Manually](#updating-fields-manually)
-  - [Resetting The Formm State](#resetting-the-form-state)
+  - [Resetting The Form State](#resetting-the-form-state)
 - [Working with TypeScript](#working-with-typescript)
 - [API](#api)
   - [`initialState`](#initialstate)
@@ -591,7 +591,7 @@ formState.reset(); // resetting the form state
 
 #### `formOptions.validateOnBlur`
 
-When set to `true`, all form fields will validated when the input loses focus. If not specified, the `validate` function of each input will be called on value change.
+By default, input validation is performed on both of the `change` and the `blur` events. Setting `validateOnBlur` to `true` will limit input validation to be **only** performed on `blur` (when the input loses focus). When set to `false`, input validation will **only** be performed on `change`.
 
 #### `formOptions.withIds`
 
@@ -742,7 +742,7 @@ The following options can be passed:
 | `onBlur(e): void`                   | Optional. A blur event handler that's called with the input's `blur` [`SyntheticEvent`](https://reactjs.org/docs/events.html).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `validate(value, values, e): any`   | Optional (required for `raw` inputs). An input validation function that determines whether the input value is valid. It's called with the input value, all input values in the form, and the change/blur event (or the raw value of the control in the case of `.raw()`). The input is considered **valid** if this method returns `true` or `undefined`. Any [truthy value](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) other than `true` returned from this method will make the input **invalid**. Such values are used a **custom validation errors** that can be retrieved from [`state.errors`](#form-state). HTML5 validation rules are ignored when this function is specified. |
 | `compare(initialValue, value): any` | Optional (required for `raw` inputs). A comparison function that determines whether the input value is pristine. It's called with the input's initial value, and the input's current value. It must return a boolean indicating whether the form is pristine.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `validateOnBlur: boolean`           | Optional. `false` by default. When set to `true` and the `validate` function is provided, the function will be called when the input loses focus. If not specified, the `validate` function will be called on value change.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `validateOnBlur: boolean`           | Optional. Unspecified by default. When unspecified, input validation is performed on both of the `change` and the `blur` events. Setting `validateOnBlur` to `true` will limit input validation to be **only** performed on `blur` (when the input loses focus). When set to `false`, input validation will **only** be performed on `change`.                                                                                                                                                                                                                                                                                                                                                        |
 | `touchOnChange: boolean`            | Optional. `false` by default. When `false`, the input will be marked as touched when the `onBlur()` event handler is called. For custom controls that do not support `onBlur`, setting this to `true` will make it so inputs will be marked as touched when `onChange()` is called instead.                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ## License
