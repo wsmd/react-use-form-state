@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { parseInputArgs } from './parseInputArgs';
 import { useInputId } from './useInputId';
-import { useCache } from './useCache';
+import { useMap, useReferencedCallback, useWarnOnce } from './utils-hooks';
 import { useState } from './useState';
 import {
   noop,
@@ -36,16 +36,9 @@ export default function useFormState(initialState, options) {
 
   const formState = useState({ initialState });
   const { getIdProp } = useInputId(formOptions.withIds);
-  const { set: setDirty, get: isDirty } = useCache();
-  const callbacks = useCache();
-  const devWarnings = useCache();
-
-  function warn(key, type, message) {
-    if (!devWarnings.has(`${type}:${key}`)) {
-      devWarnings.set(`${type}:${key}`, true);
-      console.warn('[useFormState]', message);
-    }
-  }
+  const { set: setDirty, get: isDirty } = useMap();
+  const referencedCallback = useReferencedCallback();
+  const warn = useWarnOnce();
 
   const createPropsGetter = type => (...args) => {
     const inputOptions = parseInputArgs(args);
@@ -69,8 +62,7 @@ export default function useFormState(initialState, options) {
       if (__DEV__) {
         if (isRaw) {
           warn(
-            key,
-            'missingInitialValue',
+            `missingInitialValue.${key}`,
             `The initial value for input "${name}" is missing. Custom inputs ` +
               'controlled with raw() are expected to have an initial value ' +
               'provided to useFormState(). To prevent React from treating ' +
@@ -124,8 +116,7 @@ export default function useFormState(initialState, options) {
         if (__DEV__) {
           if (isRaw && ![value, other].every(testIsEqualCompatibility)) {
             warn(
-              key,
-              'missingCompare',
+              `missingCompare.${key}`,
               `You used a raw input type for "${name}" without providing a ` +
                 'custom compare method. As a result, the pristine value of ' +
                 'this input will be calculated using strict equality check ' +
@@ -164,8 +155,7 @@ export default function useFormState(initialState, options) {
         error = e.target.validationMessage;
       } else if (__DEV__) {
         warn(
-          key,
-          'missingValidate',
+          `missingValidate.${key}`,
           `You used a raw input type for "${name}" without providing a ` +
             'custom validate method. As a result, validation of this input ' +
             'will be set to "true" automatically. If you need to validate ' +
@@ -243,7 +233,7 @@ export default function useFormState(initialState, options) {
 
         return hasValueInState ? formState.current.values[name] : '';
       },
-      onChange: callbacks.getOrSet(`onChange.${key}`, e => {
+      onChange: referencedCallback(`onChange.${key}`, e => {
         setDirty(name, true);
         let value;
         if (isRaw) {
@@ -256,8 +246,7 @@ export default function useFormState(initialState, options) {
             /* istanbul ignore else */
             if (__DEV__) {
               warn(
-                key,
-                'onChangeUndefined',
+                `onChangeUndefined.${key}`,
                 `You used a raw input type for "${name}" with an onChange() ` +
                   'option without returning a value. The onChange callback ' +
                   'of raw inputs, when provided, is used to determine the ' +
@@ -296,7 +285,7 @@ export default function useFormState(initialState, options) {
 
         formState.setValues(partialNewState);
       }),
-      onBlur: callbacks.getOrSet(`onBlur.${key}`, e => {
+      onBlur: referencedCallback(`onBlur.${key}`, e => {
         touch(e);
 
         inputOptions.onBlur(e);

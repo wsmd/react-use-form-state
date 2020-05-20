@@ -4,6 +4,8 @@ import { useFormState } from '../src';
 
 export { renderHook } from 'react-hooks-testing-library';
 
+export { render as renderElement, fireEvent };
+
 export const InputTypes = {
   textLike: ['text', 'email', 'password', 'search', 'tel', 'url'],
   time: ['date', 'month', 'time', 'week'],

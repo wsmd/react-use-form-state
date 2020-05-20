@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFormState } from '../src';
-import { renderWithFormState, renderHook, InputTypes } from './test-utils';
+import {
+  InputTypes,
+  fireEvent,
+  renderHook,
+  renderElement,
+  renderWithFormState,
+} from './test-utils';
 
 describe('input type methods return correct props object', () => {
   /**
@@ -552,5 +558,35 @@ describe('Input props are memoized', () => {
     expect(renderCheck).toHaveBeenCalledTimes(1);
     change({ value: 'c' }, root.childNodes[1]);
     expect(renderCheck).toHaveBeenCalledTimes(2);
+  });
+
+  it('prevents callbacks from using stale closures', () => {
+    const onInputChange = jest.fn();
+
+    function ComponentWithInternalState() {
+      const [state, setState] = useState(1);
+      const [, { text }] = useFormState(null, {
+        onBlur: () => {
+          onInputChange(state);
+          setState(state + 1);
+        },
+        onChange: () => {
+          onInputChange(state);
+          setState(state + 1);
+        },
+      });
+      return <input {...text('name')} />;
+    }
+
+    const { container } = renderElement(<ComponentWithInternalState />);
+
+    fireEvent.change(container.firstChild, { target: { value: 'foo' } });
+    expect(onInputChange).toHaveBeenLastCalledWith(1);
+
+    fireEvent.change(container.firstChild, { target: { value: 'bar' } });
+    expect(onInputChange).toHaveBeenLastCalledWith(2);
+
+    fireEvent.blur(container.firstChild);
+    expect(onInputChange).toHaveBeenLastCalledWith(3);
   });
 });
