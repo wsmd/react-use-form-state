@@ -20,8 +20,8 @@
     "hook"
   ],
   "scripts": {
-    "build": "rollup -c && cp src/index.d.ts dist/index.d.ts",
-    "build:dev": "rollup -c -w",
+    "build": "rollup -c",
+    "build:dev": "rollup -c -w --environment=BUILD:development",
     "clean": "rm -rf dist",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "eslint src test",
@@ -71,8 +71,8 @@
     "jest": "^24.7.1",
     "jest-dom": "^2.1.0",
     "prettier": "^1.19.1",
-    "react": "^16.7.0-alpha.0",
-    "react-dom": "^16.7.0-alpha.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "react-hooks-testing-library": "^0.3.7",
     "react-testing-library": "^6.0.0",
     "rollup": "^2.10.2",

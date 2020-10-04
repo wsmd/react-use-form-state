@@ -312,6 +312,7 @@ export default function useFormState(initialState, options) {
         onChange: inputProps.onChange,
         onBlur: inputProps.onBlur,
         value: inputProps.value,
+        name: inputProps.name,
       };
     }
 

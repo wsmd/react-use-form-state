@@ -29,5 +29,5 @@
       }
     }
   ],
-  "ignorePatterns": ["test/types.tsx"]
+  "ignorePatterns": ["test/types.tsx", "rollup.config.js"]
 }
