@@ -61,6 +61,7 @@ describe('input type methods return correct props object', () => {
   it('returns props for type "raw"', () => {
     const { result } = renderHook(() => useFormState({ option: '' }));
     expect(result.current[1].raw('option')).toEqual({
+      name: 'option',
       value: '',
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
@@ -72,6 +73,7 @@ describe('input type methods return correct props object', () => {
     expect(
       result.current[1].raw({ name: 'option', touchOnChange: true }),
     ).toEqual({
+      name: 'option',
       value: expect.any(Date),
       onChange: expect.any(Function),
       onBlur: expect.any(Function),
