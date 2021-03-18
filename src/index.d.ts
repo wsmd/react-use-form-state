@@ -16,11 +16,7 @@ type StateErrors<T, E = string> = {
 };
 
 interface UseFormStateHook {
-  (initialState?: Partial<StateShape<any>> | null, options?: FormOptions<any>): [
-    FormState<any>,
-    Inputs<any>,
-  ];
-  <T extends StateShape<T>, E = StateErrors<T, string>>(
+  <T extends StateShape<T> = StateShape<any>, E = StateErrors<T, string>>(
     initialState?: Partial<T> | null,
     options?: FormOptions<T>,
   ): [FormState<T, E>, Inputs<T>];
@@ -86,16 +82,22 @@ interface Inputs<T> {
 interface InputInitializer<T, InputProps> {
   <K extends keyof T>(options: InputOptions<T, K>): InputProps;
   <K extends keyof T>(name: K): InputProps;
+  (options: InputOptions<any, string>): InputProps;
+  (name: string): InputProps;
 }
 
 interface InputInitializerWithOwnValue<T, R> {
   <K extends keyof T>(options: InputOptions<T, K, { value: OwnValueType }>): R;
   <K extends keyof T>(name: K, value: OwnValueType): R;
+  (options: InputOptions<any, string, { value: OwnValueType }>): R;
+  (name: string, value: OwnValueType): R;
 }
 
 interface InputInitializerWithOptionalOwnValue<T, R> {
   <K extends keyof T>(options: InputOptions<T, K, { value?: OwnValueType }>): R;
   <K extends keyof T>(name: K, value?: OwnValueType): R;
+  (options: InputOptions<any, string, { value?: OwnValueType }>): R;
+  (name: string, value?: OwnValueType): R;
 }
 
 interface RawInputInitializer<T> {
@@ -103,6 +105,8 @@ interface RawInputInitializer<T> {
     options: RawInputOptions<T, K, RawValue>,
   ): RawInputProps<T, K, RawValue>;
   <RawValue extends any, K extends keyof T = keyof T>(name: K): RawInputProps<T, K, RawValue>;
+  (options: RawInputOptions<any, string, any>): RawInputProps<any, string, any>;
+  (name: string): RawInputProps<any, string, any>;
 }
 
 type InputOptions<T, K extends keyof T, OwnOptions = {}> = {
