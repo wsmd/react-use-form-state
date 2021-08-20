@@ -233,11 +233,11 @@ export default function useFormState(initialState, options) {
 
         return hasValueInState ? formState.current.values[name] : '';
       },
-      onChange: referencedCallback(`onChange.${key}`, e => {
+      onChange: referencedCallback(`onChange.${key}`, (e, ...onChangeArgs) => {
         setDirty(name, true);
         let value;
         if (isRaw) {
-          value = inputOptions.onChange(e);
+          value = inputOptions.onChange(e, ...onChangeArgs);
           if (value === undefined) {
             // setting value to its current state if onChange does not return
             // value to prevent React from complaining about the input switching
